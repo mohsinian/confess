@@ -43,69 +43,89 @@ async function main() {
   const cases = only ? [getCase(only)] : CASES;
   const summary: Array<{ caseId: string; steps: number; labels: number; repairs: number; cached: boolean }> = [];
 
-  for (const cd of cases) {
-    const pack = packFor(cd);
-    const budget = new Budget(cfg.maxRunCost);
-    const log = new RunLog(path.join(CACHE_DIR, `gen-${cd.caseId}.jsonl`));
-    await log.append(cd.caseId, "stage_start", { scenario: pack.id, injections: cd.injections, seed });
+  // 3-way worker pool: cuts wall time ~3x; logs/caches are per-case files so
+  // concurrent writes never collide.
+  const queue = [...cases];
+  const errors: Array<{ caseId: string; error: Error }> = [];
+  async function worker() {
+    for (;;) {
+      const cd = queue.shift();
+      if (!cd) return;
+      try {
+        const pack = packFor(cd);
+        const budget = new Budget(cfg.maxRunCost);
+        const log = new RunLog(path.join(CACHE_DIR, `gen-${cd.caseId}.jsonl`));
+        await log.append(cd.caseId, "stage_start", { scenario: pack.id, injections: cd.injections, seed });
 
-    // Phase 1: clean base (cached unless --fresh).
-    let clean: Trajectory | null = null;
-    let repairs = 0;
-    let cached = false;
-    if (!fresh) clean = await loadCachedClean(cd.caseId);
-    if (clean) {
-      cached = true;
-      await log.append(cd.caseId, "note", { using: "cached clean base" });
-    } else {
-      const gen = await generateCleanSession(client, cfg, budget, log, cd, pack);
-      clean = gen.events;
-      repairs = gen.repairs;
-      await ensureDir(CACHE_DIR);
-      await fs.promises.writeFile(cleanCachePath(cd.caseId), JSON.stringify({ events: clean, model: gen.model }, null, 2));
+        // Phase 1: clean base (cached unless --fresh).
+        let clean: Trajectory | null = null;
+        let repairs = 0;
+        let cached = false;
+        if (!fresh) clean = await loadCachedClean(cd.caseId);
+        if (clean) {
+          cached = true;
+          await log.append(cd.caseId, "note", { using: "cached clean base" });
+        } else {
+          const gen = await generateCleanSession(client, cfg, budget, log, cd, pack);
+          clean = gen.events;
+          repairs = gen.repairs;
+          await ensureDir(CACHE_DIR);
+          await fs.promises.writeFile(cleanCachePath(cd.caseId), JSON.stringify({ events: clean, model: gen.model }, null, 2));
+        }
+
+        // Phase 2: deterministic injection.
+        const { events, labels } = applyInjections(clean, cd, pack, seed);
+
+        // Write the case directory.
+        const dir = caseDir(cd.caseId);
+        await ensureDir(dir);
+        await fs.promises.writeFile(
+          path.join(dir, "trajectory.jsonl"),
+          events.map((e) => JSON.stringify(e)).join("\n") + "\n",
+          "utf8",
+        );
+        const labelsFile: LabelsFile = {
+          case_id: cd.caseId,
+          failures: labels,
+          clean: labels.length === 0,
+          difficulty: cd.difficulty,
+        };
+        const meta: CaseMeta = {
+          case_id: cd.caseId,
+          title: cd.title,
+          scenario: `${pack.id}: ${pack.title}`,
+          seed,
+          base_model: cfg.model,
+          n_steps: events.length,
+          difficulty: cd.difficulty,
+          generated_at: new Date().toISOString(),
+        };
+        // Validate what we write — the eval reads these exact files.
+        const lcheck = labelsFileSchema.safeParse(labelsFile);
+        const mcheck = caseMetaSchema.safeParse(meta);
+        if (!lcheck.success || !mcheck.success) {
+          throw new Error(`label/meta schema violation for ${cd.caseId} (this is a generator bug)`);
+        }
+        await fs.promises.writeFile(path.join(dir, "labels.json"), JSON.stringify(labelsFile, null, 2), "utf8");
+        await fs.promises.writeFile(path.join(dir, "meta.json"), JSON.stringify(meta, null, 2), "utf8");
+        await log.append(cd.caseId, "stage_end", { steps: events.length, labels: labels.length });
+
+        summary.push({ caseId: cd.caseId, steps: events.length, labels: labels.length, repairs, cached });
+        console.log(
+          `  ${cd.caseId}  ${String(events.length).padStart(2)} steps  ${labels.length} labels  ${labels.map((l) => l.type).join(", ") || "clean"}${cached ? "  (cached base)" : ""}`,
+        );
+      } catch (e) {
+        errors.push({ caseId: cd.caseId, error: e as Error });
+        console.error(`  ${cd.caseId}  FAILED — ${(e as Error).message.split("\n")[0]}`);
+      }
     }
+  }
+  await Promise.all([worker(), worker(), worker()]);
 
-    // Phase 2: deterministic injection.
-    const { events, labels } = applyInjections(clean, cd, pack, seed);
-
-    // Write the case directory.
-    const dir = caseDir(cd.caseId);
-    await ensureDir(dir);
-    await fs.promises.writeFile(
-      path.join(dir, "trajectory.jsonl"),
-      events.map((e) => JSON.stringify(e)).join("\n") + "\n",
-      "utf8",
-    );
-    const labelsFile: LabelsFile = {
-      case_id: cd.caseId,
-      failures: labels,
-      clean: labels.length === 0,
-      difficulty: cd.difficulty,
-    };
-    const meta: CaseMeta = {
-      case_id: cd.caseId,
-      title: cd.title,
-      scenario: `${pack.id}: ${pack.title}`,
-      seed,
-      base_model: cfg.model,
-      n_steps: events.length,
-      difficulty: cd.difficulty,
-      generated_at: new Date().toISOString(),
-    };
-    // Validate what we write — the eval reads these exact files.
-    const lcheck = labelsFileSchema.safeParse(labelsFile);
-    const mcheck = caseMetaSchema.safeParse(meta);
-    if (!lcheck.success || !mcheck.success) {
-      throw new Error(`label/meta schema violation for ${cd.caseId} (this is a generator bug)`);
-    }
-    await fs.promises.writeFile(path.join(dir, "labels.json"), JSON.stringify(labelsFile, null, 2), "utf8");
-    await fs.promises.writeFile(path.join(dir, "meta.json"), JSON.stringify(meta, null, 2), "utf8");
-    await log.append(cd.caseId, "stage_end", { steps: events.length, labels: labels.length });
-
-    summary.push({ caseId: cd.caseId, steps: events.length, labels: labels.length, repairs, cached });
-    console.log(
-      `  ${cd.caseId}  ${String(events.length).padStart(2)} steps  ${labels.length} labels  ${labels.map((l) => l.type).join(", ") || "clean"}${cached ? "  (cached base)" : ""}`,
-    );
+  if (errors.length > 0) {
+    console.error(`\n${errors.length} case(s) failed: ${errors.map((e) => e.caseId).join(", ")}`);
+    console.error("Re-run `npm run gen:dataset` — completed cases are cached, only failures regenerate.");
+    process.exit(1);
   }
 
   console.log("\nDataset built. Ground-truth totals:");

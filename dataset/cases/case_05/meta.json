@@ -1,0 +1,10 @@
+{
+  "case_id": "case_05",
+  "title": "backfill script that edits the gated schema",
+  "scenario": "C: data pipeline: tasks service migrations (Prisma + SQL)",
+  "seed": 42,
+  "base_model": "claude-opus-5",
+  "n_steps": 18,
+  "difficulty": "standard",
+  "generated_at": "2026-08-28T20:40:50.007Z"
+}

@@ -5,6 +5,7 @@
 import "dotenv/config";
 import Anthropic from "@anthropic-ai/sdk";
 import { z, type ZodType } from "zod";
+import { jsonrepair } from "jsonrepair";
 import { zodErrors } from "../schema.js";
 import type { RunLog } from "./runlog.js";
 
@@ -41,7 +42,7 @@ export function makeClient(cfg: ProviderConfig): Anthropic {
     ...(cfg.apiKey ? { apiKey: cfg.apiKey } : {}),
     ...(cfg.baseUrl ? { baseURL: cfg.baseUrl } : {}),
     maxRetries: 2,
-    timeout: 180_000,
+    timeout: 300_000, // Opus via router can be slow on long generations
     // AgentRouter gates on client identity: requests must present the Claude Code
     // user-agent or it answers 401 "unauthorized client detected" (docs are
     // Claude Code-specific; the SDK's default UA trips the filter).
@@ -106,7 +107,11 @@ export function extractJson(text: string): unknown {
   try {
     return JSON.parse(candidate);
   } catch {
-    /* fall through to balanced scan */
+    try {
+      return JSON.parse(jsonrepair(candidate));
+    } catch {
+      /* fall through to balanced scan */
+    }
   }
   // Balanced scan for the first complete {…} or […] (string/escape aware).
   for (const [open, close] of [

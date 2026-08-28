@@ -5,6 +5,14 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { loadProviderConfig, makeClient, MODEL_CANDIDATES, Budget } from "./anthropic.js";
 
+// Minimal structural type — some proxies return JSON with a non-JSON
+// content-type and the SDK surfaces a raw string, so we normalize ourselves.
+interface MessageLike {
+  model: string;
+  content: Array<{ type: string; text?: string }>;
+  usage: { input_tokens: number; output_tokens: number };
+}
+
 async function tryModel(client: Anthropic, model: string) {
   const started = Date.now();
   const raw = await client.messages.create({
@@ -13,11 +21,10 @@ async function tryModel(client: Anthropic, model: string) {
     temperature: 0,
     messages: [{ role: "user", content: "Reply with exactly: OK" }],
   });
-  // Normalize proxies that return a JSON body with a non-JSON content-type.
-  const response = (typeof raw === "string" ? JSON.parse(raw) : raw) as import("@anthropic-ai/sdk").Messages.Message;
+  const response = (typeof raw === "string" ? JSON.parse(raw) : raw) as MessageLike;
   const text = response.content
-    .filter((b): b is Extract<typeof b, { type: "text" }> => b.type === "text")
-    .map((b) => b.text)
+    .filter((b) => b.type === "text")
+    .map((b) => b.text ?? "")
     .join("");
   return { model, resolved: response.model, text, ms: Date.now() - started, usage: response.usage };
 }

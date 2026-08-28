@@ -8,6 +8,7 @@ import { validateTrajectory } from "../schema.js";
 import type { Trajectory, TrajectoryEvent } from "../types.js";
 import type { RunLog } from "../lib/runlog.js";
 import type { CaseDef, Distractor, ScenarioPack } from "./scenarios.js";
+import { jsonrepair } from "jsonrepair";
 
 const SCHEMA_BLOCK = `{"step": <1-based line number>, "type": "user"|"assistant", "content": [ blocks ]}
 Content blocks (exactly one of):
@@ -105,7 +106,12 @@ function parseJsonlEvents(text: string): TrajectoryEvent[] {
     .map((l) => l.replace(/^```[a-zA-Z]*$/, "").trim())
     .filter((l) => l.length > 0 && l.startsWith("{"));
   for (const line of cleaned) {
-    events.push(JSON.parse(line) as TrajectoryEvent);
+    try {
+      events.push(JSON.parse(line) as TrajectoryEvent);
+    } catch {
+      // LLM JSONL commonly has unescaped inner quotes; repair then retry.
+      events.push(JSON.parse(jsonrepair(line)) as TrajectoryEvent);
+    }
   }
   return events;
 }

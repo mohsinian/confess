@@ -11,6 +11,7 @@ export type RunLogKind =
   | "request"
   | "response"
   | "repair"
+  | "tool_result"
   | "error"
   | "note";
 
