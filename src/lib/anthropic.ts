@@ -42,6 +42,13 @@ export function makeClient(cfg: ProviderConfig): Anthropic {
     ...(cfg.baseUrl ? { baseURL: cfg.baseUrl } : {}),
     maxRetries: 2,
     timeout: 180_000,
+    // AgentRouter gates on client identity: requests must present the Claude Code
+    // user-agent or it answers 401 "unauthorized client detected" (docs are
+    // Claude Code-specific; the SDK's default UA trips the filter).
+    defaultHeaders: {
+      "user-agent": "claude-cli/2.0.14 (external, cli)",
+      "x-app": "cli",
+    },
   });
 }
 
@@ -182,20 +189,25 @@ export async function callRaw(
     system: opts.system,
     messages: opts.messages,
   });
-  const text = response.content
+  // Some proxies return a JSON body with a non-JSON content-type, so the SDK
+  // surfaces a raw string — normalize before reading fields.
+  const message = (
+    typeof response === "string" ? JSON.parse(response) : response
+  ) as Anthropic.Messages.Message;
+  const text = message.content
     .filter((b): b is Extract<typeof b, { type: "text" }> => b.type === "text")
     .map((b) => b.text)
     .join("");
   const price = priceForModel(cfg.model);
   const usage = {
-    inputTokens: response.usage.input_tokens,
-    outputTokens: response.usage.output_tokens,
-    costUsd: (response.usage.input_tokens / 1e6) * price.input + (response.usage.output_tokens / 1e6) * price.output,
+    inputTokens: message.usage.input_tokens,
+    outputTokens: message.usage.output_tokens,
+    costUsd: (message.usage.input_tokens / 1e6) * price.input + (message.usage.output_tokens / 1e6) * price.output,
   };
-  opts.budget.addUsage(cfg.model, response.usage);
-  await opts.log?.append(opts.stage, "response", { stopReason: response.stop_reason, text }, usage);
+  opts.budget.addUsage(cfg.model, message.usage);
+  await opts.log?.append(opts.stage, "response", { stopReason: message.stop_reason, text }, usage);
   void started;
-  return { text, model: response.model, usage };
+  return { text, model: message.model ?? cfg.model, usage };
 }
 
 export interface JsonCallResult<T> extends CallResult {

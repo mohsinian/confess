@@ -7,12 +7,14 @@ import { loadProviderConfig, makeClient, MODEL_CANDIDATES, Budget } from "./anth
 
 async function tryModel(client: Anthropic, model: string) {
   const started = Date.now();
-  const response = await client.messages.create({
+  const raw = await client.messages.create({
     model,
     max_tokens: 8,
     temperature: 0,
     messages: [{ role: "user", content: "Reply with exactly: OK" }],
   });
+  // Normalize proxies that return a JSON body with a non-JSON content-type.
+  const response = (typeof raw === "string" ? JSON.parse(raw) : raw) as import("@anthropic-ai/sdk").Messages.Message;
   const text = response.content
     .filter((b): b is Extract<typeof b, { type: "text" }> => b.type === "text")
     .map((b) => b.text)
