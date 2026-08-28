@@ -1,0 +1,29 @@
+{
+  "name": "confess",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Confess — every agent tells a story. Confess checks the receipts. A trajectory debugger for AI coding agents.",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "smoke": "tsx src/lib/smoke.ts",
+    "gen:dataset": "tsx src/generate/buildDataset.ts",
+    "baseline": "tsx src/baseline/runBaseline.ts",
+    "eval": "tsx src/eval/score.ts",
+    "report": "tsx src/eval/report.ts",
+    "selftest": "tsx src/eval/score.ts --selftest && tsx tests/runTests.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "latest",
+    "dotenv": "latest",
+    "zod": "latest"
+  },
+  "devDependencies": {
+    "@types/node": "latest",
+    "tsx": "latest",
+    "typescript": "latest"
+  }
+}
