@@ -1,0 +1,19 @@
+{
+  "case_id": "case_04",
+  "failures": [
+    {
+      "id": "f1",
+      "type": "retry_loop",
+      "primary_step": 18,
+      "evidence_steps": [
+        16,
+        18,
+        20
+      ],
+      "description": "Identical failing command \"npm run lint\" repeated 3 times with no adaptation between attempts.",
+      "mutation_id": "rl-1"
+    }
+  ],
+  "clean": false,
+  "difficulty": "standard"
+}

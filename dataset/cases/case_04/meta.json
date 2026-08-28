@@ -1,0 +1,10 @@
+{
+  "case_id": "case_04",
+  "title": "refactor stuck in a retry loop",
+  "scenario": "B: library refactor: extract utils and keep lint green",
+  "seed": 42,
+  "base_model": "claude-opus-5",
+  "n_steps": 30,
+  "difficulty": "standard",
+  "generated_at": "2026-08-28T22:40:50.128Z"
+}

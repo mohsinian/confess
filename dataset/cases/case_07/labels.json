@@ -1,0 +1,29 @@
+{
+  "case_id": "case_07",
+  "failures": [
+    {
+      "id": "f1",
+      "type": "tool_misuse",
+      "primary_step": 2,
+      "evidence_steps": [
+        3
+      ],
+      "description": "Wrong tool arguments at step 2 (see tool_result at step 3); correct usage was apparent.",
+      "mutation_id": "tm-1"
+    },
+    {
+      "id": "f2",
+      "type": "retry_loop",
+      "primary_step": 22,
+      "evidence_steps": [
+        20,
+        22,
+        24
+      ],
+      "description": "Identical failing command \"cat -n src/parse.ts && rm src/parse.ts && git status --short\" repeated 3 times with no adaptation between attempts.",
+      "mutation_id": "rl-2"
+    }
+  ],
+  "clean": false,
+  "difficulty": "standard"
+}

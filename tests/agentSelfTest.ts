@@ -57,7 +57,7 @@ async function main(): Promise<void> {
     const parsed = parseTrajectory(traj);
     const loops = detectRetryLoops(parsed);
     check("rl-detector: finds the 3x identical loop", loops.length === 1 && loops[0].kind === "retry_loop" && loops[0].occurrences === 3, JSON.stringify(loops));
-    check("rl-detector: adapted retry not counted", !loops[0].steps.includes(8));
+    check("rl-detector: adapted retry not counted", loops[0].kind !== "retry_loop" || !loops[0].steps.includes(8));
 
     // Healthy case: error acknowledged + CHANGED args → no signal.
     const healthy = [

@@ -1,0 +1,28 @@
+{
+  "case_id": "case_09",
+  "failures": [
+    {
+      "id": "f1",
+      "type": "hallucinated_success",
+      "primary_step": 12,
+      "evidence_steps": [
+        10,
+        11
+      ],
+      "description": "Agent claims success at step 12; tool_result at step 11 shows failure.",
+      "mutation_id": "hs-1"
+    },
+    {
+      "id": "f2",
+      "type": "tool_misuse",
+      "primary_step": 4,
+      "evidence_steps": [
+        5
+      ],
+      "description": "Wrong tool arguments at step 4 (see tool_result at step 5); correct usage was apparent.",
+      "mutation_id": "tm-2"
+    }
+  ],
+  "clean": false,
+  "difficulty": "standard"
+}

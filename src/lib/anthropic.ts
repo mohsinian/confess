@@ -42,7 +42,7 @@ export function makeClient(cfg: ProviderConfig): Anthropic {
     ...(cfg.apiKey ? { apiKey: cfg.apiKey } : {}),
     ...(cfg.baseUrl ? { baseURL: cfg.baseUrl } : {}),
     maxRetries: 2,
-    timeout: 300_000, // Opus via router can be slow on long generations
+    timeout: 480_000, // Opus via router: long generations can take several minutes
     // AgentRouter gates on client identity: requests must present the Claude Code
     // user-agent or it answers 401 "unauthorized client detected" (docs are
     // Claude Code-specific; the SDK's default UA trips the filter).

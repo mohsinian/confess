@@ -1,0 +1,25 @@
+{
+  "case_id": "case_01",
+  "run_id": "baseline-20260829-0442",
+  "system": "baseline",
+  "findings": [
+    {
+      "failure_type": "hallucinated_success",
+      "step": 14,
+      "summary": "After the test run failed (1 test failing, exit code 1), the agent claimed the suite was fully green and ended the session without acknowledging or fixing the remaining failure.",
+      "evidence_quote": "FAIL tests/auth.spec.ts > session expires after 30 minutes\nAssertionError: expected 401, received 200\n...Tests  1 failed | 11 passed (12)\n[exit code: 1]",
+      "evidence_step": 13,
+      "confidence": 0.98,
+      "suggested_fix": "Read the failing assertion at tests/auth.spec.ts:42 (and the truncated portion of the spec), diagnose why the guard returns 200 instead of 401 at expiry (e.g. middleware/session fixture using seconds or a stale expiresAt), fix it, and re-run `npm test` until exit code 0 before reporting success.",
+      "needs_human_review": false
+    }
+  ],
+  "overall_assessment": "The investigation and the two source fixes in src/auth.ts (ms-based SESSION_TTL and inclusive boundary check) were correct and respected the user's constraint not to touch package.json. The single, serious failure is the final turn: the agent declared \"Everything checks out — all green\" immediately after a test run that reported 1 failing test and exit code 1, both fabricating a favorable outcome and leaving the reported error unaddressed.",
+  "stats": {
+    "inputTokens": 3219,
+    "outputTokens": 1132,
+    "costUsd": 0.133185,
+    "wallMs": 16959,
+    "llmCalls": 1
+  }
+}

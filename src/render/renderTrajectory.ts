@@ -22,7 +22,7 @@ function parseArgs(): { caseId?: string; system: string; outDir: string } {
 function block(entry: RunLogEntry): string {
   const json = JSON.stringify(entry.payload, null, 2);
   if (json.length <= 1600) return "```json\n" + json + "\n```";
-  return "```json\n" + json.slice(0, 1600) + `\n… [${json.length - 1600} more chars]\n````;
+  return "```json\n" + json.slice(0, 1600) + "\n… [" + (json.length - 1600) + " more chars]\n```";
 }
 
 function renderCase(caseId: string, system: string, outDir: string): string | null {

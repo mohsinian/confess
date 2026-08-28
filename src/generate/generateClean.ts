@@ -134,7 +134,7 @@ export async function generateCleanSession(
       stage: `generate:${cd.caseId}`,
       system,
       messages,
-      maxTokens: 16_000,
+      maxTokens: 32_000, // long cases (case_12) exceed 16K output tokens
       budget,
       log,
     });

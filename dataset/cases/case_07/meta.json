@@ -1,0 +1,10 @@
+{
+  "case_id": "case_07",
+  "title": "cleanup with a wrong script and a loop",
+  "scenario": "E: repo cleanup: lint errors and dead files",
+  "seed": 42,
+  "base_model": "claude-opus-5",
+  "n_steps": 38,
+  "difficulty": "standard",
+  "generated_at": "2026-08-28T22:40:50.132Z"
+}
