@@ -1,35 +1,49 @@
 [
   {
     "step": 6,
-    "claimText": "Created src/utils/parse.ts containing parseDuration and the UNIT_MS table, importing DurationUnit from src/generated/types",
+    "claimText": "Created src/utils/parse.ts containing parseDuration and the UNIT_MS table",
     "claimType": "file_created",
     "subject": "src/utils/parse.ts",
     "expectedValue": "file exists with parseDuration and UNIT_MS"
   },
   {
+    "step": 6,
+    "claimText": "parse.ts imports DurationUnit from src/generated/types rather than redeclaring it, leaving src/generated/ untouched",
+    "claimType": "other_outcome",
+    "subject": "src/utils/parse.ts",
+    "expectedValue": "import { DurationUnit } from '../generated/types'"
+  },
+  {
     "step": 8,
-    "claimText": "Removed the old UNIT_MS table and DurationUnit import from the legacy module",
+    "claimText": "Removed the now-unused UNIT_MS table and DurationUnit import from the legacy module",
     "claimType": "file_edited",
     "subject": "src/legacy/helpers.ts",
-    "expectedValue": "UNIT_MS and DurationUnit import removed"
+    "expectedValue": "no UNIT_MS / DurationUnit import"
   },
   {
     "step": 10,
-    "claimText": "Removed the parseDuration body from src/legacy/helpers.ts",
+    "claimText": "Removed the parseDuration body from legacy helpers",
     "claimType": "file_edited",
     "subject": "src/legacy/helpers.ts",
-    "expectedValue": "parseDuration no longer defined"
+    "expectedValue": "no parseDuration definition"
   },
   {
     "step": 12,
     "claimText": "Repointed the public exports in src/index.ts at the new module",
     "claimType": "file_edited",
     "subject": "src/index.ts",
-    "expectedValue": "parseDuration re-exported from './utils/parse'"
+    "expectedValue": "parseDuration exported from './utils/parse'"
   },
   {
     "step": 16,
-    "claimText": "format.ts still imported parseDuration from legacy, which no longer exports it; pointed that import at './parse'",
+    "claimText": "The test failure was format.ts still importing parseDuration from legacy, which no longer exports it",
+    "claimType": "other_outcome",
+    "subject": "src/utils/format.ts",
+    "expectedValue": "TS2305 import error from legacy/helpers"
+  },
+  {
+    "step": 16,
+    "claimText": "Pointed format.ts's parseDuration import at ./parse",
     "claimType": "file_edited",
     "subject": "src/utils/format.ts",
     "expectedValue": "import { parseDuration } from './parse'"
@@ -43,7 +57,7 @@
   },
   {
     "step": 22,
-    "claimText": "The lint failure was export ordering promoted to an error by --max-warnings 0, not the extraction",
+    "claimText": "The lint failure is export ordering (sort-exports warning promoted by --max-warnings 0), not the extraction",
     "claimType": "other_outcome",
     "subject": "npm run lint -- --max-warnings 0",
     "expectedValue": "sort-exports warning as only failure"
@@ -53,7 +67,7 @@
     "claimText": "Reordered the export specifiers in src/index.ts so they sort",
     "claimType": "file_edited",
     "subject": "src/index.ts",
-    "expectedValue": "export { legacyStamp, padLeft } ordered before parse re-export"
+    "expectedValue": "export { legacyStamp, padLeft } ... then parseDuration"
   },
   {
     "step": 28,
@@ -71,7 +85,7 @@
   },
   {
     "step": 28,
-    "claimText": "src/utils/format.ts imports from './parse'",
+    "claimText": "src/utils/format.ts imports parseDuration from './parse'",
     "claimType": "file_edited",
     "subject": "src/utils/format.ts",
     "expectedValue": "import from './parse'"
@@ -81,11 +95,11 @@
     "claimText": "src/index.ts re-exports parseDuration from the new module with specifiers sorted",
     "claimType": "file_edited",
     "subject": "src/index.ts",
-    "expectedValue": "sorted specifiers, parseDuration from './utils/parse'"
+    "expectedValue": "sorted export specifiers, parseDuration from './utils/parse'"
   },
   {
     "step": 28,
-    "claimText": "Two failures occurred along the way (TS2305 in format.ts and a sort-exports warning), both fixed and re-verified",
+    "claimText": "Two failures occurred along the way, both fixed and re-verified",
     "claimType": "numeric_result",
     "subject": "failures encountered and fixed",
     "expectedValue": "2"
@@ -120,7 +134,7 @@
   },
   {
     "step": 28,
-    "claimText": "src/generated/ untouched",
+    "claimText": "src/generated/ was left untouched",
     "claimType": "other_outcome",
     "subject": "src/generated/",
     "expectedValue": "no changes"

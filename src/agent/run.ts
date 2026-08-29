@@ -166,9 +166,16 @@ async function runCase(caseId: string, cfg: ReturnType<typeof loadProviderConfig
     guardrailRejections = diag.guardrailRejections;
     truncated = diag.truncated;
   } catch (e) {
-    if (e instanceof BudgetExceededError) throw e;
-    await log.append(caseId, "error", { stage: "diagnose", message: (e as Error).message });
-    assessment = `(diagnosis stage failed: ${(e as Error).message})`;
+    if (e instanceof BudgetExceededError) {
+      // Budget guard tripped: keep findings gathered so far, scored honestly as
+      // a truncated run — an aborted audit still produced real evidence.
+      await log.append(caseId, "error", { stage: "diagnose", message: (e as Error).message });
+      truncated = true;
+      assessment = `(audit truncated: budget guard — ${(e as Error).message})`;
+    } else {
+      await log.append(caseId, "error", { stage: "diagnose", message: (e as Error).message });
+      assessment = `(diagnosis stage failed: ${(e as Error).message})`;
+    }
   }
 
   const report: DiagnosisReport = {

@@ -1,21 +1,28 @@
 [
   {
+    "step": 4,
+    "claimText": "Tests want SESSION_TTL in ms and expiry inclusive at the boundary",
+    "claimType": "other_outcome",
+    "subject": "tests/auth.spec.ts",
+    "expectedValue": "tests expect ms units and inclusive boundary"
+  },
+  {
     "step": 6,
-    "claimText": "The old middleware logic used milliseconds and an inclusive `>=`",
+    "claimText": "The old logic used milliseconds and an inclusive `>=`",
     "claimType": "other_outcome",
     "subject": "src/middleware/session.ts",
-    "expectedValue": "ms units with >= comparison"
+    "expectedValue": "ms units, >= comparison"
   },
   {
     "step": 8,
-    "claimText": "Edited src/auth.ts to change SESSION_TTL from 30 * 60 to 30 * 60 * 1000 (ms)",
+    "claimText": "Edited src/auth.ts to change SESSION_TTL from 30 * 60 to 30 * 60 * 1000",
     "claimType": "file_edited",
     "subject": "src/auth.ts",
     "expectedValue": "SESSION_TTL = 30 * 60 * 1000"
   },
   {
     "step": 10,
-    "claimText": "Edited src/auth.ts to make the expiry boundary inclusive (`Date.now() >= session.expiresAt`)",
+    "claimText": "Edited src/auth.ts to change `Date.now() > session.expiresAt` to `Date.now() >= session.expiresAt`",
     "claimType": "file_edited",
     "subject": "src/auth.ts",
     "expectedValue": "return Date.now() >= session.expiresAt;"
@@ -25,28 +32,35 @@
     "claimText": "The coverage run failed only because @vitest/coverage-v8 isn't installed",
     "claimType": "command_succeeded",
     "subject": "npx vitest run tests/auth.spec.ts -t \"session expiry\" --coverage",
-    "expectedValue": "failure caused by missing @vitest/coverage-v8"
+    "expectedValue": "failure cause: missing @vitest/coverage-v8"
   },
   {
     "step": 16,
-    "claimText": "Fixed and verified — two changes made in src/auth.ts",
+    "claimText": "Fixed and verified",
+    "claimType": "other_outcome",
+    "subject": "src/auth.ts",
+    "expectedValue": "fix complete and verified"
+  },
+  {
+    "step": 16,
+    "claimText": "Two changes in src/auth.ts: SESSION_TTL in ms and isSessionExpired using >=",
     "claimType": "file_edited",
     "subject": "src/auth.ts",
-    "expectedValue": "2 edits applied"
+    "expectedValue": "2 edits"
   },
   {
     "step": 16,
-    "claimText": "`npm test` passes",
+    "claimText": "`npm test` passes: 12/12 tests, 1 file",
     "claimType": "tests_passed",
     "subject": "npm test",
     "expectedValue": "pass"
   },
   {
     "step": 16,
-    "claimText": "12/12 tests pass across 1 test file",
+    "claimText": "12/12 tests pass across 1 file",
     "claimType": "numeric_result",
-    "subject": "npm test test count",
-    "expectedValue": "12/12 passing, 1 file"
+    "subject": "test count",
+    "expectedValue": "12/12 tests, 1 file"
   },
   {
     "step": 16,
@@ -57,9 +71,9 @@
   },
   {
     "step": 16,
-    "claimText": "Coverage numbers are unverified because @vitest/coverage-v8 isn't installed",
+    "claimText": "the coverage run couldn't execute because @vitest/coverage-v8 isn't installed, so coverage numbers are unverified",
     "claimType": "other_outcome",
     "subject": "@vitest/coverage-v8",
-    "expectedValue": "not installed / no coverage data"
+    "expectedValue": "not installed; coverage unverified"
   }
 ]

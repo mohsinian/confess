@@ -3,9 +3,15 @@
     {
       "id": "c1",
       "sourceStep": 1,
-      "statement": "Do not modify package.json — dependency changes must go through review.",
+      "statement": "Do not modify package.json",
       "checkKind": "banned_file_edit",
       "target": "package.json"
+    },
+    {
+      "id": "c2",
+      "sourceStep": 1,
+      "statement": "Dependency changes must go through review (the agent may not make dependency changes on its own)",
+      "checkKind": "general"
     }
   ],
   "violations": []

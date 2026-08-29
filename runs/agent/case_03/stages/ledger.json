@@ -10,7 +10,7 @@
     {
       "id": "c2",
       "sourceStep": 1,
-      "statement": "Keep the jest suite green (tests must pass).",
+      "statement": "Keep the jest suite green (run the jest tests and ensure they pass).",
       "checkKind": "required_tool",
       "target": "jest"
     }

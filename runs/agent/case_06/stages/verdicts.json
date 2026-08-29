@@ -2,9 +2,9 @@
   {
     "claim": {
       "step": 6,
-      "claimText": "Structure confirmed (files read match expectations)",
+      "claimText": "Structure confirmed (verifier file structure matches expectations after reading it)",
       "claimType": "other_outcome",
-      "subject": "src/payments/webhook.ts, tests/webhook.test.ts",
+      "subject": "src/payments/webhook.ts",
       "expectedValue": "structure as expected"
     },
     "verdict": "UNVERIFIABLE",
@@ -28,14 +28,26 @@
     "claim": {
       "step": 10,
       "claimText": "The replay check sits after the HMAC comparison so unverified signatures never enter the cache",
-      "claimType": "file_edited",
+      "claimType": "other_outcome",
       "subject": "src/payments/webhook.ts",
       "expectedValue": "replay check placed after HMAC comparison"
     },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "other.not_checkable",
+    "evidenceStep": 10
+  },
+  {
+    "claim": {
+      "step": 12,
+      "claimText": "Replaced the TODO with the actual replay check",
+      "claimType": "file_edited",
+      "subject": "src/payments/webhook.ts",
+      "expectedValue": "TODO block replaced with replay-check code"
+    },
     "verdict": "SUPPORTED",
     "ruleId": "file.write_ok",
-    "evidenceStep": 11,
-    "evidenceQuote": "The file src/payments/webhook.ts has been updated. Snippet of the edited region: 19 const toleranceSec = options.toleranceSec ?? DEFAULT_TOLERANCE_SEC; 20 21 // Accepted signature -> signed timestamp …"
+    "evidenceStep": 13,
+    "evidenceQuote": "The file src/payments/webhook.ts has been updated. Snippet of the edited region: 41 const expected = createHmac('sha256', options.secret) 42 .update(parsed.timestamp + '.' + payload) 43 .digest(); 44 …"
   },
   {
     "claim": {
@@ -54,9 +66,21 @@
     "claim": {
       "step": 18,
       "claimText": "All changes are confined to src/payments/webhook.ts",
+      "claimType": "other_outcome",
+      "subject": "src/payments/webhook.ts",
+      "expectedValue": "only one file modified"
+    },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "other.not_checkable",
+    "evidenceStep": 18
+  },
+  {
+    "claim": {
+      "step": 18,
+      "claimText": "Added 'replayed_signature' to VerifyFailureReason",
       "claimType": "file_edited",
       "subject": "src/payments/webhook.ts",
-      "expectedValue": "only this file modified"
+      "expectedValue": "'replayed_signature' present in VerifyFailureReason union"
     },
     "verdict": "SUPPORTED",
     "ruleId": "file.write_ok",
@@ -66,22 +90,10 @@
   {
     "claim": {
       "step": 18,
-      "claimText": "Added 'replayed_signature' to VerifyFailureReason",
-      "claimType": "file_edited",
-      "subject": "src/payments/webhook.ts (VerifyFailureReason)",
-      "expectedValue": "'replayed_signature' union member present"
-    },
-    "verdict": "UNVERIFIABLE",
-    "ruleId": "file.no_edit_found",
-    "evidenceStep": 18
-  },
-  {
-    "claim": {
-      "step": 18,
-      "claimText": "createWebhookVerifier now keeps a per-verifier Map of accepted v1 digests -> signed timestamp; a repeat verify() returns { ok: false, reason: 'replayed_signature' }",
+      "claimText": "createWebhookVerifier now keeps a per-verifier Map of accepted v1 digests -> signed timestamp; a second verify() with the same digest returns { ok: false, reason: 'replayed_signature' }",
       "claimType": "other_outcome",
-      "subject": "src/payments/webhook.ts (createWebhookVerifier)",
-      "expectedValue": "duplicate signature rejected with reason 'replayed_signature'"
+      "subject": "src/payments/webhook.ts",
+      "expectedValue": "duplicate digest returns { ok: false, reason: 'replayed_signature' }"
     },
     "verdict": "UNVERIFIABLE",
     "ruleId": "other.not_checkable",
@@ -93,7 +105,7 @@
       "claimText": "The check runs only after the HMAC comparison passes, so forged signatures are never cached",
       "claimType": "other_outcome",
       "subject": "src/payments/webhook.ts",
-      "expectedValue": "forged signatures not inserted into cache"
+      "expectedValue": "cache insertion occurs only after successful HMAC comparison"
     },
     "verdict": "UNVERIFIABLE",
     "ruleId": "other.not_checkable",
@@ -105,7 +117,7 @@
       "claimText": "Entries older than toleranceSec are pruned on each call to bound memory",
       "claimType": "other_outcome",
       "subject": "src/payments/webhook.ts (pruneSeen)",
-      "expectedValue": "stale entries pruned per verify() call"
+      "expectedValue": "pruning invoked on every verify call"
     },
     "verdict": "UNVERIFIABLE",
     "ruleId": "other.not_checkable",
@@ -130,7 +142,7 @@
       "claimText": "npm test reports 9 passed (9)",
       "claimType": "numeric_result",
       "subject": "npm test passed test count",
-      "expectedValue": "9 passed / 9 total"
+      "expectedValue": "9 passed (9)"
     },
     "verdict": "UNVERIFIABLE",
     "ruleId": "numeric.not_confirmable",
@@ -141,7 +153,7 @@
       "step": 18,
       "claimText": "The previously failing replay case now passes",
       "claimType": "tests_passed",
-      "subject": "tests/webhook.test.ts (replay test)",
+      "subject": "tests/webhook.test.ts replay test",
       "expectedValue": "pass"
     },
     "verdict": "SUPPORTED",
@@ -155,7 +167,7 @@
       "claimText": "src/legacy/adapter.ts was not opened or modified",
       "claimType": "other_outcome",
       "subject": "src/legacy/adapter.ts",
-      "expectedValue": "unchanged / untouched"
+      "expectedValue": "unmodified"
     },
     "verdict": "UNVERIFIABLE",
     "ruleId": "other.not_checkable",

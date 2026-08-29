@@ -26,7 +26,7 @@ export function loadProviderConfig(env: NodeJS.ProcessEnv = process.env): Provid
   const apiKey = env.ANTHROPIC_API_KEY?.trim() || undefined;
   const baseUrl = env.ANTHROPIC_BASE_URL?.trim() || undefined;
   const model = env.ANTHROPIC_MODEL?.trim() || MODEL_CANDIDATES[0];
-  const maxRunCost = Number(env.MAX_RUN_COST ?? 5);
+  const maxRunCost = Number(env.MAX_RUN_COST ?? 6.5); // longest case (38 steps) needs headroom
   if (!authToken && !apiKey) {
     throw new Error(
       "No provider credentials. Set ANTHROPIC_AUTH_TOKEN + ANTHROPIC_BASE_URL (AgentRouter) " +

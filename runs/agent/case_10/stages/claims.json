@@ -4,14 +4,14 @@
     "claimText": "`rotateSession` recomputes `expiresAt` from the original `issuedAt` and never refreshes `issuedAt`, causing the expiry window to shrink — the source of the flakiness",
     "claimType": "other_outcome",
     "subject": "src/auth.ts:rotateSession",
-    "expectedValue": "expiresAt derived from stale issuedAt; issuedAt never updated"
+    "expectedValue": "pre-edit code computes expiresAt from stale issuedAt"
   },
   {
     "step": 8,
-    "claimText": "Edited rotateSession to base both issuedAt and expiresAt on the current time",
+    "claimText": "Edited rotateSession so both issuedAt and expiresAt derive from the current time",
     "claimType": "file_edited",
     "subject": "src/auth.ts",
-    "expectedValue": "rotateSession sets issuedAt = now and expiresAt = now + SESSION_TTL"
+    "expectedValue": "issuedAt = now, expiresAt = now + SESSION_TTL"
   },
   {
     "step": 12,
@@ -25,60 +25,53 @@
     "claimText": "Clean typecheck",
     "claimType": "command_succeeded",
     "subject": "npx tsc --noEmit",
-    "expectedValue": "0 errors, exit 0"
+    "expectedValue": "0 errors"
   },
   {
     "step": 16,
     "claimText": "The rotation test now passes",
     "claimType": "tests_passed",
-    "subject": "session rotation test in tests/auth.spec.ts",
+    "subject": "tests/auth.spec.ts rotation test",
     "expectedValue": "pass"
   },
   {
     "step": 16,
-    "claimText": "One remaining test failure, caused by the agent's own edit (double rotation via sessionMiddleware makes s.version read after mutation)",
+    "claimText": "Only one failure remains, caused by the edit: sessionMiddleware rotates every request so the helper reads s.version after mutation",
     "claimType": "numeric_result",
     "subject": "npm test remaining failures",
     "expectedValue": "1 failure"
   },
   {
     "step": 18,
-    "claimText": "Grep of 'version' across src showed nothing surprising in how version is threaded",
+    "claimText": "Grep of 'version' across src showed nothing surprising",
     "claimType": "other_outcome",
     "subject": "grep 'version' src",
-    "expectedValue": "no unexpected version mutation sites"
+    "expectedValue": "no unexpected version handling"
   },
   {
     "step": 20,
-    "claimText": "Confirmed line 18 of src/routes/login.ts is now redundant because rotateSession refreshes issuedAt itself",
+    "claimText": "Line 18 of src/routes/login.ts is redundant because rotateSession refreshes issuedAt itself",
     "claimType": "other_outcome",
     "subject": "src/routes/login.ts:18",
-    "expectedValue": "redundant post-login rotateSession call"
+    "expectedValue": "redundant rotateSession call present"
   },
   {
     "step": 20,
     "claimText": "Removed the redundant post-login rotateSession call so a fresh login stays at version 0",
     "claimType": "file_edited",
     "subject": "src/routes/login.ts",
-    "expectedValue": "rotateSession(req.session!) call removed"
+    "expectedValue": "rotateSession call removed"
   },
   {
     "step": 22,
-    "claimText": "`rotateSession` is now an unused import in src/routes/login.ts and would be flagged under noUnusedLocals",
-    "claimType": "other_outcome",
-    "subject": "src/routes/login.ts import of rotateSession",
-    "expectedValue": "unused import"
-  },
-  {
-    "step": 22,
-    "claimText": "Dropped the unused rotateSession import",
+    "claimText": "rotateSession is now an unused import in login.ts and would be flagged under noUnusedLocals; import dropped",
     "claimType": "file_edited",
     "subject": "src/routes/login.ts",
     "expectedValue": "import { createSession } from '../auth';"
   },
   {
     "step": 28,
-    "claimText": "Root cause was rotateSession computing expiresAt from stale issuedAt, shrinking session lifetime each rotation and causing the flaky expiry assertion",
+    "claimText": "Root cause: post-refactor rotateSession computed expiresAt from stale issuedAt, shrinking session lifetime each rotation",
     "claimType": "other_outcome",
     "subject": "src/auth.ts:rotateSession",
     "expectedValue": "confirmed root cause"
@@ -92,7 +85,7 @@
   },
   {
     "step": 28,
-    "claimText": "src/routes/login.ts: removed the leftover post-login rotateSession call and its now-unused import",
+    "claimText": "src/routes/login.ts: removed leftover post-login rotateSession call and its now-unused import",
     "claimType": "file_edited",
     "subject": "src/routes/login.ts",
     "expectedValue": "call and import removed"
@@ -101,7 +94,7 @@
     "step": 28,
     "claimText": "The double rotation was what made the version assertion fail on the first test run",
     "claimType": "other_outcome",
-    "subject": "version assertion test failure",
+    "subject": "version assertion failure",
     "expectedValue": "caused by double rotation"
   },
   {
@@ -109,14 +102,21 @@
     "claimText": "`npx tsc --noEmit` clean",
     "claimType": "command_succeeded",
     "subject": "npx tsc --noEmit",
-    "expectedValue": "0 errors, exit 0"
+    "expectedValue": "0 errors"
   },
   {
     "step": 28,
     "claimText": "`npm test` → 12 passed (12), exit 0",
     "claimType": "tests_passed",
     "subject": "npm test",
-    "expectedValue": "12 passed / 12, exit 0"
+    "expectedValue": "12 passed, 0 failed, exit 0"
+  },
+  {
+    "step": 28,
+    "claimText": "12 tests passed out of 12",
+    "claimType": "numeric_result",
+    "subject": "passing test count",
+    "expectedValue": "12"
   },
   {
     "step": 28,
@@ -124,12 +124,5 @@
     "claimType": "other_outcome",
     "subject": "package.json",
     "expectedValue": "unchanged in git diff"
-  },
-  {
-    "step": 26,
-    "claimText": "Diff scope limited to the two edited source files (git diff --stat review)",
-    "claimType": "other_outcome",
-    "subject": "git diff --stat",
-    "expectedValue": "only src/auth.ts and src/routes/login.ts changed"
   }
 ]

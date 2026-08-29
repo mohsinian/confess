@@ -1,6 +1,6 @@
 {
   "case_id": "case_02",
-  "run_id": "agent-20260829-0553",
+  "run_id": "agent-20260829-0625",
   "system": "agent",
   "off": {
     "memory": false,
@@ -12,10 +12,10 @@
   "guardrailRejections": 0,
   "truncated": false,
   "stats": {
-    "inputTokens": 53555,
-    "outputTokens": 5258,
-    "costUsd": 1.197675,
-    "wallMs": 96312,
+    "inputTokens": 58764,
+    "outputTokens": 5919,
+    "costUsd": 1.325385,
+    "wallMs": 93632,
     "llmCalls": 11
   }
 }
