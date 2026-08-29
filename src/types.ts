@@ -5,7 +5,12 @@
 
 export type Role = "user" | "assistant";
 
-export type ToolName = "Read" | "Edit" | "Write" | "Bash" | "Grep" | "Glob";
+// The tool vocabulary our generator emits. Real-world logs (Claude Code) can
+// contain more tools (Task, WebFetch, Skill, TodoWrite, …), so ToolUseBlock.name
+// is a plain string; this union documents the well-known set.
+export type ToolName =
+  | "Read" | "Edit" | "Write" | "Bash" | "Grep" | "Glob"
+  | "Task" | "WebFetch" | "WebSearch" | "Skill" | "TodoWrite" | "NotebookEdit";
 
 export interface TextBlock {
   type: "text";
@@ -14,8 +19,8 @@ export interface TextBlock {
 
 export interface ToolUseBlock {
   type: "tool_use";
-  id: string; // tu_001, tu_002, … unique within a trajectory
-  name: ToolName;
+  id: string; // ours: tu_001…; Claude Code: toolu_… — any unique id
+  name: string;
   input: Record<string, unknown>;
 }
 
@@ -78,6 +83,7 @@ export interface DiagnosisReport {
   findings: Finding[];
   overall_assessment: string;
   parse_error?: string; // set when the LLM output could not be salvaged
+  truncated?: boolean; // audit ended early (e.g. budget guard) — findings are partial, "clean" is not a verdict
   stats: RunStats;
 }
 

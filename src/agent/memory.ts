@@ -40,9 +40,10 @@ export async function buildLedger(
   log: RunLog | undefined,
   parsed: ParsedTrajectory,
 ): Promise<MemoryResult> {
+  const cap = (t: string) => (t.length > 2500 ? t.slice(0, 2500) + " […truncated]" : t);
   const userMessages = parsed.steps
     .filter((s) => s.type === "user" && s.blocks.some((b) => b.type === "text"))
-    .map((s) => `step ${s.index} (user): ${eventText(s)}`)
+    .map((s) => `step ${s.index} (user): ${cap(eventText(s))}`)
     .join("\n\n");
 
   const result = await callJson(client, cfg, {

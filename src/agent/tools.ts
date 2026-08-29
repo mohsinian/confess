@@ -209,7 +209,7 @@ export class DiagnosisToolbox {
     const hits: string[] = [];
     for (const step of this.parsed.steps) {
       for (const b of step.blocks) {
-        const text = b.type === "text" ? b.text : b.type === "tool_use" ? `${b.name} ${JSON.stringify(b.input)}` : b.content;
+        const text = b.type === "text" ? b.text : b.type === "tool_use" ? `${b.name} ${JSON.stringify(b.input).slice(0, 300)}` : b.content;
         const m = re.exec(text);
         if (m) {
           hits.push(`step ${step.index}: …${text.slice(Math.max(0, (m.index ?? 0) - 30), (m.index ?? 0) + 140).replace(/\s+/g, " ")}…`);

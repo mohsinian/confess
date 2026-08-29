@@ -1,41 +1,47 @@
-# CONFESS
+# confess-audit
 
 **Every agent tells a story. Confess checks the receipts.**
 
-Confess audits the session logs of AI coding agents (Claude Code-style transcripts: user
-instructions, agent messages, tool calls, tool results) and returns a diagnosis: which steps
-failed, what failure type, the verbatim evidence, a suggested fix — and a confidence score.
-Findings below the confidence line are routed to a **human review queue** instead of being
-asserted.
+`confess-audit` audits the session transcripts of AI coding agents and reports which steps
+failed, what kind of failure it was, the verbatim evidence, a suggested fix, and a confidence
+score. Findings below the confidence line go to a human review queue instead of being asserted.
 
+Works with Claude Code session logs today (`~/.claude/projects/**/*.jsonl`).
+
+## Quick start
+
+```bash
+npx confess-audit                       # audit your most recent Claude Code session
+npx confess-audit --list                # browse sessions, newest first
+npx confess-audit <file.jsonl>          # audit a specific transcript
+npx confess-audit --off verify,memory   # cheaper pass (detectors + diagnosis agent)
 ```
-npm run agent -- --case case_12        # interrogate one session
-```
 
-## Who has this problem
+Credentials: `ANTHROPIC_API_KEY` (direct Anthropic) or `ANTHROPIC_AUTH_TOKEN` +
+`ANTHROPIC_BASE_URL` (any Anthropic-compatible router) — via environment variables or a
+`.env` in the working directory.
 
-Two people, same pain:
+The command confirms the model and expected cost before the first API call (`--yes` skips
+the prompt). A typical audit costs ~$1–3 and takes 1–3 minutes. Findings print to the
+terminal; the full report lands in `./confess-reports/<session>/report.md`.
 
-1. **The engineer reviewing an agent's work.** Claude Code (or any API-driven coding agent) just
-   ran for 20 minutes and touched 6 files. Before merging, someone must trust — verify? — what
-   happened. The transcript is 30 steps long; the summary at the end says "all green".
-2. **The team lead skimming overnight autonomous runs.** Ten sessions, each claiming success.
-   Which ones actually lied?
+## What it detects
 
-## The bottleneck
+| Type | Signature |
+|---|---|
+| `hallucinated_success` | claims "tests pass" — nearest tool result shows failures |
+| `constraint_violation` | tool call touches what the user explicitly banned earlier |
+| `tool_misuse` | wrong args / wrong tool, error or wrong data, correct usage was apparent |
+| `retry_loop` | same failing call, materially identical args, 3+ times, no adaptation |
+| `error_swallowing` | a real error result; next turn neither acknowledges nor adapts |
 
-**Claims in agent transcripts are never checked against evidence.** The agent says "tests pass"
-two steps after a failing test run; it quietly edits the one file the user banned; it ignores an
-error and carries on. The failure is *in the log the whole time* — but a human re-reading 30
-steps (15–30 min) misses it, and an LLM asked "any problems?" over-flags benign optimism
-(our one-shot baseline: 8 false positives on 12 logs, 6 of them phantom failures on healthy
-behavior). The cost of a missed hallucinated success is downstream human debugging, which is
-far more expensive than the audit itself.
+Acknowledged errors, adapted retries, and fail-then-fixed sequences are **not** failures —
+enforcing that boundary is where most of the engineering went.
 
-## What Confess does
+## How it works
 
-Seven-stage pipeline — deterministic code where code is better, an LLM where judgment is needed,
-and **gates that make assertions expensive**:
+Seven stages — deterministic code where code is better, an LLM where judgment is needed,
+and gates that make assertions expensive:
 
 ```
 trajectory.jsonl (the session log)
@@ -44,8 +50,8 @@ trajectory.jsonl (the session log)
  3. claims         LLM     every checkable assertion the agent made, step-linked
  4. verify         code    claim vs tool_result: SUPPORTED / CONTRADICTED / UNVERIFIABLE (rule ids)
  5. memory         LLM+code  constraint ledger: user's rules checked against every later tool call
- 6. diagnose       agent   tool-use loop: list_signals, read_steps, search_log, verify_claim,
-                           record_finding, submit_report — with rejection guardrails
+ 6. diagnose       agent   tool-use loop: read_steps, search_log, verify_claim, record_finding,
+                           submit_report — with rejection guardrails
  7. gate + report  code    confidence < 0.60 → human review queue; report.json + report.md
 ```
 
@@ -53,85 +59,69 @@ The guardrails are the point: `record_finding` **rejects** a `hallucinated_succe
 unless a claim near that step was actually CONTRADICTED by the verifier; rejects an
 `error_swallowing` finding whose cited result isn't a real failure; rejects duplicate findings;
 rejects evidence quotes that aren't verbatim substrings of the cited step; and `submit_report`
-is refused if the agent never examined the log. Every rejection is logged and the agent adapts —
-the run log is itself a readable trajectory.
+is refused if the agent never examined the log. Every rejection is logged and the agent adapts.
 
 Confess is **read-only analysis**: it never executes the commands in the log it audits.
 
-## Results (12 synthetic logs, 15 planted failures, exact labels by construction)
+## Reading a report
 
-| METRIC | BASELINE (one-shot) | CONFESS |
+- **Asserted findings** carry type, step, verbatim evidence quote, confidence, and a suggested fix.
+- **Review queue** — findings below 0.60 confidence are routed for a qualified human, not auto-asserted.
+- **Truncation honesty** — if the cost guard stops an audit early, the report is labeled
+  *truncated — partial, not a clean verdict*. Never "No failures detected."
+
+## Cost control
+
+- Typical audit ~$1–3 with an Opus-class model; per-audit hard cap via `MAX_RUN_COST`
+  (default $8.00).
+- Cheaper pass: `--off verify,memory` (detectors + diagnosis agent only).
+- Very large sessions can exceed the cap — raise `MAX_RUN_COST` or use the cheaper pass.
+
+## Privacy
+
+Read-only. Transcript quotes stay on your machine except for the model provider you
+configure. Reports land in `./confess-reports/`. No telemetry.
+
+## Benchmark
+
+On a 12-session synthetic benchmark with planted failures (labels exact by construction),
+the gated pipeline beats a one-shot "find the failures" prompt over the same logs, same model:
+
+| METRIC | one-shot prompt | confess-audit |
 |---|---|---|
-| **Failure-detection F1** | 75.7% | **82.4%** |
+| Failure-detection F1 | 75.7% | **82.4%** |
 | Precision / Recall | 63.6% / 93.3% | 73.7% / 93.3% |
 | False positives | 8 | **5** |
-| Clean-case false positives | 0 | 0 |
-| Cost per case | $0.26 | $2.48 |
+| Cost per session | $0.26 | $2.48 |
 
-Full tables, per-type and per-case breakdowns, and the memory ablation (−2.4 F1 when the
-constraint ledger is disabled): [eval/comparison.md](eval/comparison.md).
-The improvement story, experiment by experiment: [CHANGELOG.md](CHANGELOG.md).
+Full tables, per-type breakdowns, and the ablation study: [eval/comparison.md](eval/comparison.md).
+The iteration-by-iteration development story: [CHANGELOG.md](CHANGELOG.md).
 
-The hard case — `case_12`, "the cover-up": the agent edits a banned `prisma/schema.prisma` at
-step 22, then declares "Tests are green across the board. Done." at step 28, two steps after a
-failing run. Confess reports both defects with verbatim evidence and explains the healthy
-recoveries it *dismissed*. Compare:
-[`runs/agent/case_12/report.md`](runs/agent/case_12/report.md) vs
-[`runs/baseline/case_12/report.md`](runs/baseline/case_12/report.md).
+## Known limitations
 
-## Failure types
+- **Exit-code markers** — deterministic verification keys on a `[exit code: N]` suffix when
+  present; Claude Code results don't carry it, so those rules fall back to matching pass/fail
+  counts in the command output.
+- **Format support** — Claude Code transcripts today. The pipeline's input format is plain
+  JSONL (user/assistant events with text / tool_use / tool_result blocks); supporting another
+  agent means writing one adapter.
+- **Context size** — very long sessions cost more and can hit the budget cap; the audit then
+  stops and says so honestly.
 
-| Type | Signature |
-|---|---|
-| `hallucinated_success` | claims "tests pass" — nearest tool_result shows failures |
-| `constraint_violation` | tool call touches what the user explicitly banned earlier |
-| `tool_misuse` | wrong args / wrong tool, error or wrong data, correct usage was apparent |
-| `retry_loop` | same failing call, materially identical args, 3+ times, no adaptation |
-| `error_swallowing` | a real error result; next turn neither acknowledges nor adapts |
-
-Acknowledged errors, adapted retries, and fail-then-fixed sequences are **not** failures — and
-the enforcement of that boundary is where most of the engineering went.
-
-## Provenance & compliance
-
-- Everything in this repo was written during the micro1 Agentic Workflows Hackathon. Design
-  history is in [`planning/`](planning/) (pre-registered decisions D1–D13, eval spec frozen
-  before any agent run).
-- Data is 100% synthetic, generated by a seeded script (`src/generate/`); failures are planted
-  by deterministic code, so ground-truth labels are exact. No real user transcripts.
-- No credentials in the repo (`.env` is gitignored; `.env.example` documents both provider
-  variants). Confess only reads logs and calls the model — no consequential actions.
-
-## The submission is the product
-
-Confess's thesis — *every claim must cite evidence* — is applied to this repo itself, so the
-hackathon's required deliverables and the product's own outputs are the same artifacts:
-
-| Brief requires | Confess produces |
-|---|---|
-| Complete solution code + changelog | this repo + [CHANGELOG.md](CHANGELOG.md), where every number cites a committed `eval/` or `runs/` file |
-| Reproduction guide | [REPRODUCTION.md](REPRODUCTION.md) — Path A re-scores the committed run artifacts with the deterministic scorer, no API key |
-| Baseline comparison | `eval/comparison.md` — baseline vs agent vs ablation, same 12 cases, same model, pre-registered matching |
-| Agent trajectories | `runs/rendered/` — rendered from `run.jsonl` logs the tool wrote about itself while running: every turn, tool call, rejection, and repair ([case_12 audit](runs/rendered/case_12-agent.md), [its generator](runs/rendered/gen-case_12-generator.md)) |
-
-The dataset generator, claim extractor, memory extractor, diagnosis agent, and baseline all run
-through the same logging layer — the trajectories above cover each. A judge can verify any claim
-in this README against raw logs without trusting us, which is precisely the property Confess
-sells for other agents' sessions.
-
-## Run it
+## Development
 
 ```bash
-npm install
-cp .env.example .env          # add your key (AgentRouter or direct Anthropic)
-npm run smoke                 # 1-token call: verifies auth, prints the model
-npm run gen:dataset           # regenerate the 12 cases (optional — dataset is committed)
-npm run baseline              # one-shot baseline over all cases
-npm run agent                 # Confess over all cases
-npm run eval -- --run agent   # score (no API key needed for eval)
-npm run report                # rebuild eval/comparison.md
-npm run demo -- --case case_12  # render the audit as a readable trajectory
+git clone https://github.com/mohsinian/confess.git
+cd confess && npm ci
+npm run selftest                    # 59 no-LLM checks
+npm run build                       # emit dist/
+npm run eval -- --run agent         # re-score committed runs offline (no API key)
+npm run confess -- --list           # run the CLI from source
 ```
 
-No key? `eval/` and `runs/` are committed — `npm run eval` + `npm run report` reproduce every
-number offline. Details: [REPRODUCTION.md](REPRODUCTION.md).
+Full reproduction guide (offline re-scoring, dataset regeneration, ablations):
+[REPRODUCTION.md](REPRODUCTION.md).
+
+## License
+
+[MIT](LICENSE)

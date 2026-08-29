@@ -20,6 +20,18 @@ npx tsc --noEmit        # optional: typecheck
 npm run selftest        # 59 no-LLM checks — all green expected
 ```
 
+## One-off audit, no clone (npx)
+
+```bash
+npx confess-audit            # audits your most recent Claude Code session; --list to browse
+npx confess-audit <file>     # or a specific transcript
+```
+
+Credentials via environment variables or `./.env` (same provider setup as Path B). Typical
+cost ~$1–3 per session, guard-capped at `MAX_RUN_COST` (default $8.00) — large sessions can
+hit the cap; truncated audits are labeled **partial**, never clean. Reports land in
+`./confess-reports/` and stay local.
+
 ## Path A — offline (no API key, ~5 minutes, $0)
 
 All model outputs and the dataset are committed (`dataset/`, `runs/`, `eval/`).
@@ -125,6 +137,6 @@ distractors; `case_12` is the 28-step "cover-up".
   content-type; `callRaw`/`smoke.ts` already normalize this.
 - **`Request timed out` during generation**: the router can be slow; `timeout: 480_000` is set.
   Re-run — completed cases are cached, only failures regenerate.
-- **`BUDGET GUARD` abort**: a case exceeded $6.50 (default). Findings so far are still written
+- **`BUDGET GUARD` abort**: a case exceeded $8.00 (default). Findings so far are still written
   and scored as a truncated run. Raise via `MAX_RUN_COST` in `.env`.
 - **Windows**: all IO is Node-side (no shell pipes in npm scripts); works in Git Bash and PowerShell.

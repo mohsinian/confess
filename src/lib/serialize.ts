@@ -13,13 +13,19 @@ function truncate(text: string, max: number): string {
   return text.slice(0, max) + `\n[… truncated ${text.length - max} more chars]`;
 }
 
+/** tool_use inputs can embed whole files (Skill) — cap their JSON rendering */
+function inputJson(input: Record<string, unknown>, max = 400): string {
+  const json = JSON.stringify(input);
+  return json.length <= max ? json : json.slice(0, max) + `…(input truncated, ${json.length} chars)`;
+}
+
 export function serializeEvent(ev: TrajectoryEvent, maxResultChars: number): string[] {
   const lines: string[] = [`-- step ${ev.step} · ${ev.type.toUpperCase()} ${"-".repeat(Math.max(3, 46 - String(ev.step).length))}`];
   for (const block of ev.content) {
     if (block.type === "text") {
       lines.push(block.text);
     } else if (block.type === "tool_use") {
-      lines.push(`  → tool_use ${block.id} ${block.name} ${JSON.stringify(block.input)}`);
+      lines.push(`  → tool_use ${block.id} ${block.name} ${inputJson(block.input)}`);
     } else {
       const exit = /\[exit code: (\d+)\]\s*$/.exec(block.content);
       const flag = block.is_error ? "[ERROR]" : exit && exit[1] !== "0" ? `[exit ${exit[1]}]` : "[ok]";

@@ -11,3 +11,10 @@ docs/video/
 *.mp4
 *.mov
 *.mkv
+
+# Real-transcript audits: quotes from your own sessions stay local
+runs/claude-code/
+confess-reports/
+
+# npm pack artifacts
+*.tgz

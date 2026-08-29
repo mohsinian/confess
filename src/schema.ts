@@ -22,8 +22,9 @@ export const textBlockSchema = z.object({
 
 export const toolUseSchema = z.object({
   type: z.literal("tool_use"),
-  id: z.string().regex(/^tu_[A-Za-z0-9_-]+$/, "tool_use id must match tu_*"),
-  name: z.enum(["Read", "Edit", "Write", "Bash", "Grep", "Glob"]),
+  // Accepts our tu_001 ids and Claude Code's toolu_* ids
+  id: z.string().regex(/^[A-Za-z][A-Za-z0-9_-]{2,}$/, "tool_use id must be an identifier"),
+  name: z.string().min(1), // real logs contain tools beyond the six we generate
   input: z.record(z.string(), z.unknown()),
 });
 
@@ -191,6 +192,7 @@ export const diagnosisReportSchema = z.object({
   findings: z.array(findingSchema),
   overall_assessment: z.string(),
   parse_error: z.string().optional(),
+  truncated: z.boolean().optional(),
   stats: z.object({
     inputTokens: z.number(),
     outputTokens: z.number(),

@@ -40,7 +40,7 @@ export async function extractClaims(
   const messages = parsed.steps
     .filter((s) => s.type === "assistant")
     .map((s) => {
-      const text = eventText(s);
+      const text = eventText(s).slice(0, 2500); // long real-world narration capped
       const toolBits = s.blocks
         .filter((b) => b.type === "tool_use")
         .map((b) => `[${b.name} ${JSON.stringify(b.input)}]`)

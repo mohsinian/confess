@@ -17,9 +17,17 @@ import { runAgentLoop } from "./diagnose.js";
 import { diagnosisReportSchema, zodErrors } from "../schema.js";
 import { GATE_THRESHOLD, type DiagnosisReport, type Finding, type Trajectory } from "../types.js";
 
-interface Options {
+export interface Options {
   only?: string;
   off: { memory: boolean; verify: boolean; detectors: boolean };
+}
+
+/** Optional integrations for embedders of the pipeline (the CLI passes both). */
+export interface AuditHooks {
+  /** progress callback — called as each pipeline stage starts */
+  onStage?: (stage: string) => void;
+  /** write artifacts under <outBase>/<caseId>/ instead of ROOT/runs/<tag>/<caseId>/ */
+  outBase?: string;
 }
 
 function parseArgs(): Options {
@@ -61,6 +69,9 @@ export function findingsMarkdown(report: DiagnosisReport): string {
   const head = `# CONFESS — ${report.case_id} (${report.system})\n`;
   if (report.parse_error) return head + `\n## ⚠ pipeline error\n\n${report.parse_error}\n`;
   const sections: string[] = [head];
+  if (report.truncated) {
+    sections.push("> ⚠ Audit truncated (budget guard) before diagnosis completed — findings so far are partial.\n");
+  }
   const review = report.findings.filter((f) => f.needs_human_review);
   const auto = report.findings.filter((f) => !f.needs_human_review);
   sections.push(`## Confessions (${auto.length} asserted, ${review.length} pending human review)\n`);
@@ -68,6 +79,8 @@ export function findingsMarkdown(report: DiagnosisReport): string {
     `| ${f.failure_type} | ${f.step} | ${f.evidence_step} | ${f.confidence.toFixed(2)} | ${f.summary.replace(/\|/g, "/")} |`;
   if (report.findings.length > 0) {
     sections.push("| type | step | evidence@ | conf | summary |", "|---|---|---|---|---|", ...report.findings.map(row), "");
+  } else if (report.truncated) {
+    sections.push("No findings — but the audit was truncated, so this is NOT a clean verdict (see assessment).\n");
   } else {
     sections.push("No failures detected — the session's claims check out against its tool results.\n");
   }
@@ -97,12 +110,18 @@ export function findingsMarkdown(report: DiagnosisReport): string {
   return sections.join("\n");
 }
 
-async function runCase(caseId: string, cfg: ReturnType<typeof loadProviderConfig>, opts: Options): Promise<DiagnosisReport> {
+async function runAudit(
+  caseId: string,
+  events: Trajectory,
+  cfg: ReturnType<typeof loadProviderConfig>,
+  opts: Options,
+  runTag: string,
+  hooks: AuditHooks = {},
+): Promise<DiagnosisReport> {
   const client = makeClient(cfg);
   const budget = new Budget(cfg.maxRunCost);
   const systemName = opts.off.memory || opts.off.verify || opts.off.detectors ? "agent-ablation" : "agent";
-  const runTag = systemName === "agent-ablation" ? `agent-ablation${opts.off.memory ? "-memory" : ""}${opts.off.verify ? "-verify" : ""}${opts.off.detectors ? "-detectors" : ""}` : "agent";
-  const dir = runDir(runTag, caseId);
+  const dir = hooks.outBase ? path.join(hooks.outBase, caseId) : runDir(runTag, caseId);
   await ensureDir(dir);
   const stagesDir = path.join(dir, "stages");
   await ensureDir(stagesDir);
@@ -111,11 +130,12 @@ async function runCase(caseId: string, cfg: ReturnType<typeof loadProviderConfig
   const started = Date.now();
   await log.append(caseId, "run_start", { system: systemName, off: opts.off, model: cfg.model });
 
-  const events = await loadTrajectory(caseId);
+  hooks.onStage?.("parse");
   const parsed = parseTrajectory(events);
   await fs.promises.writeFile(path.join(stagesDir, "parse.json"), JSON.stringify({ steps: parsed.steps.length, pairs: parsed.pairs.length }, null, 2));
 
   // Stage 2: detectors
+  hooks.onStage?.("detectors");
   const signals = opts.off.detectors ? [] : runDetectors(parsed);
   await fs.promises.writeFile(path.join(stagesDir, "signals.json"), JSON.stringify(signals, null, 2));
 
@@ -124,9 +144,11 @@ async function runCase(caseId: string, cfg: ReturnType<typeof loadProviderConfig
   let verdicts: ReturnType<typeof verifyAll> = [];
   if (!opts.off.verify) {
     try {
+      hooks.onStage?.("claims");
       claims = (await extractClaims(client, cfg, budget, log, parsed)).claims;
       await fs.promises.writeFile(path.join(stagesDir, "claims.json"), JSON.stringify(claims, null, 2));
       // Stage 4: verification
+      hooks.onStage?.("verify");
       verdicts = verifyAll(parsed, claims);
       await fs.promises.writeFile(path.join(stagesDir, "verdicts.json"), JSON.stringify(verdicts, null, 2));
     } catch (e) {
@@ -139,6 +161,7 @@ async function runCase(caseId: string, cfg: ReturnType<typeof loadProviderConfig
   let violations: Awaited<ReturnType<typeof buildLedger>>["violations"] = [];
   if (!opts.off.memory) {
     try {
+      hooks.onStage?.("memory");
       const ledger = await buildLedger(client, cfg, budget, log, parsed);
       constraints = ledger.constraints;
       violations = ledger.violations;
@@ -155,6 +178,7 @@ async function runCase(caseId: string, cfg: ReturnType<typeof loadProviderConfig
   let guardrailRejections = 0;
   let truncated = false;
   try {
+    hooks.onStage?.("diagnose");
     const diag = await runAgentLoop(
       client, cfg, budget, log, caseId, parsed,
       { signals, verdicts, constraints, violations },
@@ -184,6 +208,7 @@ async function runCase(caseId: string, cfg: ReturnType<typeof loadProviderConfig
     system: systemName,
     findings,
     overall_assessment: assessment,
+    truncated,
     stats: {
       inputTokens: budget.totals.inputTokens,
       outputTokens: budget.totals.outputTokens,
@@ -211,6 +236,18 @@ async function runCase(caseId: string, cfg: ReturnType<typeof loadProviderConfig
   await log.append(caseId, "run_end", { findings: findings.length, turns, stats: report.stats });
   return report;
 }
+
+/** Audit a case from the committed dataset (derives the run tag from ablation flags). */
+export async function runCase(caseId: string, cfg: ReturnType<typeof loadProviderConfig>, opts: Options): Promise<DiagnosisReport> {
+  const runTag = opts.off.memory || opts.off.verify || opts.off.detectors
+    ? `agent-ablation${opts.off.memory ? "-memory" : ""}${opts.off.verify ? "-verify" : ""}${opts.off.detectors ? "-detectors" : ""}`
+    : "agent";
+  const events = await loadTrajectory(caseId);
+  return runAudit(caseId, events, cfg, opts, runTag);
+}
+
+/** Audit an arbitrary trajectory (e.g. a real Claude Code session via ingest). */
+export { runAudit };
 
 async function main(): Promise<void> {
   const opts = parseArgs();
@@ -242,7 +279,12 @@ async function main(): Promise<void> {
   console.log(`\nDone. Total cost $${totalCost.toFixed(3)}. Reports in runs/.`);
 }
 
-main().catch((e) => {
-  console.error(e);
-  process.exit(1);
-});
+// Run the sweep only when invoked directly (`npm run agent` / `npm run ablate`),
+// not when this module is imported by the CLI or tests.
+const entry = path.basename(process.argv[1] ?? "");
+if (entry === "run.ts" || entry === "run.js") {
+  main().catch((e) => {
+    console.error(e);
+    process.exit(1);
+  });
+}

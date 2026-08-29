@@ -1,12 +1,23 @@
 {
-  "name": "confess",
-  "version": "0.1.0",
-  "private": true,
+  "name": "confess-audit",
+  "version": "0.1.1",
   "type": "module",
   "description": "Confess — every agent tells a story. Confess checks the receipts. A trajectory debugger for AI coding agents.",
+  "license": "MIT",
   "engines": {
     "node": ">=22"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mohsinian/confess.git"
+  },
+  "bin": {
+    "confess-audit": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "smoke": "tsx src/lib/smoke.ts",
     "gen:dataset": "tsx src/generate/buildDataset.ts",
@@ -17,7 +28,11 @@
     "typecheck": "tsc --noEmit",
     "agent": "tsx src/agent/run.ts",
     "ablate": "tsx src/agent/run.ts",
-    "demo": "tsx src/render/renderTrajectory.ts"
+    "demo": "tsx src/render/renderTrajectory.ts",
+    "confess": "tsx src/cli.ts",
+    "build": "tsc -p tsconfig.build.json",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm run typecheck && npm run build && npm run selftest"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "latest",
