@@ -43,13 +43,12 @@ export function makeClient(cfg: ProviderConfig): Anthropic {
     ...(cfg.baseUrl ? { baseURL: cfg.baseUrl } : {}),
     maxRetries: 2,
     timeout: 480_000, // Opus via router: long generations can take several minutes
-    // AgentRouter gates on client identity: requests must present the Claude Code
-    // user-agent or it answers 401 "unauthorized client detected" (docs are
-    // Claude Code-specific; the SDK's default UA trips the filter).
-    defaultHeaders: {
-      "user-agent": "claude-cli/2.0.14 (external, cli)",
-      "x-app": "cli",
-    },
+    // Router compatibility only: AgentRouter gates on client identity and answers
+    // 401 "unauthorized client detected" without the Claude Code user-agent.
+    // Direct Anthropic API needs none of this — headers stay out of that path.
+    ...(cfg.baseUrl
+      ? { defaultHeaders: { "user-agent": "claude-cli/2.0.14 (external, cli)", "x-app": "cli" } }
+      : {}),
   });
 }
 

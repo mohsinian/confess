@@ -193,6 +193,7 @@ export const diagnosisReportSchema = z.object({
   overall_assessment: z.string(),
   parse_error: z.string().optional(),
   truncated: z.boolean().optional(),
+  degraded: z.boolean().optional(),
   stats: z.object({
     inputTokens: z.number(),
     outputTokens: z.number(),

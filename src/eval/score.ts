@@ -6,7 +6,7 @@
 // CLI: npm run eval -- --run baseline [--out results-baseline] [--selftest]
 import fs from "node:fs";
 import path from "node:path";
-import { EVAL_DIR, listCases, labelsPath, runDir, ensureDir } from "../lib/cases.js";
+import { EVAL_DIR, listCases, labelsPath, runDir, ensureDir, trajectoryPath } from "../lib/cases.js";
 import { diagnosisReportSchema, labelsFileSchema } from "../schema.js";
 import { FAILURE_TYPES, type DiagnosisReport, type FailureLabel, type Finding, type LabelsFile } from "../types.js";
 
@@ -20,6 +20,8 @@ export interface CaseScore {
   fnTypes: string[]; // missed GT types
   fpSteps: number[]; // unmatched prediction steps
   fpTypes: string[]; // unmatched prediction types
+  /** findings excluded because their evidence did not validate against the log */
+  invalidEvidence: number;
   localizationWithin1: number; // TPs with |Δstep| ≤ 1
   matched: Array<{ gtId: string; predStep: number; gtStep: number; type: string; delta: number; review: boolean }>;
 }
@@ -105,13 +107,65 @@ export interface EvalRunResult {
   };
   cleanCaseFp: number | null;
   parseErrors: number;
+  invalidEvidence: number;
+  misCitedEvidence: number;
+  fabricatedEvidence: number;
   totals: { inputTokens: number; outputTokens: number; costUsd: number; wallMs: number; llmCalls: number };
+}
+
+/**
+ * Evidence validation, three tiers (ground rule 9: a TP must have checkable receipts):
+ *  - ok:         every non-trivial segment of the quote (ellipsis-abridged allowed)
+ *                appears in the cited step's canonical serialization
+ *  - mis-cited:  segments appear somewhere in the log, but not in the cited step
+ *  - fabricated: segments appear nowhere — invented evidence
+ * Systems were shown the serialized transcript, so validation runs against the same
+ * serialization (tool_use rendered as "name {json}", results as content), full text.
+ */
+const SEGMENT_MIN = 12; // ignore tiny fragments ("Error", a bare path) when segmenting
+
+function stepText(events: Array<Record<string, unknown>>, step: number): string | null {
+  // Mirrors lib/serialize.ts's rendering — systems were audited against this
+  // canonical view (arrows, flags, rendered inputs), so validation uses it too.
+  const ev = events.find((e) => (e.step as number) === step) as { content: Array<Record<string, unknown>> } | undefined;
+  if (!ev) return null;
+  return ev.content
+    .map((b) => {
+      if (b.type === "text") return String(b.text ?? "");
+      if (b.type === "tool_use") return `  → tool_use ${b.id} ${b.name} ${JSON.stringify(b.input)}`;
+      const isErr = b.is_error === true;
+      const exit = /\[exit code: (\d+)\]\s*$/.exec(String(b.content ?? ""));
+      const flag = isErr ? "[ERROR]" : exit && exit[1] !== "0" ? `[exit ${exit[1]}]` : "[ok]";
+      return `  ← tool_result for ${b.tool_use_id} ${flag}\n${String(b.content ?? "")}`;
+    })
+    .join("\n");
+}
+
+function evidenceTier(f: Finding, events: Array<Record<string, unknown>>): "ok" | "mis-cited" | "fabricated" {
+  const cited = stepText(events, f.evidence_step);
+  const offending = stepText(events, f.step);
+  if (cited === null || offending === null) return "fabricated"; // cites steps that do not exist
+  const norm = (x: string) => x.replace(/\s+/g, " ").trim();
+  const hay = norm(cited);
+  const whole = norm(events.map((e) => stepText(events, e.step as number) ?? "").join("\n"));
+  const segments = norm(f.evidence_quote)
+    .split(/…|\.\.\./)
+    .map((x) => x.trim())
+    .filter((x) => x.length >= SEGMENT_MIN);
+  if (segments.length === 0) return "fabricated"; // nothing checkable
+  const inCited = segments.every((seg) => hay.includes(seg));
+  if (inCited) return "ok";
+  const inLog = segments.every((seg) => whole.includes(seg));
+  return inLog ? "mis-cited" : "fabricated";
 }
 
 export async function scoreRun(runName: string, caseIds: string[]): Promise<EvalRunResult> {
   const cases: CaseScore[] = [];
   const totals = { inputTokens: 0, outputTokens: 0, costUsd: 0, wallMs: 0, llmCalls: 0 };
   let parseErrors = 0;
+  let invalidEvidenceTotal = 0;
+  let misCitedTotal = 0;
+  let fabricatedTotal = 0;
   let autoTp = 0, autoFp = 0, reviewTp = 0, reviewFp = 0, cleanCaseFp: number | null = null;
 
   for (const caseId of caseIds) {
@@ -142,6 +196,31 @@ export async function scoreRun(runName: string, caseIds: string[]): Promise<Eval
       parseErrors += 1;
     }
 
+    // Evidence integrity (ground rule 9): a finding must have checkable receipts.
+    // Tiers: ok → scored normally; mis-cited (quote exists elsewhere in the log) and
+    // fabricated (quote exists nowhere) → excluded from matching, counted, never
+    // silently dropped. Type+step proximity alone must never earn a TP.
+    let misCited = 0;
+    let fabricated = 0;
+    let events: Array<Record<string, unknown>> = [];
+    try {
+      events = (await fs.promises.readFile(trajectoryPath(caseId), "utf8"))
+        .split("\n").filter((l) => l.trim()).map((l) => JSON.parse(l));
+    } catch { /* trajectory missing — skip validation, score as before */ }
+    if (events.length > 0) {
+      const valid = findings.filter((f) => {
+        const tier = evidenceTier(f, events);
+        if (tier === "mis-cited") misCited++;
+        if (tier === "fabricated") fabricated++;
+        return tier === "ok";
+      });
+      findings = valid;
+    }
+    const invalidEvidence = misCited + fabricated;
+
+    invalidEvidenceTotal += invalidEvidence;
+    misCitedTotal += misCited;
+    fabricatedTotal += fabricated;
     const m = matchFindings(findings, labelsFile.failures);
     for (const match of m.matched) {
       if (match.review) reviewTp++; else autoTp++;
@@ -163,6 +242,7 @@ export async function scoreRun(runName: string, caseIds: string[]): Promise<Eval
       fnTypes: m.fnTypes,
       fpSteps: m.fpSteps,
       fpTypes: m.fpTypes,
+      invalidEvidence,
       localizationWithin1: m.localizationWithin1,
       matched: m.matched,
     });
@@ -207,6 +287,9 @@ export async function scoreRun(runName: string, caseIds: string[]): Promise<Eval
     },
     cleanCaseFp,
     parseErrors,
+    invalidEvidence: invalidEvidenceTotal,
+    misCitedEvidence: misCitedTotal,
+    fabricatedEvidence: fabricatedTotal,
     totals,
   };
 }
@@ -282,7 +365,9 @@ async function main() {
   const args = process.argv.slice(2);
   const runIdx = args.indexOf("--run");
   const outIdx = args.indexOf("--out");
-  const runName = runIdx !== -1 ? args[runIdx + 1] : "baseline";
+  // Some npm versions drop args after "--" — also accept the run name positionally.
+  const positional = args.find((a, i) => !a.startsWith("--") && args[i - 1] !== "--run" && args[i - 1] !== "--out" && args[i - 1] !== "--tag");
+  const runName = runIdx !== -1 ? args[runIdx + 1] : positional ?? "baseline";
   const outName = outIdx !== -1 ? args[outIdx + 1] : `results-${runName}`;
   const caseIds = await listCases();
   if (caseIds.length === 0) {

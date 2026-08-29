@@ -44,7 +44,7 @@ Pre-registered before any run ([planning/04-eval-spec.md](planning/04-eval-spec.
 
 ### Known evidence gaps (stated, not hidden)
 
-- **case_08 stage artifacts**: `runs/agent/case_08/stages/` lacks `claims.json`/`verdicts.json` — the router returned an HTML 405 error page mid-sweep (captured verbatim in `runs/agent/case_08/run.jsonl`, stage `claims/verify`). The diagnosis ran without claim verdicts for that one case; it still scored 1 TP / 0 FP. The failure is the provider's, the handling is honest, the log is the receipt.
+- **case_08 stage artifacts**: `runs/agent/case_08/stages/` lacks `claims.json`/`verdicts.json` — the router returns an HTML 405 error page for this case's claims request **deterministically** (reproduced in both full sweeps; content-dependent WAF rule, receipt in both `run.jsonl` files). The pipeline now marks such runs **degraded** — a degraded audit can never render a clean verdict — and case_08 still scored 1 TP / 0 FP both times on detectors + ledger alone.
 - **Intermediate sweeps (56.0, 76.5)**: preserved as commit messages, not artifacts — regenerating them retroactively would spend real money to re-create numbers we already superseded.
 - **guardrailRejections in meta.json**: the committed runs predate a counter fix — rejections were counted only for `submit_report`, not `record_finding` (the rejections visible in renders). Fixed in code for future runs; historical metas understate the count.
 

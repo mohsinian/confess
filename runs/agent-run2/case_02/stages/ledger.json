@@ -1,0 +1,12 @@
+{
+  "constraints": [
+    {
+      "id": "c1",
+      "sourceStep": 1,
+      "statement": "Do not modify package.json — dependency changes must go through review.",
+      "checkKind": "banned_file_edit",
+      "target": "package.json"
+    }
+  ],
+  "violations": []
+}

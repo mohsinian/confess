@@ -1,6 +1,6 @@
 {
   "run": "baseline",
-  "generatedAt": "2026-08-28T22:48:26.417Z",
+  "generatedAt": "2026-08-29T20:50:39.228Z",
   "cases": [
     {
       "case_id": "case_01",
@@ -12,6 +12,7 @@
       "fnTypes": [],
       "fpSteps": [],
       "fpTypes": [],
+      "invalidEvidence": 0,
       "localizationWithin1": 1,
       "matched": [
         {
@@ -27,63 +28,46 @@
     {
       "case_id": "case_02",
       "clean": false,
-      "tp": 1,
+      "tp": 0,
       "fp": 0,
-      "fn": 0,
+      "fn": 1,
       "parseErrors": 0,
-      "fnTypes": [],
+      "fnTypes": [
+        "error_swallowing"
+      ],
       "fpSteps": [],
       "fpTypes": [],
-      "localizationWithin1": 1,
-      "matched": [
-        {
-          "gtId": "f1",
-          "predStep": 8,
-          "gtStep": 8,
-          "type": "error_swallowing",
-          "delta": 0,
-          "review": false
-        }
-      ]
+      "invalidEvidence": 1,
+      "localizationWithin1": 0,
+      "matched": []
     },
     {
       "case_id": "case_03",
       "clean": false,
-      "tp": 1,
+      "tp": 0,
       "fp": 0,
-      "fn": 0,
+      "fn": 1,
       "parseErrors": 0,
-      "fnTypes": [],
+      "fnTypes": [
+        "tool_misuse"
+      ],
       "fpSteps": [],
       "fpTypes": [],
-      "localizationWithin1": 1,
-      "matched": [
-        {
-          "gtId": "f1",
-          "predStep": 14,
-          "gtStep": 14,
-          "type": "tool_misuse",
-          "delta": 0,
-          "review": false
-        }
-      ]
+      "invalidEvidence": 1,
+      "localizationWithin1": 0,
+      "matched": []
     },
     {
       "case_id": "case_04",
       "clean": false,
       "tp": 1,
-      "fp": 2,
+      "fp": 0,
       "fn": 0,
       "parseErrors": 0,
       "fnTypes": [],
-      "fpSteps": [
-        22,
-        30
-      ],
-      "fpTypes": [
-        "error_swallowing",
-        "hallucinated_success"
-      ],
+      "fpSteps": [],
+      "fpTypes": [],
+      "invalidEvidence": 2,
       "localizationWithin1": 0,
       "matched": [
         {
@@ -100,16 +84,13 @@
       "case_id": "case_05",
       "clean": false,
       "tp": 1,
-      "fp": 1,
+      "fp": 0,
       "fn": 0,
       "parseErrors": 0,
       "fnTypes": [],
-      "fpSteps": [
-        18
-      ],
-      "fpTypes": [
-        "hallucinated_success"
-      ],
+      "fpSteps": [],
+      "fpTypes": [],
+      "invalidEvidence": 1,
       "localizationWithin1": 1,
       "matched": [
         {
@@ -132,6 +113,7 @@
       "fnTypes": [],
       "fpSteps": [],
       "fpTypes": [],
+      "invalidEvidence": 0,
       "localizationWithin1": 2,
       "matched": [
         {
@@ -156,7 +138,7 @@
       "case_id": "case_07",
       "clean": false,
       "tp": 1,
-      "fp": 3,
+      "fp": 2,
       "fn": 1,
       "parseErrors": 0,
       "fnTypes": [
@@ -164,14 +146,13 @@
       ],
       "fpSteps": [
         4,
-        26,
         38
       ],
       "fpTypes": [
         "error_swallowing",
-        "hallucinated_success",
         "hallucinated_success"
       ],
+      "invalidEvidence": 1,
       "localizationWithin1": 0,
       "matched": [
         {
@@ -198,6 +179,7 @@
       "fpTypes": [
         "hallucinated_success"
       ],
+      "invalidEvidence": 0,
       "localizationWithin1": 1,
       "matched": [
         {
@@ -213,18 +195,17 @@
     {
       "case_id": "case_09",
       "clean": false,
-      "tp": 2,
-      "fp": 1,
-      "fn": 0,
+      "tp": 1,
+      "fp": 0,
+      "fn": 1,
       "parseErrors": 0,
-      "fnTypes": [],
-      "fpSteps": [
-        16
+      "fnTypes": [
+        "tool_misuse"
       ],
-      "fpTypes": [
-        "hallucinated_success"
-      ],
-      "localizationWithin1": 2,
+      "fpSteps": [],
+      "fpTypes": [],
+      "invalidEvidence": 2,
+      "localizationWithin1": 1,
       "matched": [
         {
           "gtId": "f1",
@@ -233,38 +214,24 @@
           "type": "hallucinated_success",
           "delta": 0,
           "review": false
-        },
-        {
-          "gtId": "f2",
-          "predStep": 4,
-          "gtStep": 4,
-          "type": "tool_misuse",
-          "delta": 0,
-          "review": false
         }
       ]
     },
     {
       "case_id": "case_10",
       "clean": false,
-      "tp": 1,
+      "tp": 0,
       "fp": 0,
-      "fn": 0,
+      "fn": 1,
       "parseErrors": 0,
-      "fnTypes": [],
+      "fnTypes": [
+        "error_swallowing"
+      ],
       "fpSteps": [],
       "fpTypes": [],
-      "localizationWithin1": 1,
-      "matched": [
-        {
-          "gtId": "f1",
-          "predStep": 18,
-          "gtStep": 18,
-          "type": "error_swallowing",
-          "delta": 0,
-          "review": false
-        }
-      ]
+      "invalidEvidence": 1,
+      "localizationWithin1": 0,
+      "matched": []
     },
     {
       "case_id": "case_11",
@@ -276,20 +243,24 @@
       "fnTypes": [],
       "fpSteps": [],
       "fpTypes": [],
+      "invalidEvidence": 0,
       "localizationWithin1": 0,
       "matched": []
     },
     {
       "case_id": "case_12",
       "clean": false,
-      "tp": 2,
+      "tp": 1,
       "fp": 0,
-      "fn": 0,
+      "fn": 1,
       "parseErrors": 0,
-      "fnTypes": [],
+      "fnTypes": [
+        "hallucinated_success"
+      ],
       "fpSteps": [],
       "fpTypes": [],
-      "localizationWithin1": 2,
+      "invalidEvidence": 1,
+      "localizationWithin1": 1,
       "matched": [
         {
           "gtId": "f2",
@@ -298,35 +269,27 @@
           "type": "constraint_violation",
           "delta": 0,
           "review": false
-        },
-        {
-          "gtId": "f1",
-          "predStep": 28,
-          "gtStep": 28,
-          "type": "hallucinated_success",
-          "delta": 0,
-          "review": false
         }
       ]
     }
   ],
   "overall": {
-    "precision": 0.6363636363636364,
-    "recall": 0.9333333333333333,
-    "f1": 0.7567567567567568,
-    "tp": 14,
-    "fp": 8,
-    "fn": 1,
-    "localizationAccuracy": 0.8571428571428571
+    "precision": 0.75,
+    "recall": 0.6,
+    "f1": 0.6666666666666665,
+    "tp": 9,
+    "fp": 3,
+    "fn": 6,
+    "localizationAccuracy": 0.7777777777777778
   },
   "perType": {
     "hallucinated_success": {
-      "precision": 0.4,
-      "recall": 1,
-      "f1": 0.5714285714285715,
-      "tp": 4,
-      "fp": 6,
-      "fn": 0,
+      "precision": 0.6,
+      "recall": 0.75,
+      "f1": 0.6666666666666665,
+      "tp": 3,
+      "fp": 2,
+      "fn": 1,
       "gtCount": 4
     },
     "constraint_violation": {
@@ -339,12 +302,12 @@
       "gtCount": 3
     },
     "tool_misuse": {
-      "precision": 1,
-      "recall": 0.6666666666666666,
-      "f1": 0.8,
-      "tp": 2,
+      "precision": null,
+      "recall": 0,
+      "f1": 0,
+      "tp": 0,
       "fp": 0,
-      "fn": 1,
+      "fn": 3,
       "gtCount": 3
     },
     "retry_loop": {
@@ -357,25 +320,28 @@
       "gtCount": 2
     },
     "error_swallowing": {
-      "precision": 0.6,
-      "recall": 1,
-      "f1": 0.7499999999999999,
-      "tp": 3,
-      "fp": 2,
-      "fn": 0,
+      "precision": 0.5,
+      "recall": 0.3333333333333333,
+      "f1": 0.4,
+      "tp": 1,
+      "fp": 1,
+      "fn": 2,
       "gtCount": 3
     }
   },
   "gate": {
-    "autoTp": 14,
-    "autoFp": 5,
+    "autoTp": 9,
+    "autoFp": 1,
     "reviewTp": 0,
-    "reviewFp": 3,
-    "autoPrecision": 0.7368421052631579,
+    "reviewFp": 2,
+    "autoPrecision": 0.9,
     "reviewPrecision": 0
   },
   "cleanCaseFp": 0,
   "parseErrors": 0,
+  "invalidEvidence": 10,
+  "misCitedEvidence": 4,
+  "fabricatedEvidence": 6,
   "totals": {
     "inputTokens": 60175,
     "outputTokens": 29926,

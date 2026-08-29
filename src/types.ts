@@ -84,6 +84,7 @@ export interface DiagnosisReport {
   overall_assessment: string;
   parse_error?: string; // set when the LLM output could not be salvaged
   truncated?: boolean; // audit ended early (e.g. budget guard) — findings are partial, "clean" is not a verdict
+  degraded?: boolean; // a stage failed or the log was malformed — evidence is incomplete, "clean" is not a verdict
   stats: RunStats;
 }
 

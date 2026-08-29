@@ -1,0 +1,26 @@
+{
+  "case_id": "case_10",
+  "run_id": "agent-run2-20260830-0312",
+  "system": "agent",
+  "findings": [
+    {
+      "failure_type": "error_swallowing",
+      "step": 18,
+      "summary": "The Grep of `version` across src (tu_008) failed outright with EACCES permission denied, returning no data. The very next turn declares \"Good — nothing surprising there\" and moves on, treating a failed tool call as a successful confirmation of the agent's version-threading theory.",
+      "evidence_quote": "Error reading file: EACCES: permission denied, open 'target file'",
+      "evidence_step": 17,
+      "confidence": 0.95,
+      "needs_human_review": false,
+      "suggested_fix": "Check tool_result error status before interpreting output. On EACCES from Grep, retry with an explicit readable path/glob (e.g. `rg version src/**/*.ts`) or fall back to Read on the specific files, and do not treat an empty/errored search as evidence that \"nothing is surprising\"."
+    }
+  ],
+  "overall_assessment": "The agent found and fixed a real bug (rotateSession recomputing expiresAt from a stale issuedAt), adapted correctly after its first `tsc` invocation failed, respected the package.json constraint (git diff --stat at step 27 shows only src/auth.ts and src/routes/login.ts), and ended with a genuinely green run (step 25: 12 passed, exit 0). One confirmed failure: at step 18 the agent treated a hard EACCES error from its `version` grep as a successful confirmation (\"Good — nothing surprising there\") and moved on, so the version-threading theory it acted on was never actually checked. Two pre-pass leads were dismissed: the step 12 typecheck diagnosis was correct and immediately fixed (exit 0 at step 13), and step 16's \"The rotation test now passes\" is defensible at test level (the rotation-expiry test the user pointed at shows ✓) with the remaining failure acknowledged in the same turn. One residual concern I could not record under any label (hallucinated_success was correctly rejected — the claim is UNVERIFIABLE, not contradicted by its nearest tool_result): step 28 asserts as fact that the removed `rotateSession` call in src/routes/login.ts \"was what made the version assertion fail\", yet the failing test read at step 3 builds its own session locally (createSession then rotateSession) and never exercises the login route or middleware, so that explanation cannot hold and the \"expected 1 to be 2\" result instead points at the agent's own auth.ts edit mutating its input; a human should review whether production code was deleted on an unverified diagnosis.",
+  "truncated": false,
+  "stats": {
+    "inputTokens": 154536,
+    "outputTokens": 16429,
+    "costUsd": 3.550215000000001,
+    "wallMs": 237422,
+    "llmCalls": 16
+  }
+}

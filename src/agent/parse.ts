@@ -21,6 +21,8 @@ export interface PairedStep {
 export interface ParsedTrajectory {
   steps: Step[];
   pairs: PairedStep[];
+  /** malformed-log signal: tool ids with more than one result (first wins) */
+  duplicateToolIds: string[];
   /** step index of user text events (constraints live here) */
   userTextSteps: number[];
   /** final assistant step (the closing summary) */
@@ -52,9 +54,15 @@ export function parseTrajectory(events: Trajectory): ParsedTrajectory {
 
   // Map tool_use id → its result block (searching forward only, normally the next event).
   const resultMap = new Map<string, { result: ToolResultBlock; step: number }>();
+  const duplicateToolIds: string[] = []; // malformed logs: first result wins, dupes counted
   for (const ev of events) {
     for (const b of ev.content) {
-      if (b.type === "tool_result") resultMap.set(b.tool_use_id, { result: b, step: ev.step });
+      if (b.type !== "tool_result") continue;
+      if (resultMap.has(b.tool_use_id)) {
+        duplicateToolIds.push(b.tool_use_id);
+        continue;
+      }
+      resultMap.set(b.tool_use_id, { result: b, step: ev.step });
     }
   }
 
@@ -83,7 +91,7 @@ export function parseTrajectory(events: Trajectory): ParsedTrajectory {
     .map((ev) => ev.step);
   const finalAssistantStep = [...events].reverse().find((ev) => ev.type === "assistant")?.step ?? 0;
 
-  return { steps, pairs, userTextSteps, finalAssistantStep };
+  return { steps, pairs, userTextSteps, finalAssistantStep, duplicateToolIds };
 }
 
 /** all text of an event joined (assistant narration or user instruction) */

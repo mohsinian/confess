@@ -20,6 +20,8 @@ import { GATE_THRESHOLD, type DiagnosisReport, type Finding, type Trajectory } f
 export interface Options {
   only?: string;
   off: { memory: boolean; verify: boolean; detectors: boolean };
+  /** label run directory runs/<tag>/<case> (e.g. run2 for variance measurement) */
+  tag?: string;
 }
 
 /** Optional integrations for embedders of the pipeline (the CLI passes both). */
@@ -42,7 +44,8 @@ function parseArgs(): Options {
       else if (comp === "detectors") off.detectors = true;
     }
   }
-  return { only: caseIdx !== -1 ? args[caseIdx + 1] : undefined, off };
+  const tagIdx = args.indexOf("--tag");
+  return { only: caseIdx !== -1 ? args[caseIdx + 1] : undefined, off, tag: tagIdx !== -1 ? args[tagIdx + 1] : undefined };
 }
 
 async function loadTrajectory(caseId: string): Promise<Trajectory> {
@@ -139,6 +142,11 @@ async function runAudit(
   const signals = opts.off.detectors ? [] : runDetectors(parsed);
   await fs.promises.writeFile(path.join(stagesDir, "signals.json"), JSON.stringify(signals, null, 2));
 
+  const stageErrors: string[] = [];
+  if (parsed.duplicateToolIds.length > 0) {
+    stageErrors.push(`malformed log: duplicate tool ids ${parsed.duplicateToolIds.join(", ")} (first result kept)`);
+  }
+
   // Stage 3: claims
   let claims: Awaited<ReturnType<typeof extractClaims>>["claims"] = [];
   let verdicts: ReturnType<typeof verifyAll> = [];
@@ -152,6 +160,7 @@ async function runAudit(
       verdicts = verifyAll(parsed, claims);
       await fs.promises.writeFile(path.join(stagesDir, "verdicts.json"), JSON.stringify(verdicts, null, 2));
     } catch (e) {
+      stageErrors.push(`claims/verify: ${(e as Error).message.slice(0, 160)}`);
       await log.append(caseId, "error", { stage: "claims/verify", message: (e as Error).message });
     }
   }
@@ -167,6 +176,7 @@ async function runAudit(
       violations = ledger.violations;
       await fs.promises.writeFile(path.join(stagesDir, "ledger.json"), JSON.stringify({ constraints, violations }, null, 2));
     } catch (e) {
+      stageErrors.push(`memory: ${(e as Error).message.slice(0, 160)}`);
       await log.append(caseId, "error", { stage: "memory", message: (e as Error).message });
     }
   }
@@ -202,6 +212,13 @@ async function runAudit(
     }
   }
 
+  // A run is DEGRADED when evidence stages failed, the log was malformed, or the
+  // diagnosis never submitted — a degraded run must never read as a clean verdict.
+  const submitted = assessment.length > 0 && !assessment.startsWith("(");
+  const degraded = stageErrors.length > 0 || !submitted;
+  if (degraded && stageErrors.length > 0) {
+    await log.append(caseId, "error", { stage: "degraded", reasons: stageErrors });
+  }
   const report: DiagnosisReport = {
     case_id: caseId,
     run_id: id,
@@ -209,6 +226,7 @@ async function runAudit(
     findings,
     overall_assessment: assessment,
     truncated,
+    ...(degraded ? { degraded: true } : {}),
     stats: {
       inputTokens: budget.totals.inputTokens,
       outputTokens: budget.totals.outputTokens,
@@ -230,7 +248,7 @@ async function runAudit(
   await fs.promises.writeFile(path.join(dir, "report.md"), findingsMarkdown(report), "utf8");
   await fs.promises.writeFile(
     path.join(dir, "meta.json"),
-    JSON.stringify({ case_id: caseId, run_id: id, system: systemName, off: opts.off, model: cfg.model, turns, guardrailRejections, truncated, stats: report.stats }, null, 2),
+    JSON.stringify({ case_id: caseId, run_id: id, system: systemName, off: opts.off, model: cfg.model, turns, guardrailRejections, truncated, degraded, stageErrors, stats: report.stats }, null, 2),
     "utf8",
   );
   await log.append(caseId, "run_end", { findings: findings.length, turns, stats: report.stats });
@@ -241,7 +259,7 @@ async function runAudit(
 export async function runCase(caseId: string, cfg: ReturnType<typeof loadProviderConfig>, opts: Options): Promise<DiagnosisReport> {
   const runTag = opts.off.memory || opts.off.verify || opts.off.detectors
     ? `agent-ablation${opts.off.memory ? "-memory" : ""}${opts.off.verify ? "-verify" : ""}${opts.off.detectors ? "-detectors" : ""}`
-    : "agent";
+    : opts.tag ?? "agent";
   const events = await loadTrajectory(caseId);
   return runAudit(caseId, events, cfg, opts, runTag);
 }

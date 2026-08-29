@@ -129,6 +129,18 @@ applies deterministic failure injections — so labels are exact by construction
 with the same seed replays the same injections. The clean `case_11` contains only healthy
 distractors; `case_12` is the 28-step "cover-up".
 
+## Note on npm argument forwarding
+
+Some npm versions (observed on 10.9.0/Windows) silently drop arguments after `--` in
+`npm run` scripts — e.g. `npm run eval -- --run agent` scoring the default run instead.
+Every eval run prints the scope it selected (`eval: <name> over N cases`) — check that line.
+If args are dropped on your setup, invoke the scripts directly:
+
+```bash
+npx tsx src/eval/score.ts --run agent        # identical to npm run eval -- --run agent
+npx tsx src/agent/run.ts --case case_12      # identical to npm run agent -- --case case_12
+```
+
 ## Troubleshooting
 
 - **401 "unauthorized client detected"** (AgentRouter): the client must present the Claude Code

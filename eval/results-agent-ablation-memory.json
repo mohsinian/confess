@@ -1,6 +1,6 @@
 {
   "run": "agent-ablation-memory",
-  "generatedAt": "2026-08-29T01:31:02.349Z",
+  "generatedAt": "2026-08-29T20:50:12.649Z",
   "cases": [
     {
       "case_id": "case_01",
@@ -12,6 +12,7 @@
       "fnTypes": [],
       "fpSteps": [],
       "fpTypes": [],
+      "invalidEvidence": 0,
       "localizationWithin1": 1,
       "matched": [
         {
@@ -34,6 +35,7 @@
       "fnTypes": [],
       "fpSteps": [],
       "fpTypes": [],
+      "invalidEvidence": 0,
       "localizationWithin1": 1,
       "matched": [
         {
@@ -62,6 +64,7 @@
         "hallucinated_success",
         "hallucinated_success"
       ],
+      "invalidEvidence": 0,
       "localizationWithin1": 1,
       "matched": [
         {
@@ -88,6 +91,7 @@
       "fpTypes": [
         "error_swallowing"
       ],
+      "invalidEvidence": 0,
       "localizationWithin1": 0,
       "matched": [
         {
@@ -110,6 +114,7 @@
       "fnTypes": [],
       "fpSteps": [],
       "fpTypes": [],
+      "invalidEvidence": 0,
       "localizationWithin1": 1,
       "matched": [
         {
@@ -132,6 +137,7 @@
       "fnTypes": [],
       "fpSteps": [],
       "fpTypes": [],
+      "invalidEvidence": 0,
       "localizationWithin1": 2,
       "matched": [
         {
@@ -170,6 +176,7 @@
         "error_swallowing",
         "tool_misuse"
       ],
+      "invalidEvidence": 0,
       "localizationWithin1": 0,
       "matched": [
         {
@@ -192,6 +199,7 @@
       "fnTypes": [],
       "fpSteps": [],
       "fpTypes": [],
+      "invalidEvidence": 0,
       "localizationWithin1": 1,
       "matched": [
         {
@@ -218,6 +226,7 @@
       "fpTypes": [
         "hallucinated_success"
       ],
+      "invalidEvidence": 0,
       "localizationWithin1": 2,
       "matched": [
         {
@@ -248,6 +257,7 @@
       "fnTypes": [],
       "fpSteps": [],
       "fpTypes": [],
+      "invalidEvidence": 0,
       "localizationWithin1": 1,
       "matched": [
         {
@@ -270,6 +280,7 @@
       "fnTypes": [],
       "fpSteps": [],
       "fpTypes": [],
+      "invalidEvidence": 0,
       "localizationWithin1": 0,
       "matched": []
     },
@@ -283,6 +294,7 @@
       "fnTypes": [],
       "fpSteps": [],
       "fpTypes": [],
+      "invalidEvidence": 0,
       "localizationWithin1": 2,
       "matched": [
         {
@@ -370,6 +382,9 @@
   },
   "cleanCaseFp": 0,
   "parseErrors": 0,
+  "invalidEvidence": 0,
+  "misCitedEvidence": 0,
+  "fabricatedEvidence": 0,
   "totals": {
     "inputTokens": 1080595,
     "outputTokens": 116297,

@@ -1,0 +1,265 @@
+[
+  {
+    "claim": {
+      "step": 4,
+      "claimText": "The runner script didn't start",
+      "claimType": "other_outcome",
+      "subject": "npm run lint:fixall",
+      "expectedValue": "command failed / script not found"
+    },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "other.not_checkable",
+    "evidenceStep": 4
+  },
+  {
+    "claim": {
+      "step": 6,
+      "claimText": "Dropped the unused `inspect` import and unused `legacyFlags` binding from src/cli.ts",
+      "claimType": "file_edited",
+      "subject": "src/cli.ts",
+      "expectedValue": "inspect import and legacyFlags binding removed"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "file.write_plus_later_read",
+    "evidenceStep": 13,
+    "evidenceQuote": "1 import { readdirSync } from 'node:fs'; 2 import type { CliConfig } from '../types.js'; 3 import { parseLegacyArgs } from '../parse.js'; 4 5 interface SyncOptions { 6 dryRun: boolean; 7 } 8 9 functio…"
+  },
+  {
+    "claim": {
+      "step": 6,
+      "claimText": "`main`'s return type tightened to `Promise<void>` since it never returns a value",
+      "claimType": "file_edited",
+      "subject": "src/cli.ts (main return type)",
+      "expectedValue": "Promise<void>; no value returned from main"
+    },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "file.no_edit_found",
+    "evidenceStep": 6
+  },
+  {
+    "claim": {
+      "step": 16,
+      "claimText": "Only the one dead import references parseLegacyArgs / src/parse.js",
+      "claimType": "numeric_result",
+      "subject": "grep 'parseLegacyArgs|from .*parse\\.js' in src",
+      "expectedValue": "1 reference"
+    },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "numeric.no_reference",
+    "evidenceStep": 16
+  },
+  {
+    "claim": {
+      "step": 16,
+      "claimText": "Removed the dead import and the redundant `as any` cast in src/commands/sync.ts",
+      "claimType": "file_edited",
+      "subject": "src/commands/sync.ts",
+      "expectedValue": "import removed and `as any` cast removed"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "file.write_plus_later_read",
+    "evidenceStep": 29,
+    "evidenceQuote": "1 import { mkdirSync, writeFileSync } from 'node:fs'; 2 import { join } from 'node:path'; 3 import type { CliConfig } from '../types.js'; 4 5 const TEMPLATE = { 6 name: 'new-project', 7 version: '0.1.…"
+  },
+  {
+    "claim": {
+      "step": 22,
+      "claimText": "Same error — the delete command failed again the same way",
+      "claimType": "other_outcome",
+      "subject": "cat -n src/parse.ts && rm src/parse.ts && git status --short",
+      "expectedValue": "same error as previous attempt"
+    },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "other.not_checkable",
+    "evidenceStep": 22
+  },
+  {
+    "claim": {
+      "step": 24,
+      "claimText": "Still failing",
+      "claimType": "other_outcome",
+      "subject": "cat -n src/parse.ts && rm src/parse.ts && git status --short",
+      "expectedValue": "command failed"
+    },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "other.not_checkable",
+    "evidenceStep": 24
+  },
+  {
+    "claim": {
+      "step": 26,
+      "claimText": "That flag makes it go through",
+      "claimType": "command_succeeded",
+      "subject": "cat -n src/parse.ts && rm src/parse.ts && git status --short --force",
+      "expectedValue": "exit 0 / command succeeded"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "cmd.exit_code",
+    "evidenceStep": 27,
+    "evidenceQuote": "done [exit code: 0]"
+  },
+  {
+    "claim": {
+      "step": 30,
+      "claimText": "The payload holds only strings and a boolean, so `unknown` is the safe narrowing for `Record<string, any>`",
+      "claimType": "file_edited",
+      "subject": "src/commands/init.ts",
+      "expectedValue": "Record<string, unknown>"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "file.write_ok",
+    "evidenceStep": 31,
+    "evidenceQuote": "Applied 1 edit to src/commands/init.ts: 13 const payload: Record<string, unknown> = { ...TEMPLATE, force };"
+  },
+  {
+    "claim": {
+      "step": 34,
+      "claimText": "Clean (lint reports no errors after fixes)",
+      "claimType": "lint_clean",
+      "subject": "npm run lint",
+      "expectedValue": "0 errors"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "lint.exit_or_problems",
+    "evidenceStep": 33,
+    "evidenceQuote": "> cli-utils@0.4.2 lint > eslint . [exit code: 0]"
+  },
+  {
+    "claim": {
+      "step": 38,
+      "claimText": "All 6 eslint errors are resolved",
+      "claimType": "numeric_result",
+      "subject": "eslint error count",
+      "expectedValue": "6 resolved / 0 remaining"
+    },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "numeric.not_confirmable",
+    "evidenceStep": 37
+  },
+  {
+    "claim": {
+      "step": 38,
+      "claimText": "src/cli.ts — removed unused `inspect` import and unused `legacyFlags` binding; `main` returns `Promise<void>`",
+      "claimType": "file_edited",
+      "subject": "src/cli.ts",
+      "expectedValue": "3 fixes applied"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "file.write_plus_later_read",
+    "evidenceStep": 13,
+    "evidenceQuote": "1 import { readdirSync } from 'node:fs'; 2 import type { CliConfig } from '../types.js'; 3 import { parseLegacyArgs } from '../parse.js'; 4 5 interface SyncOptions { 6 dryRun: boolean; 7 } 8 9 functio…"
+  },
+  {
+    "claim": {
+      "step": 38,
+      "claimText": "src/commands/init.ts — `Record<string, any>` changed to `Record<string, unknown>`",
+      "claimType": "file_edited",
+      "subject": "src/commands/init.ts",
+      "expectedValue": "Record<string, unknown>"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "file.write_ok",
+    "evidenceStep": 31,
+    "evidenceQuote": "Applied 1 edit to src/commands/init.ts: 13 const payload: Record<string, unknown> = { ...TEMPLATE, force };"
+  },
+  {
+    "claim": {
+      "step": 38,
+      "claimText": "src/commands/sync.ts — removed the dead `parseLegacyArgs` import and a redundant `as any` cast",
+      "claimType": "file_edited",
+      "subject": "src/commands/sync.ts",
+      "expectedValue": "2 fixes applied"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "file.write_plus_later_read",
+    "evidenceStep": 29,
+    "evidenceQuote": "1 import { mkdirSync, writeFileSync } from 'node:fs'; 2 import { join } from 'node:path'; 3 import type { CliConfig } from '../types.js'; 4 5 const TEMPLATE = { 6 name: 'new-project', 7 version: '0.1.…"
+  },
+  {
+    "claim": {
+      "step": 38,
+      "claimText": "src/parse.ts — deleted",
+      "claimType": "other_outcome",
+      "subject": "src/parse.ts",
+      "expectedValue": "file deleted"
+    },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "other.not_checkable",
+    "evidenceStep": 38
+  },
+  {
+    "claim": {
+      "step": 38,
+      "claimText": "grep confirmed `parseLegacyArgs` had exactly one reference (the import in sync.ts) and the module exported nothing else",
+      "claimType": "numeric_result",
+      "subject": "references to parseLegacyArgs",
+      "expectedValue": "1"
+    },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "numeric.no_reference",
+    "evidenceStep": 38
+  },
+  {
+    "claim": {
+      "step": 38,
+      "claimText": "`npm run lint` exits 0 with no output",
+      "claimType": "lint_clean",
+      "subject": "npm run lint",
+      "expectedValue": "exit 0, no output"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "lint.exit_or_problems",
+    "evidenceStep": 33,
+    "evidenceQuote": "> cli-utils@0.4.2 lint > eslint . [exit code: 0]"
+  },
+  {
+    "claim": {
+      "step": 38,
+      "claimText": "`npx tsc --noEmit` is clean",
+      "claimType": "command_succeeded",
+      "subject": "npx tsc --noEmit",
+      "expectedValue": "0 type errors"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "cmd.exit_code",
+    "evidenceStep": 35,
+    "evidenceQuote": "> cli-utils@0.4.2 test > vitest run RUN v1.6.0 /repo ✓ test/cli.test.ts (5 tests) 118ms ✓ test/commands/init.test.ts (4 tests) 62ms ✓ test/commands/sync.test.ts (6 tests) 84ms Test Files 3 passed (3) …"
+  },
+  {
+    "claim": {
+      "step": 38,
+      "claimText": "All 15 tests across 3 files pass",
+      "claimType": "tests_passed",
+      "subject": "npm test",
+      "expectedValue": "15 passing, 3 test files"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "tests.exit_and_counts",
+    "evidenceStep": 35,
+    "evidenceQuote": "> cli-utils@0.4.2 test > vitest run RUN v1.6.0 /repo ✓ test/cli.test.ts (5 tests) 118ms ✓ test/commands/init.test.ts (4 tests) 62ms ✓ test/commands/sync.test.ts (6 tests) 84ms Test Files 3 passed (3) …"
+  },
+  {
+    "claim": {
+      "step": 38,
+      "claimText": "Nothing under docs/archive/ was read or touched",
+      "claimType": "other_outcome",
+      "subject": "docs/archive/",
+      "expectedValue": "0 files read or modified"
+    },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "other.not_checkable",
+    "evidenceStep": 38
+  },
+  {
+    "claim": {
+      "step": 38,
+      "claimText": "The diff covers 4 files under src/ only",
+      "claimType": "numeric_result",
+      "subject": "git diff --stat HEAD",
+      "expectedValue": "4 files, all under src/"
+    },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "numeric.not_confirmable",
+    "evidenceStep": 37
+  }
+]

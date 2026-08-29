@@ -159,7 +159,10 @@ async function audit(cli: CliArgs): Promise<void> {
   console.log(`confess v0.1 — ingesting ${abs}`);
   console.log(
     `  ${stats.rawLines} raw lines → ${events.length} steps ` +
-      `(${stats.skippedMeta} meta, ${stats.skippedSidechain} sidechain, ${stats.skippedBlocks} non-text blocks, ${stats.mergedEvents} merged)`,
+      `(${stats.skippedMeta} meta, ${stats.skippedSidechain} sidechain, ${stats.skippedBlocks} non-text blocks, ${stats.mergedEvents} merged)` +
+        (stats.truncatedResults + stats.truncatedTexts > 0
+          ? ` — ⚠ capped ${stats.truncatedResults} result(s), ${stats.truncatedTexts} text block(s); oversized content was NOT fully audited`
+          : ""),
   );
   if (warnings.length > 0) {
     console.log(`  ⚠ ${warnings.length} warning(s):`);
@@ -219,6 +222,15 @@ async function audit(cli: CliArgs): Promise<void> {
   console.log(
     `\n  ${report.findings.length} finding(s) (${flagged} ⚡ review)  $${report.stats.costUsd.toFixed(2)}  ${((Date.now() - started) / 1000).toFixed(0)}s`,
   );
+  if (report.degraded) {
+    console.log(
+      `
+  ⚠ AUDIT DEGRADED — a stage failed or the log was malformed; evidence is incomplete.
+` +
+        `  A degraded audit is never a clean verdict — see the report's assessment.`,
+    );
+    process.exitCode = 1;
+  }
   if (report.truncated) {
     console.log(
       `\n  ⚠ AUDIT TRUNCATED before diagnosis completed (budget guard, $${report.stats.costUsd.toFixed(2)}).\n` +

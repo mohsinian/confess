@@ -15,6 +15,8 @@ export interface IngestResult {
     skippedSidechain: number;
     skippedBlocks: number; // thinking etc.
     mergedEvents: number;
+    truncatedResults: number; // tool results capped at ingestion
+    truncatedTexts: number; // text blocks capped at ingestion
   };
 }
 
@@ -40,6 +42,7 @@ function normalizeBlocks(content: unknown, warnings: string[], stats: IngestResu
       // Real sessions include pasted documents; cap text blocks so one huge
       // paste can't dominate every downstream prompt.
       const cap = 4000;
+      if (b.text.length > cap) stats.truncatedTexts++;
       const text = b.text.length > cap ? b.text.slice(0, cap) + " […truncated at ingestion]" : b.text;
       blocks.push({ type: "text", text });
     } else if (b.type === "tool_use" && typeof b.id === "string" && typeof b.name === "string") {
@@ -80,7 +83,7 @@ function normalizeBlocks(content: unknown, warnings: string[], stats: IngestResu
 
 export function ingestClaudeCode(file: string): IngestResult {
   const warnings: string[] = [];
-  const stats = { rawLines: 0, skippedMeta: 0, skippedSidechain: 0, skippedBlocks: 0, mergedEvents: 0 };
+  const stats = { rawLines: 0, skippedMeta: 0, skippedSidechain: 0, skippedBlocks: 0, mergedEvents: 0, truncatedResults: 0, truncatedTexts: 0 };
   const raw = fs.readFileSync(file, "utf8").split("\n").filter((l) => l.trim());
 
   const collected: Array<{ type: "user" | "assistant"; blocks: ContentBlock[] }> = [];

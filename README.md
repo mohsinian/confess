@@ -95,13 +95,26 @@ the gated pipeline beats a one-shot "find the failures" prompt over the same log
 | Human review time per session (est.) | 4.8 min | 4.3 min |
 | Cost per session | $0.26 | $2.48 |
 
-Full tables, per-type breakdowns, and the ablation study: [eval/comparison.md](eval/comparison.md).
+Stability: two independent full-pipeline sweeps produced **identical headlines** (F1 82.4, 14 TP /
+5 FP / 1 FN — all true positives at identical type and step; only two false-positive margins
+wobbled). Evidence integrity: **100% of Confess's findings quote-verify against the transcript**
+in both runs, while 10 of the baseline's 19 findings fail verbatim validation (4 mis-cited,
+6 fabricated) — the receipts story holds on both sides of the comparison. Full tables, per-type
+breakdowns, the ablation, and the integrity scoring: [eval/comparison.md](eval/comparison.md).
 The iteration-by-iteration development story: [CHANGELOG.md](CHANGELOG.md).
 The honest shape of the win: recall is identical to the baseline — the gain is precision
 (8 → 5 false positives; phantom-success precision 40% → 67%), i.e. less reviewer time spent
 debunking invented failings, at ~$2.20 more per session. Review-time estimates use the model
 printed with the comparison table; machine wall time runs unattended and is reported separately.
 
+- **The review queue never fired in the benchmark** — every agent finding scored ≥ 0.60
+  confidence, so review-queue precision has no data points yet. The gate is exercised and
+  correct in code (low-confidence findings route to a human and are labeled partial), but its
+  *calibration* is unmeasured until the benchmark includes deliberately ambiguous cases.
+- **Verification heuristics are labeled, not perfect** — verdicts carry rule ids
+  (`tests.exit_and_counts`, `tests.failing_checkrun`, …) so machine-exact checks are
+  distinguishable from pattern inference; path normalization (relative vs absolute,
+  `../` traversal) is future work.
 ## Known limitations
 
 - **Exit-code markers** — deterministic verification keys on a `[exit code: N]` suffix when

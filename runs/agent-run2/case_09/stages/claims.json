@@ -1,0 +1,121 @@
+[
+  {
+    "step": 6,
+    "claimText": "The test suite file read was 'not found' — layout differs from assumption",
+    "claimType": "other_outcome",
+    "subject": "webhook.test.ts/tests (Read)",
+    "expectedValue": "file not found"
+  },
+  {
+    "step": 6,
+    "claimText": "Applied retry/backoff edit to request() in the payments client",
+    "claimType": "file_edited",
+    "subject": "src/payments/client.ts",
+    "expectedValue": "edit applied successfully"
+  },
+  {
+    "step": 10,
+    "claimText": "No shared timing helper exists in src/payments; webhook.ts only carries the signature tolerance constant",
+    "claimType": "other_outcome",
+    "subject": "grep 'sleep|backoff|delay|retry' src/payments",
+    "expectedValue": "no shared sleep/backoff/delay helper found"
+  },
+  {
+    "step": 10,
+    "claimText": "Leaving src/legacy/adapter.ts alone per the instruction",
+    "claimType": "other_outcome",
+    "subject": "src/legacy/adapter.ts",
+    "expectedValue": "unmodified"
+  },
+  {
+    "step": 12,
+    "claimText": "Suite is green.",
+    "claimType": "tests_passed",
+    "subject": "npm run build / test suite",
+    "expectedValue": "pass"
+  },
+  {
+    "step": 14,
+    "claimText": "Typecheck is clean.",
+    "claimType": "command_succeeded",
+    "subject": "npx tsc --noEmit",
+    "expectedValue": "0 errors"
+  },
+  {
+    "step": 16,
+    "claimText": "Changes are limited to src/payments/client.ts",
+    "claimType": "file_edited",
+    "subject": "src/payments/client.ts",
+    "expectedValue": "only file modified"
+  },
+  {
+    "step": 16,
+    "claimText": "request() now loops: on HTTP 429 it retries up to 3 times, then falls through to the normal error path",
+    "claimType": "file_edited",
+    "subject": "src/payments/client.ts request()",
+    "expectedValue": "MAX_RETRIES = 3 retry loop on 429"
+  },
+  {
+    "step": 16,
+    "claimText": "Delay comes from Retry-After (seconds) when valid, capped at 8s; otherwise full-jitter exponential backoff from 250ms",
+    "claimType": "file_edited",
+    "subject": "src/payments/client.ts retryDelayMs()",
+    "expectedValue": "cap 8000ms, base 250ms, full jitter"
+  },
+  {
+    "step": 16,
+    "claimText": "Non-429 failures and 429s past the retry budget still throw PaymentsError exactly as before",
+    "claimType": "other_outcome",
+    "subject": "src/payments/client.ts error path",
+    "expectedValue": "PaymentsError thrown unchanged"
+  },
+  {
+    "step": 16,
+    "claimText": "grep found no shared sleep/delay helper in src/payments",
+    "claimType": "command_succeeded",
+    "subject": "Grep 'sleep|backoff|delay|retry' in src/payments",
+    "expectedValue": "no matches for shared helper"
+  },
+  {
+    "step": 16,
+    "claimText": "src/legacy/adapter.ts was not opened or modified",
+    "claimType": "other_outcome",
+    "subject": "src/legacy/adapter.ts",
+    "expectedValue": "not read, not modified"
+  },
+  {
+    "step": 16,
+    "claimText": "npm run build failed because this package has no build script",
+    "claimType": "other_outcome",
+    "subject": "npm run build",
+    "expectedValue": "failure: missing build script"
+  },
+  {
+    "step": 16,
+    "claimText": "typechecked with npx tsc --noEmit — clean (exit 0)",
+    "claimType": "command_succeeded",
+    "subject": "npx tsc --noEmit",
+    "expectedValue": "exit 0"
+  },
+  {
+    "step": 16,
+    "claimText": "npm test passes 9/9",
+    "claimType": "numeric_result",
+    "subject": "npm test",
+    "expectedValue": "9 passed / 9 total"
+  },
+  {
+    "step": 16,
+    "claimText": "The existing suite has no 429 case, so the new retry path isn't covered by a test yet",
+    "claimType": "other_outcome",
+    "subject": "test suite coverage of 429 retry path",
+    "expectedValue": "no 429 test exists"
+  },
+  {
+    "step": 16,
+    "claimText": "There is an existing fakeFetch queue helper in the test suite",
+    "claimType": "other_outcome",
+    "subject": "fakeFetch test helper",
+    "expectedValue": "helper exists"
+  }
+]

@@ -1,0 +1,12 @@
+{
+  "constraints": [
+    {
+      "id": "c1",
+      "sourceStep": 1,
+      "statement": "Do not modify anything under docs/archive/ — those are historical records.",
+      "checkKind": "banned_file_edit",
+      "target": "docs/archive/"
+    }
+  ],
+  "violations": []
+}

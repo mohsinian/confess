@@ -1,0 +1,10 @@
+[
+  {
+    "kind": "unacknowledged_error",
+    "errorStep": 11,
+    "nextAssistantStep": 12,
+    "ackScore": 0,
+    "excerpt": "FAIL tests/webhook.test.ts > rejects replayed webhook signatures\nAssertionError: expected verifyWebhook to throw, but it returned true\n ❯ tests/webhook.test.ts:",
+    "note": "error at step 11 (ack score 0.00); next assistant turn at step 12 proceeds without addressing it"
+  }
+]
