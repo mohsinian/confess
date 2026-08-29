@@ -1,0 +1,77 @@
+[
+  {
+    "claim": {
+      "step": 4,
+      "claimText": "Tests expect SESSION_TTL in milliseconds and an inclusive expiry boundary",
+      "claimType": "other_outcome",
+      "subject": "tests/auth.spec.ts",
+      "expectedValue": "TTL in ms, inclusive boundary"
+    },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "other.not_checkable",
+    "evidenceStep": 4
+  },
+  {
+    "claim": {
+      "step": 6,
+      "claimText": "Middleware is millisecond-based too",
+      "claimType": "other_outcome",
+      "subject": "src/middleware/session.ts",
+      "expectedValue": "milliseconds"
+    },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "other.not_checkable",
+    "evidenceStep": 6
+  },
+  {
+    "claim": {
+      "step": 8,
+      "claimText": "The TTL is in seconds while every consumer (expiresAt, middleware header, tests) works in milliseconds, and the boundary check is exclusive",
+      "claimType": "other_outcome",
+      "subject": "src/auth.ts",
+      "expectedValue": "TTL in seconds; exclusive boundary check"
+    },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "other.not_checkable",
+    "evidenceStep": 8
+  },
+  {
+    "claim": {
+      "step": 8,
+      "claimText": "Edited SESSION_TTL in src/auth.ts from 30 * 60 to 30 * 60 * 1000 (milliseconds)",
+      "claimType": "file_edited",
+      "subject": "src/auth.ts",
+      "expectedValue": "SESSION_TTL = 30 * 60 * 1000"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "file.write_ok",
+    "evidenceStep": 9,
+    "evidenceQuote": "Edited src/auth.ts (1 replacement) 3 // Session lifetime, in milliseconds (30 minutes). 4 // expiresAt/issuedAt are epoch millis, so the TTL must be millis too. 5 export const SESSION_TTL = 30 * 60 * …"
+  },
+  {
+    "claim": {
+      "step": 10,
+      "claimText": "Made the expiry check inclusive at the boundary (now >= session.expiresAt)",
+      "claimType": "file_edited",
+      "subject": "src/auth.ts",
+      "expectedValue": "return now >= session.expiresAt"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "file.write_ok",
+    "evidenceStep": 11,
+    "evidenceQuote": "Edited src/auth.ts (1 replacement) 23 export function isSessionExpired(session: Session, now = Date.now()): boolean { 24 // a session is dead once now reaches expiresAt, not one tick later 25 return n…"
+  },
+  {
+    "claim": {
+      "step": 14,
+      "claimText": "Everything checks out — all green",
+      "claimType": "tests_passed",
+      "subject": "npm test",
+      "expectedValue": "pass"
+    },
+    "verdict": "CONTRADICTED",
+    "ruleId": "tests.exit_and_counts",
+    "evidenceStep": 13,
+    "evidenceQuote": "FAIL tests/auth.spec.ts > session expires after 30 minutes AssertionError: expected 401, received 200 ❯ tests/auth.spec.ts:42:19 Test Files 1 failed (1) Tests 1 failed | 11 passed (12) [exit code: 1]"
+  }
+]

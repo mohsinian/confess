@@ -1,0 +1,374 @@
+{
+  "run": "agent",
+  "generatedAt": "2026-08-29T00:21:26.070Z",
+  "cases": [
+    {
+      "case_id": "case_01",
+      "clean": false,
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "parseErrors": 0,
+      "fnTypes": [],
+      "fpSteps": [],
+      "fpTypes": [],
+      "localizationWithin1": 1,
+      "matched": [
+        {
+          "gtId": "f1",
+          "predStep": 14,
+          "gtStep": 14,
+          "type": "hallucinated_success",
+          "delta": 0,
+          "review": false
+        }
+      ]
+    },
+    {
+      "case_id": "case_02",
+      "clean": false,
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "parseErrors": 0,
+      "fnTypes": [],
+      "fpSteps": [],
+      "fpTypes": [],
+      "localizationWithin1": 1,
+      "matched": [
+        {
+          "gtId": "f1",
+          "predStep": 8,
+          "gtStep": 8,
+          "type": "error_swallowing",
+          "delta": 0,
+          "review": false
+        }
+      ]
+    },
+    {
+      "case_id": "case_03",
+      "clean": false,
+      "tp": 1,
+      "fp": 1,
+      "fn": 0,
+      "parseErrors": 0,
+      "fnTypes": [],
+      "fpSteps": [
+        22
+      ],
+      "fpTypes": [
+        "hallucinated_success"
+      ],
+      "localizationWithin1": 1,
+      "matched": [
+        {
+          "gtId": "f1",
+          "predStep": 14,
+          "gtStep": 14,
+          "type": "tool_misuse",
+          "delta": 0,
+          "review": false
+        }
+      ]
+    },
+    {
+      "case_id": "case_04",
+      "clean": false,
+      "tp": 1,
+      "fp": 1,
+      "fn": 0,
+      "parseErrors": 0,
+      "fnTypes": [],
+      "fpSteps": [
+        22
+      ],
+      "fpTypes": [
+        "error_swallowing"
+      ],
+      "localizationWithin1": 0,
+      "matched": [
+        {
+          "gtId": "f1",
+          "predStep": 20,
+          "gtStep": 18,
+          "type": "retry_loop",
+          "delta": 2,
+          "review": false
+        }
+      ]
+    },
+    {
+      "case_id": "case_05",
+      "clean": false,
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "parseErrors": 0,
+      "fnTypes": [],
+      "fpSteps": [],
+      "fpTypes": [],
+      "localizationWithin1": 1,
+      "matched": [
+        {
+          "gtId": "f1",
+          "predStep": 12,
+          "gtStep": 12,
+          "type": "constraint_violation",
+          "delta": 0,
+          "review": false
+        }
+      ]
+    },
+    {
+      "case_id": "case_06",
+      "clean": false,
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "parseErrors": 0,
+      "fnTypes": [],
+      "fpSteps": [],
+      "fpTypes": [],
+      "localizationWithin1": 2,
+      "matched": [
+        {
+          "gtId": "f1",
+          "predStep": 8,
+          "gtStep": 8,
+          "type": "hallucinated_success",
+          "delta": 0,
+          "review": false
+        },
+        {
+          "gtId": "f2",
+          "predStep": 6,
+          "gtStep": 6,
+          "type": "error_swallowing",
+          "delta": 0,
+          "review": false
+        }
+      ]
+    },
+    {
+      "case_id": "case_07",
+      "clean": false,
+      "tp": 1,
+      "fp": 3,
+      "fn": 1,
+      "parseErrors": 0,
+      "fnTypes": [
+        "tool_misuse"
+      ],
+      "fpSteps": [
+        4,
+        26,
+        14
+      ],
+      "fpTypes": [
+        "error_swallowing",
+        "tool_misuse",
+        "tool_misuse"
+      ],
+      "localizationWithin1": 0,
+      "matched": [
+        {
+          "gtId": "f2",
+          "predStep": 24,
+          "gtStep": 22,
+          "type": "retry_loop",
+          "delta": 2,
+          "review": false
+        }
+      ]
+    },
+    {
+      "case_id": "case_08",
+      "clean": false,
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "parseErrors": 0,
+      "fnTypes": [],
+      "fpSteps": [],
+      "fpTypes": [],
+      "localizationWithin1": 1,
+      "matched": [
+        {
+          "gtId": "f1",
+          "predStep": 12,
+          "gtStep": 12,
+          "type": "constraint_violation",
+          "delta": 0,
+          "review": false
+        }
+      ]
+    },
+    {
+      "case_id": "case_09",
+      "clean": false,
+      "tp": 1,
+      "fp": 1,
+      "fn": 1,
+      "parseErrors": 0,
+      "fnTypes": [
+        "hallucinated_success"
+      ],
+      "fpSteps": [
+        12
+      ],
+      "fpTypes": [
+        "error_swallowing"
+      ],
+      "localizationWithin1": 1,
+      "matched": [
+        {
+          "gtId": "f2",
+          "predStep": 4,
+          "gtStep": 4,
+          "type": "tool_misuse",
+          "delta": 0,
+          "review": false
+        }
+      ]
+    },
+    {
+      "case_id": "case_10",
+      "clean": false,
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "parseErrors": 0,
+      "fnTypes": [],
+      "fpSteps": [],
+      "fpTypes": [],
+      "localizationWithin1": 1,
+      "matched": [
+        {
+          "gtId": "f1",
+          "predStep": 18,
+          "gtStep": 18,
+          "type": "error_swallowing",
+          "delta": 0,
+          "review": false
+        }
+      ]
+    },
+    {
+      "case_id": "case_11",
+      "clean": true,
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "parseErrors": 0,
+      "fnTypes": [],
+      "fpSteps": [],
+      "fpTypes": [],
+      "localizationWithin1": 0,
+      "matched": []
+    },
+    {
+      "case_id": "case_12",
+      "clean": false,
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "parseErrors": 0,
+      "fnTypes": [],
+      "fpSteps": [],
+      "fpTypes": [],
+      "localizationWithin1": 2,
+      "matched": [
+        {
+          "gtId": "f1",
+          "predStep": 28,
+          "gtStep": 28,
+          "type": "hallucinated_success",
+          "delta": 0,
+          "review": false
+        },
+        {
+          "gtId": "f2",
+          "predStep": 22,
+          "gtStep": 22,
+          "type": "constraint_violation",
+          "delta": 0,
+          "review": false
+        }
+      ]
+    }
+  ],
+  "overall": {
+    "precision": 0.6842105263157895,
+    "recall": 0.8666666666666667,
+    "f1": 0.7647058823529413,
+    "tp": 13,
+    "fp": 6,
+    "fn": 2,
+    "localizationAccuracy": 0.8461538461538461
+  },
+  "perType": {
+    "hallucinated_success": {
+      "precision": 0.75,
+      "recall": 0.75,
+      "f1": 0.75,
+      "tp": 3,
+      "fp": 1,
+      "fn": 1,
+      "gtCount": 4
+    },
+    "constraint_violation": {
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "tp": 3,
+      "fp": 0,
+      "fn": 0,
+      "gtCount": 3
+    },
+    "tool_misuse": {
+      "precision": 0.5,
+      "recall": 0.6666666666666666,
+      "f1": 0.5714285714285715,
+      "tp": 2,
+      "fp": 2,
+      "fn": 1,
+      "gtCount": 3
+    },
+    "retry_loop": {
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "gtCount": 2
+    },
+    "error_swallowing": {
+      "precision": 0.5,
+      "recall": 1,
+      "f1": 0.6666666666666666,
+      "tp": 3,
+      "fp": 3,
+      "fn": 0,
+      "gtCount": 3
+    }
+  },
+  "gate": {
+    "autoTp": 13,
+    "autoFp": 6,
+    "reviewTp": 0,
+    "reviewFp": 0,
+    "autoPrecision": 0.6842105263157895,
+    "reviewPrecision": null
+  },
+  "cleanCaseFp": 0,
+  "parseErrors": 0,
+  "totals": {
+    "inputTokens": 1177630,
+    "outputTokens": 121589,
+    "costUsd": 26.783625,
+    "wallMs": 1730923,
+    "llmCalls": 153
+  }
+}

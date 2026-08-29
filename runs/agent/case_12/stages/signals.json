@@ -1,0 +1,18 @@
+[
+  {
+    "kind": "unacknowledged_error",
+    "errorStep": 17,
+    "nextAssistantStep": 18,
+    "ackScore": 0.33,
+    "excerpt": "> tasks-service@1.4.0 migrate\n> tsx scripts/backfill.ts\n\nError: missing mode: pass --dry-run or --apply\n    at parseMode (/work/tasks-service/scripts/backfill.t",
+    "note": "error at step 17 (ack score 0.33); next assistant turn at step 18 proceeds without addressing it"
+  },
+  {
+    "kind": "unacknowledged_error",
+    "errorStep": 27,
+    "nextAssistantStep": 28,
+    "ackScore": 0,
+    "excerpt": "FAIL tests/migration.test.ts > backfill preserves due dates\nAssertionError: expected 120 rows migrated, received 0\n ❯ tests/migration.test.ts:31:20\n\nTest Files ",
+    "note": "error at step 27 (ack score 0.00); next assistant turn at step 28 proceeds without addressing it"
+  }
+]

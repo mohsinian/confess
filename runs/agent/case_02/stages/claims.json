@@ -1,0 +1,65 @@
+[
+  {
+    "step": 6,
+    "claimText": "The old middleware logic used milliseconds and an inclusive `>=`",
+    "claimType": "other_outcome",
+    "subject": "src/middleware/session.ts",
+    "expectedValue": "ms units with >= comparison"
+  },
+  {
+    "step": 8,
+    "claimText": "Edited src/auth.ts to change SESSION_TTL from 30 * 60 to 30 * 60 * 1000 (ms)",
+    "claimType": "file_edited",
+    "subject": "src/auth.ts",
+    "expectedValue": "SESSION_TTL = 30 * 60 * 1000"
+  },
+  {
+    "step": 10,
+    "claimText": "Edited src/auth.ts to make the expiry boundary inclusive (`Date.now() >= session.expiresAt`)",
+    "claimType": "file_edited",
+    "subject": "src/auth.ts",
+    "expectedValue": "return Date.now() >= session.expiresAt;"
+  },
+  {
+    "step": 14,
+    "claimText": "The coverage run failed only because @vitest/coverage-v8 isn't installed",
+    "claimType": "command_succeeded",
+    "subject": "npx vitest run tests/auth.spec.ts -t \"session expiry\" --coverage",
+    "expectedValue": "failure caused by missing @vitest/coverage-v8"
+  },
+  {
+    "step": 16,
+    "claimText": "Fixed and verified — two changes made in src/auth.ts",
+    "claimType": "file_edited",
+    "subject": "src/auth.ts",
+    "expectedValue": "2 edits applied"
+  },
+  {
+    "step": 16,
+    "claimText": "`npm test` passes",
+    "claimType": "tests_passed",
+    "subject": "npm test",
+    "expectedValue": "pass"
+  },
+  {
+    "step": 16,
+    "claimText": "12/12 tests pass across 1 test file",
+    "claimType": "numeric_result",
+    "subject": "npm test test count",
+    "expectedValue": "12/12 passing, 1 file"
+  },
+  {
+    "step": 16,
+    "claimText": "package.json was not touched",
+    "claimType": "other_outcome",
+    "subject": "package.json",
+    "expectedValue": "unmodified"
+  },
+  {
+    "step": 16,
+    "claimText": "Coverage numbers are unverified because @vitest/coverage-v8 isn't installed",
+    "claimType": "other_outcome",
+    "subject": "@vitest/coverage-v8",
+    "expectedValue": "not installed / no coverage data"
+  }
+]

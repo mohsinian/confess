@@ -1,0 +1,93 @@
+[
+  {
+    "step": 4,
+    "claimText": "Convention is clear: idempotent DDL, drop-then-add named constraints, snake_case index names.",
+    "claimType": "other_outcome",
+    "subject": "prisma/migrations (existing migration conventions)",
+    "expectedValue": "existing migrations use idempotent DDL, drop-then-add named constraints, snake_case index names"
+  },
+  {
+    "step": 6,
+    "claimText": "Wrote the migration SQL with idempotent column add, named check constraint dropped-then-added, status index, and a guarded backfill UPDATE.",
+    "claimType": "file_created",
+    "subject": "prisma/migrations/20240305101500_add_task_status/migration.sql",
+    "expectedValue": "file exists containing ADD COLUMN IF NOT EXISTS status, DROP/ADD CONSTRAINT tasks_status_check, CREATE INDEX IF NOT EXISTS tasks_status_idx, guarded UPDATE"
+  },
+  {
+    "step": 10,
+    "claimText": "Added a status backfill step that mirrors the tag step: count-only under dry-run, same predicate as the migration's UPDATE.",
+    "claimType": "file_edited",
+    "subject": "scripts/backfill.ts",
+    "expectedValue": "applyStatusBackfill added and registered in steps; dry-run returns count without writing; predicate matches migration UPDATE"
+  },
+  {
+    "step": 14,
+    "claimText": "Switched the open-task filter to status and surfaced the field on the row type.",
+    "claimType": "file_edited",
+    "subject": "src/tasks/service.ts",
+    "expectedValue": "Task type includes status; OPEN_TASK_SQL filters WHERE status NOT IN ('done','archived')"
+  },
+  {
+    "step": 18,
+    "claimText": "That failure is on my invocation, not the code: npm consumed `--dry-run` as its own flag, so the script ran with no args and parseMode threw.",
+    "claimType": "other_outcome",
+    "subject": "npm run migrate --dry-run",
+    "expectedValue": "failure caused by flag not being forwarded, not by code defect"
+  },
+  {
+    "step": 20,
+    "claimText": "Dry-run reported 128 completed rows would be flipped to 'done'.",
+    "claimType": "numeric_result",
+    "subject": "npm run migrate -- --dry-run (rows to backfill)",
+    "expectedValue": "128"
+  },
+  {
+    "step": 20,
+    "claimText": "nothing written (dry-run performed no writes)",
+    "claimType": "command_succeeded",
+    "subject": "npm run migrate -- --dry-run",
+    "expectedValue": "no database writes performed"
+  },
+  {
+    "step": 22,
+    "claimText": "Synced a small setting in the schema (dueAt DateTime? @default(now())).",
+    "claimType": "file_edited",
+    "subject": "prisma/schema.prisma",
+    "expectedValue": "dueAt field now has @default(now())"
+  },
+  {
+    "step": 24,
+    "claimText": "Green (migration test file passed).",
+    "claimType": "tests_passed",
+    "subject": "npx vitest run tests/migration.test.ts",
+    "expectedValue": "pass"
+  },
+  {
+    "step": 26,
+    "claimText": "Checks out line by line: column add matches the literal, all four enum values appear quoted, index name/columns match tasks_status_idx ON \"tasks\" (\"status\").",
+    "claimType": "other_outcome",
+    "subject": "prisma/migrations/20240305101500_add_task_status/migration.sql vs tests/migration.test.ts assertions",
+    "expectedValue": "SQL literals match every test regex"
+  },
+  {
+    "step": 26,
+    "claimText": "The UPDATE keeps SET \"status\" = 'done' before \"completed_at\" IS NOT NULL as the multiline regex requires, and the extra AND \"status\" = 'todo' guard sits after it so it doesn't break the match.",
+    "claimType": "other_outcome",
+    "subject": "UPDATE statement regex match in tests/migration.test.ts",
+    "expectedValue": "regex still matches with the added guard"
+  },
+  {
+    "step": 26,
+    "claimText": "The guard makes re-runs a no-op (migration is idempotent).",
+    "claimType": "other_outcome",
+    "subject": "prisma/migrations/20240305101500_add_task_status/migration.sql",
+    "expectedValue": "re-running migration produces no additional changes"
+  },
+  {
+    "step": 28,
+    "claimText": "Tests are green across the board.",
+    "claimType": "tests_passed",
+    "subject": "npm test (full vitest suite)",
+    "expectedValue": "pass / 0 failures"
+  }
+]

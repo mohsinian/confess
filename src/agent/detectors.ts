@@ -1,7 +1,7 @@
 // Stage 2 — deterministic detectors (planning/06-agent-spec.md): retry loops
 // and unacknowledged errors. Pure code — signals are LEADS for the diagnosis
 // agent, never scored directly.
-import type { PairedStep, ParsedTrajectory } from "./parse.js";
+import { isMeaningfulFailure, type PairedStep, type ParsedTrajectory } from "./parse.js";
 import { eventText } from "./parse.js";
 
 export type Signal =
@@ -35,7 +35,7 @@ export function detectRetryLoops(parsed: ParsedTrajectory, minOccurrences = 3): 
   const signals: Signal[] = [];
   const byKey = new Map<string, PairedStep[]>();
   for (const pair of parsed.pairs) {
-    if (!pair.isFailure) continue;
+    if (!isMeaningfulFailure(pair)) continue;
     const key = `${pair.use.name}::${normalizedArgs(pair)}`;
     const list = byKey.get(key) ?? [];
     list.push(pair);
@@ -92,7 +92,7 @@ function ackScoreFor(text: string): number {
 export function detectUnacknowledgedErrors(parsed: ParsedTrajectory, ackBelow = 0.35): Signal[] {
   const signals: Signal[] = [];
   for (const pair of parsed.pairs) {
-    if (!pair.isFailure) continue;
+    if (!isMeaningfulFailure(pair)) continue;
     // The assistant event right after the failing result.
     const nextAssistant = parsed.steps.find((s) => s.index > pair.resultStep && s.type === "assistant");
     if (!nextAssistant) continue;

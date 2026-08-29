@@ -29,6 +29,24 @@ export interface ParsedTrajectory {
 
 const EXIT_RE = /\[exit code: (\d+)\]\s*$/;
 
+// Check-run = a command whose exit code asserts something about the work.
+const CHECK_RUN_RE = /(test|spec|vitest|jest|mocha|lint|eslint|build|compile|tsc|typecheck|check|migrate|prisma|backfill)/i;
+// Strong error text inside a result (independent of the exit-code suffix).
+const ERROR_TEXT_RE = /error|failed|EADDRINUSE|EACCES|ECONNREFUSED|ETIMEDOUT|permission denied|not found|cannot find|missing script/i;
+
+/**
+ * Does this result indicate failure OF THE WORK? Informational commands
+ * (git diff/status/log, ls, cat) can carry odd exit codes without the work
+ * failing — error_swallowing must not fire on those.
+ */
+export function isMeaningfulFailure(pair: PairedStep): boolean {
+  if (pair.result.is_error) return true;
+  if (pair.exitCode === null || pair.exitCode === 0) return false;
+  const command = String((pair.use.input as { command?: string }).command ?? "");
+  if (CHECK_RUN_RE.test(command)) return true;
+  return ERROR_TEXT_RE.test(pair.result.content);
+}
+
 export function parseTrajectory(events: Trajectory): ParsedTrajectory {
   const steps: Step[] = events.map((ev) => ({ index: ev.step, type: ev.type, blocks: ev.content }));
 

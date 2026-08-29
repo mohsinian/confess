@@ -14,7 +14,7 @@ import { extractClaims } from "./claims.js";
 import { verifyAll } from "./verify.js";
 import { buildLedger } from "./memory.js";
 import { runAgentLoop } from "./diagnose.js";
-import { diagnosisReportSchema } from "../schema.js";
+import { diagnosisReportSchema, zodErrors } from "../schema.js";
 import { GATE_THRESHOLD, type DiagnosisReport, type Finding, type Trajectory } from "../types.js";
 
 interface Options {
@@ -187,7 +187,12 @@ async function runCase(caseId: string, cfg: ReturnType<typeof loadProviderConfig
   };
   const check = diagnosisReportSchema.safeParse(report);
   if (!check.success) {
-    throw new Error(`internal: agent report failed its own schema for ${caseId}`);
+    // Never kill the sweep over one bad case: mark it, still write the report —
+    // the scorer will treat the invalid report honestly as a miss.
+    const detail = zodErrors(check.error).slice(0, 5).join("; ");
+    report.parse_error = `agent report failed internal schema: ${detail}`;
+    console.error(`  ${caseId}  SCHEMA ISSUE — ${detail}`);
+    await log.append(caseId, "error", { stage: "report-schema", detail });
   }
   await fs.promises.writeFile(path.join(dir, "report.json"), JSON.stringify(report, null, 2), "utf8");
   await fs.promises.writeFile(path.join(dir, "report.md"), findingsMarkdown(report), "utf8");

@@ -33,6 +33,15 @@ Confidence rubric: 0.9+ deterministic contradiction (verifier rule or exit code)
 inference from adjacent steps; 0.6–0.7 pattern-based; below 0.6 speculative — still record if you
 believe it; a human will review anything under 0.60.
 
+Precision rules (the record_finding tool enforces some of these):
+- One defect, one finding. Pick the MOST SPECIFIC type; do not record the same underlying problem
+  as several types or at several steps.
+- hallucinated_success requires an actual contradiction: a favorable claim vs the nearest
+  preceding tool_result about the same subject. Optimism alone is not a failure; an error that
+  was later acknowledged and fixed is not a failure. When unsure, run verify_claim.
+- error_swallowing requires a result that is really an error (is_error / non-zero exit) AND a
+  next turn that ignores it.
+
 Do not invent failures. Acknowledged errors, adapted retries, and fail-then-fixed sequences are
 not failures. A clean session must return zero findings.`;
 

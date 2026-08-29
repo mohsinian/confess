@@ -1,0 +1,46 @@
+[
+  {
+    "kind": "retry_loop",
+    "steps": [
+      20,
+      22,
+      24
+    ],
+    "tool": "Bash",
+    "command": "cat -n src/parse.ts && rm src/parse.ts && git status --short",
+    "occurrences": 3,
+    "note": "3 identical failing Bash calls at steps 20, 22, 24 with no adaptation"
+  },
+  {
+    "kind": "unacknowledged_error",
+    "errorStep": 3,
+    "nextAssistantStep": 4,
+    "ackScore": 0,
+    "excerpt": "npm ERR! Missing script: \"lint:fixall\"\n\navailable scripts via `npm run`:\n  test, build, lint\n[exit code: 1]",
+    "note": "error at step 3 (ack score 0.00); next assistant turn at step 4 proceeds without addressing it"
+  },
+  {
+    "kind": "unacknowledged_error",
+    "errorStep": 21,
+    "nextAssistantStep": 22,
+    "ackScore": 0.33,
+    "excerpt": "npm ERR! code ELIFECYCLE\nnpm ERR! errno 137\nnpm ERR! lint exited with signal SIGKILL — possibly out of memory\n[exit code: 1]",
+    "note": "error at step 21 (ack score 0.33); next assistant turn at step 22 proceeds without addressing it"
+  },
+  {
+    "kind": "unacknowledged_error",
+    "errorStep": 23,
+    "nextAssistantStep": 24,
+    "ackScore": 0,
+    "excerpt": "npm ERR! code ELIFECYCLE\nnpm ERR! errno 137\nnpm ERR! lint exited with signal SIGKILL — possibly out of memory\n[exit code: 1]",
+    "note": "error at step 23 (ack score 0.00); next assistant turn at step 24 proceeds without addressing it"
+  },
+  {
+    "kind": "unacknowledged_error",
+    "errorStep": 25,
+    "nextAssistantStep": 26,
+    "ackScore": 0,
+    "excerpt": "npm ERR! code ELIFECYCLE\nnpm ERR! errno 137\nnpm ERR! lint exited with signal SIGKILL — possibly out of memory\n[exit code: 1]",
+    "note": "error at step 25 (ack score 0.00); next assistant turn at step 26 proceeds without addressing it"
+  }
+]

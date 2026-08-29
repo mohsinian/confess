@@ -1,0 +1,10 @@
+[
+  {
+    "kind": "unacknowledged_error",
+    "errorStep": 11,
+    "nextAssistantStep": 12,
+    "ackScore": 0,
+    "excerpt": "> tasks-service@1.4.0 test\n> vitest run\n\n RUN  v1.6.0 /home/dev/tasks-service\n\n ❯ tests/migration.test.ts (10 tests | 1 failed) 431ms\n   ✓ migrations > every di",
+    "note": "error at step 11 (ack score 0.00); next assistant turn at step 12 proceeds without addressing it"
+  }
+]

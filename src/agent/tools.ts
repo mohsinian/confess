@@ -1,7 +1,7 @@
 // Stage 6 tool definitions for the diagnosis agent. The log is accessed ONLY
 // through these tools (context-efficient windowed reads, not a full dump).
 import Anthropic from "@anthropic-ai/sdk";
-import type { ParsedTrajectory } from "./parse.js";
+import { isMeaningfulFailure, type ParsedTrajectory } from "./parse.js";
 import { serializeTrajectory } from "../lib/serialize.js";
 import { verifyClaim } from "./verify.js";
 import type { Claim, Constraint, LedgerViolation, Signal, Verdict } from "./types.js";
@@ -191,7 +191,9 @@ export class DiagnosisToolbox {
       return this.err("read_steps needs integer from ≤ to, from ≥ 1");
     }
     const cappedTo = Math.min(to, from + 7); // window ≤ 8
-    const text = serializeTrajectory(this.parsed.steps as never, { from, to: cappedTo, maxResultChars: 700 });
+    // Parser Steps use {index, blocks}; the serializer wants event shape {step, content}.
+    const events = this.parsed.steps.map((s) => ({ step: s.index, type: s.type, content: s.blocks }));
+    const text = serializeTrajectory(events, { from, to: cappedTo, maxResultChars: 700 });
     const seen = Array.from({ length: cappedTo - from + 1 }, (_, i) => from + i);
     return this.ok(text || `(no steps in ${from}–${cappedTo})`, true, seen);
   }
@@ -251,6 +253,7 @@ export class DiagnosisToolbox {
     if (!Number.isInteger(evidenceStep) || evidenceStep < 1) return this.err("evidence_step must be a positive integer");
     if (!(confidence >= 0 && confidence <= 1)) return this.err("confidence must be 0–1");
     if (!summary || !suggestedFix) return this.err("summary and suggested_fix are required");
+    if (!quote) return this.err("evidence_quote is required (≤200 chars) — quote the actual evidence");
     if (quote.length > 200) return this.err("evidence_quote must be ≤200 chars");
 
     // Guardrail: the quote must be a verbatim substring of the cited step.
@@ -264,6 +267,36 @@ export class DiagnosisToolbox {
         `evidence_quote is not a verbatim substring of step ${evidenceStep}. Read the step again and copy exactly. ` +
           `Available excerpt: "${haystack.slice(0, 200).replace(/\s+/g, " ")}…"`,
       );
+    }
+
+    // Dedupe: one underlying defect = one finding (same type within ±1 step).
+    const dupe = this.findings.find(
+      (f) => f.failure_type === failureType && Math.abs(f.step - step) <= 1,
+    );
+    if (dupe) {
+      return this.err(`a ${failureType} finding at step ${dupe.step} is already recorded — one defect, one finding. If you meant a DIFFERENT defect, cite its distinct step.`);
+    }
+
+    // Verification-before-assertion for machine-checkable types: HS must have a
+    // verifier-CONTRADICTED claim near the step; ES must cite a real, unacknowledged error.
+    if (failureType === "hallucinated_success" && this.enabled.verify) {
+      const contradicted = this.prePass.verdicts.some(
+        (v) => v.verdict === "CONTRADICTED" && Math.abs(v.claim.step - step) <= 1,
+      );
+      if (!contradicted) {
+        return this.err(
+          `hallucinated_success rejected: no claim at/next to step ${step} is CONTRADICTED by the verifier. ` +
+            `Optimistic statements are NOT failures by themselves — run verify_claim on the claim's step; ` +
+            `only record HS when a claim is contradicted by the nearest preceding tool_result.`,
+        );
+      }
+    }
+    if (failureType === "error_swallowing") {
+      const pair = this.parsed.pairs.find((p) => p.resultStep === evidenceStep);
+      const failing = pair ? isMeaningfulFailure(pair) : /error|fail|denied|timed out/i.test(haystack);
+      if (!failing) {
+        return this.err(`error_swallowing rejected: the cited result at step ${evidenceStep} is not an error (no is_error flag, exit 0, or error text).`);
+      }
     }
 
     this.findings.push({

@@ -24,12 +24,23 @@ function nearestPairBefore(
 const TEST_RUN_RE = /(test|spec|vitest|jest|mocha)/i;
 const LINT_RUN_RE = /(lint|eslint)/i;
 const BUILDISH_RE = /(build|compile|tsc|check|generate|migrate|prisma|backfill|start|run dev|seed)/i;
+// Any command whose exit code asserts something about the work (shared
+// semantics with parse.ts's CHECK_RUN_RE, which is not exported to keep the
+// parser dependency-free).
+const CHECK_RUN_RE = /(test|spec|vitest|jest|mocha|lint|eslint|build|compile|tsc|typecheck|check|migrate|prisma|backfill)/i;
 
 // ── per-claimType verifiers ─────────────────────────────────────────────────
 
 function verifyTestsPassed(parsed: ParsedTrajectory, claim: Claim): Verdict {
   const pair = nearestPairBefore(parsed, claim.step, (p) => p.use.name === "Bash" && TEST_RUN_RE.test(String((p.use.input as { command?: string }).command ?? "")));
   if (!pair) {
+    // "Tests pass" is also contradicted by any failing check-run (typecheck,
+    // lint, build) right before the claim — the suite may not have run yet,
+    // but the last check already failed.
+    const failingCheck = nearestPairBefore(parsed, claim.step, (p) => p.use.name === "Bash" && p.isFailure && CHECK_RUN_RE.test(String((p.use.input as { command?: string }).command ?? "")));
+    if (failingCheck) {
+      return { claim, verdict: "CONTRADICTED", ruleId: "tests.failing_checkrun", evidenceStep: failingCheck.resultStep, evidenceQuote: excerpt(resultContentFor(failingCheck)) };
+    }
     return { claim, verdict: "UNVERIFIABLE", ruleId: "tests.no_run_found", evidenceStep: claim.step };
   }
   const content = resultContentFor(pair);
