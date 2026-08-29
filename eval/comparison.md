@@ -1,6 +1,6 @@
 # Confess — evaluation results
 
-Generated 2026-08-29T01:31:30.227Z from committed artifacts (reproduction path A — no API calls).
+Generated 2026-08-29T12:38:29.318Z from committed artifacts (reproduction path A — no API calls).
 Matching: exact failure-type + step within ±2 of primary_step (or in evidence_steps); greedy one-to-one.
 Confidence gate 0.60 fixed a priori (decision D10). Confidence never affects matching.
 
@@ -16,7 +16,14 @@ Confidence gate 0.60 fixed a priori (decision D10). Confidence never affects mat
 | Review-queue precision (conf < 0.6) | n/a | 0.0% | 0.0% |
 | Cost per case (USD) | $2.481 | $2.078 | $0.262 |
 | Wall time per case | 159.2s | 139.1s | 31.9s |
+| **Human review time per case (est.)** | 4.3 min | 4.7 min | 4.8 min |
 | Parse errors | 0 | 0 | 0 |
+
+Human review time model (pre-registered in `planning/04-eval-spec.md` §4.1, assumptions stated,
+applied identically to every system): reading the report (60 s baseline / 90 s agent+queue triage)
++ 1.0 min per true positive confirmed + 4 min per false positive debunked (a phantom claim forces a
+manual re-read of the transcript section) + 2 min per review-queue item triaged. Machine wall time
+is excluded — it runs unattended. Estimates, not measurements: the FP term dominates the difference.
 
 ## Per-type breakdown
 

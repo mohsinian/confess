@@ -92,10 +92,15 @@ the gated pipeline beats a one-shot "find the failures" prompt over the same log
 | Failure-detection F1 | 75.7% | **82.4%** |
 | Precision / Recall | 63.6% / 93.3% | 73.7% / 93.3% |
 | False positives | 8 | **5** |
+| Human review time per session (est.) | 4.8 min | 4.3 min |
 | Cost per session | $0.26 | $2.48 |
 
 Full tables, per-type breakdowns, and the ablation study: [eval/comparison.md](eval/comparison.md).
 The iteration-by-iteration development story: [CHANGELOG.md](CHANGELOG.md).
+The honest shape of the win: recall is identical to the baseline — the gain is precision
+(8 → 5 false positives; phantom-success precision 40% → 67%), i.e. less reviewer time spent
+debunking invented failings, at ~$2.20 more per session. Review-time estimates use the model
+printed with the comparison table; machine wall time runs unattended and is reported separately.
 
 ## Known limitations
 

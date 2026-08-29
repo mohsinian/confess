@@ -35,7 +35,9 @@ Credentials:
   ANTHROPIC_API_KEY=sk-ant-...                    (direct Anthropic)
   ANTHROPIC_AUTH_TOKEN=... ANTHROPIC_BASE_URL=... (Anthropic-compatible router)
   or a .env file in the current directory (same variable names).
-  A typical session audit costs ~$1–3 with an Opus-class model.`;
+  A typical session audit costs ~$1–3 with an Opus-class model.
+
+Exit codes: 0 complete (findings or clean) · 1 partial (budget-truncated) or error.`;
 
 interface CliArgs {
   file?: string;
@@ -196,9 +198,13 @@ async function audit(cli: CliArgs): Promise<void> {
   }
 
   const outBase = path.resolve(cli.out ?? REPORTS_DIRNAME);
+  // Config-specific report dir: a cheap re-run (--off) must never overwrite a
+  // full audit's report — they are different products about the same session.
+  const configTag = offLabel ? "-off-" + [cli.off.memory && "memory", cli.off.verify && "verify", cli.off.detectors && "detectors"].filter(Boolean).join("-") : "";
+  const reportDir = path.join(outBase, session + configTag);
   const started = Date.now();
   const report = await runAudit(
-    session,
+    session + configTag,
     events,
     cfg,
     { off: cli.off },
@@ -219,6 +225,7 @@ async function audit(cli: CliArgs): Promise<void> {
         `  A partial audit is NOT a clean bill of health — raise MAX_RUN_COST in your\n` +
         `  environment, or re-run cheaper: confess-audit --off verify,memory <file>`,
     );
+    process.exitCode = 1; // scripts can detect a partial audit without parsing output
   } else if (report.findings.length === 0) {
     console.log("   No failures detected — the session's claims check out against its tool results.");
   }
@@ -227,7 +234,7 @@ async function audit(cli: CliArgs): Promise<void> {
       `   • ${f.failure_type} @ step ${f.step} (conf ${f.confidence.toFixed(2)})${f.needs_human_review ? " ⚡" : ""}: ${f.summary.split("\n")[0].slice(0, 110)}`,
     );
   }
-  console.log(`\n  report: ${path.join(outBase, session, "report.md")}`);
+  console.log(`\n  report: ${path.join(reportDir, "report.md")}`);
 }
 
 async function main(): Promise<void> {

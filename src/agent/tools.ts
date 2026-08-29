@@ -247,23 +247,23 @@ export class DiagnosisToolbox {
     const summary = String(input.summary ?? "");
     const suggestedFix = String(input.suggested_fix ?? "");
     if (!["hallucinated_success", "constraint_violation", "tool_misuse", "retry_loop", "error_swallowing"].includes(failureType)) {
-      return this.err(`invalid failure_type "${failureType}"`);
+      return this.reject(`invalid failure_type "${failureType}"`);
     }
-    if (!Number.isInteger(step) || step < 1) return this.err("step must be a positive integer");
-    if (!Number.isInteger(evidenceStep) || evidenceStep < 1) return this.err("evidence_step must be a positive integer");
-    if (!(confidence >= 0 && confidence <= 1)) return this.err("confidence must be 0–1");
-    if (!summary || !suggestedFix) return this.err("summary and suggested_fix are required");
-    if (!quote) return this.err("evidence_quote is required (≤200 chars) — quote the actual evidence");
-    if (quote.length > 200) return this.err("evidence_quote must be ≤200 chars");
+    if (!Number.isInteger(step) || step < 1) return this.reject("step must be a positive integer");
+    if (!Number.isInteger(evidenceStep) || evidenceStep < 1) return this.reject("evidence_step must be a positive integer");
+    if (!(confidence >= 0 && confidence <= 1)) return this.reject("confidence must be 0–1");
+    if (!summary || !suggestedFix) return this.reject("summary and suggested_fix are required");
+    if (!quote) return this.reject("evidence_quote is required (≤200 chars) — quote the actual evidence");
+    if (quote.length > 200) return this.reject("evidence_quote must be ≤200 chars");
 
     // Guardrail: the quote must be a verbatim substring of the cited step.
     const stepEv = this.parsed.steps.find((s) => s.index === evidenceStep);
-    if (!stepEv) return this.err(`evidence_step ${evidenceStep} does not exist in this log`);
+    if (!stepEv) return this.reject(`evidence_step ${evidenceStep} does not exist in this log`);
     const haystack = stepEv.blocks
       .map((b) => (b.type === "text" ? b.text : b.type === "tool_use" ? `${b.name} ${JSON.stringify(b.input)}` : b.content))
       .join("\n");
     if (!haystack.includes(quote)) {
-      return this.err(
+      return this.reject(
         `evidence_quote is not a verbatim substring of step ${evidenceStep}. Read the step again and copy exactly. ` +
           `Available excerpt: "${haystack.slice(0, 200).replace(/\s+/g, " ")}…"`,
       );
@@ -274,7 +274,7 @@ export class DiagnosisToolbox {
       (f) => f.failure_type === failureType && Math.abs(f.step - step) <= 1,
     );
     if (dupe) {
-      return this.err(`a ${failureType} finding at step ${dupe.step} is already recorded — one defect, one finding. If you meant a DIFFERENT defect, cite its distinct step.`);
+      return this.reject(`a ${failureType} finding at step ${dupe.step} is already recorded — one defect, one finding. If you meant a DIFFERENT defect, cite its distinct step.`);
     }
 
     // Verification-before-assertion for machine-checkable types: HS must have a
@@ -284,7 +284,7 @@ export class DiagnosisToolbox {
         (v) => v.verdict === "CONTRADICTED" && Math.abs(v.claim.step - step) <= 1,
       );
       if (!contradicted) {
-        return this.err(
+        return this.reject(
           `hallucinated_success rejected: no claim at/next to step ${step} is CONTRADICTED by the verifier. ` +
             `Optimistic statements are NOT failures by themselves — run verify_claim on the claim's step; ` +
             `only record HS when a claim is contradicted by the nearest preceding tool_result.`,
@@ -295,7 +295,7 @@ export class DiagnosisToolbox {
       const pair = this.parsed.pairs.find((p) => p.resultStep === evidenceStep);
       const failing = pair ? isMeaningfulFailure(pair) : /error|fail|denied|timed out/i.test(haystack);
       if (!failing) {
-        return this.err(`error_swallowing rejected: the cited result at step ${evidenceStep} is not an error (no is_error flag, exit 0, or error text).`);
+        return this.reject(`error_swallowing rejected: the cited result at step ${evidenceStep} is not an error (no is_error flag, exit 0, or error text).`);
       }
     }
 
@@ -307,6 +307,12 @@ export class DiagnosisToolbox {
     this.stepsSeen.add(evidenceStep);
     this.sawLogContent = true;
     return this.ok(`finding recorded (${this.findings.length} total): ${failureType} @ step ${step}`, true, [evidenceStep]);
+  }
+
+  /** count + return a rejection — every guardrail refusal is a first-class event */
+  private reject(msg: string): ToolboxResult {
+    this.guardrailRejections++;
+    return this.err(msg);
   }
 
   private submitReport(assessment: string): ToolboxResult {
