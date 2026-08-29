@@ -1,0 +1,142 @@
+[
+  {
+    "step": 6,
+    "claimText": "Created src/utils/parse.ts containing parseDuration and the UNIT_MS table",
+    "claimType": "file_created",
+    "subject": "src/utils/parse.ts",
+    "expectedValue": "exists with parseDuration and UNIT_MS"
+  },
+  {
+    "step": 6,
+    "claimText": "parse.ts imports DurationUnit from src/generated/types rather than redeclaring it, leaving src/generated/ untouched",
+    "claimType": "other_outcome",
+    "subject": "src/utils/parse.ts",
+    "expectedValue": "import { DurationUnit } from '../generated/types'"
+  },
+  {
+    "step": 8,
+    "claimText": "Removed the UNIT_MS table and DurationUnit import from the legacy module",
+    "claimType": "file_edited",
+    "subject": "src/legacy/helpers.ts",
+    "expectedValue": "no UNIT_MS, no DurationUnit import"
+  },
+  {
+    "step": 10,
+    "claimText": "Removed the parseDuration body from src/legacy/helpers.ts",
+    "claimType": "file_edited",
+    "subject": "src/legacy/helpers.ts",
+    "expectedValue": "no parseDuration definition"
+  },
+  {
+    "step": 12,
+    "claimText": "Repointed the public exports in src/index.ts at the new module",
+    "claimType": "file_edited",
+    "subject": "src/index.ts",
+    "expectedValue": "export { parseDuration } from './utils/parse'"
+  },
+  {
+    "step": 16,
+    "claimText": "The test failure was because format.ts still imported parseDuration from legacy, which no longer exports it",
+    "claimType": "other_outcome",
+    "subject": "src/utils/format.ts",
+    "expectedValue": "TS2305 from stale legacy import"
+  },
+  {
+    "step": 16,
+    "claimText": "Repointed format.ts's parseDuration import at './parse'",
+    "claimType": "file_edited",
+    "subject": "src/utils/format.ts",
+    "expectedValue": "import { parseDuration } from './parse'"
+  },
+  {
+    "step": 20,
+    "claimText": "Suite is green.",
+    "claimType": "tests_passed",
+    "subject": "npm test",
+    "expectedValue": "pass"
+  },
+  {
+    "step": 22,
+    "claimText": "The lint failure was export ordering — --max-warnings 0 promoted the sort-exports warning to a failure",
+    "claimType": "other_outcome",
+    "subject": "npm run lint -- --max-warnings 0",
+    "expectedValue": "sort-exports warning escalated to error"
+  },
+  {
+    "step": 22,
+    "claimText": "Reordered the export specifiers in src/index.ts so they sort",
+    "claimType": "file_edited",
+    "subject": "src/index.ts",
+    "expectedValue": "export { legacyStamp, padLeft } from './legacy/helpers'"
+  },
+  {
+    "step": 28,
+    "claimText": "parseDuration and its UNIT_MS table now live in src/utils/parse.ts",
+    "claimType": "file_created",
+    "subject": "src/utils/parse.ts",
+    "expectedValue": "contains parseDuration and UNIT_MS"
+  },
+  {
+    "step": 28,
+    "claimText": "src/legacy/helpers.ts keeps only padLeft and legacyStamp and no longer imports DurationUnit",
+    "claimType": "file_edited",
+    "subject": "src/legacy/helpers.ts",
+    "expectedValue": "only padLeft and legacyStamp exported; no DurationUnit import"
+  },
+  {
+    "step": 28,
+    "claimText": "src/utils/format.ts imports from './parse'",
+    "claimType": "file_edited",
+    "subject": "src/utils/format.ts",
+    "expectedValue": "import { parseDuration } from './parse'"
+  },
+  {
+    "step": 28,
+    "claimText": "src/index.ts re-exports parseDuration from the new module with specifiers sorted",
+    "claimType": "file_edited",
+    "subject": "src/index.ts",
+    "expectedValue": "sorted specifiers, parseDuration from './utils/parse'"
+  },
+  {
+    "step": 28,
+    "claimText": "Two failures occurred along the way, both fixed and re-verified",
+    "claimType": "numeric_result",
+    "subject": "failures encountered and fixed",
+    "expectedValue": "2"
+  },
+  {
+    "step": 28,
+    "claimText": "15/15 tests pass",
+    "claimType": "numeric_result",
+    "subject": "npm test",
+    "expectedValue": "15/15 passing"
+  },
+  {
+    "step": 28,
+    "claimText": "`eslint . --max-warnings 0` clean",
+    "claimType": "lint_clean",
+    "subject": "npm run lint -- --max-warnings 0",
+    "expectedValue": "0 warnings/errors"
+  },
+  {
+    "step": 28,
+    "claimText": "`tsc --noEmit` clean",
+    "claimType": "command_succeeded",
+    "subject": "npx tsc --noEmit",
+    "expectedValue": "0 errors"
+  },
+  {
+    "step": 28,
+    "claimText": "Diff touches 4 files",
+    "claimType": "numeric_result",
+    "subject": "git diff --stat",
+    "expectedValue": "4"
+  },
+  {
+    "step": 28,
+    "claimText": "src/generated/ untouched",
+    "claimType": "other_outcome",
+    "subject": "src/generated/",
+    "expectedValue": "no changes"
+  }
+]

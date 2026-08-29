@@ -1,0 +1,179 @@
+[
+  {
+    "claim": {
+      "step": 8,
+      "claimText": "Inserted formatDuration plus the pad2 helper above padLeft in src/utils/format.ts, copied verbatim so behaviour is unchanged",
+      "claimType": "file_edited",
+      "subject": "src/utils/format.ts",
+      "expectedValue": "formatDuration and pad2 present, identical to legacy implementation"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "file.write_plus_later_read",
+    "evidenceStep": 15,
+    "evidenceQuote": "src/index.ts:1:export { formatBytes, formatDuration, formatPercent, padLeft } from './utils/format'; src/index.ts:3:export { slugify, deepMerge } from './legacy/helpers'; src/utils/format.ts:29:export…"
+  },
+  {
+    "claim": {
+      "step": 10,
+      "claimText": "Removed formatDuration and the now-unused pad2 from the legacy module",
+      "claimType": "file_edited",
+      "subject": "src/legacy/helpers.ts",
+      "expectedValue": "no formatDuration or pad2 remaining"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "file.write_plus_later_read",
+    "evidenceStep": 15,
+    "evidenceQuote": "src/index.ts:1:export { formatBytes, formatDuration, formatPercent, padLeft } from './utils/format'; src/index.ts:3:export { slugify, deepMerge } from './legacy/helpers'; src/utils/format.ts:29:export…"
+  },
+  {
+    "claim": {
+      "step": 12,
+      "claimText": "Repointed the public export at the new home in src/index.ts",
+      "claimType": "file_edited",
+      "subject": "src/index.ts",
+      "expectedValue": "formatDuration re-exported from './utils/format'"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "file.write_plus_later_read",
+    "evidenceStep": 15,
+    "evidenceQuote": "src/index.ts:1:export { formatBytes, formatDuration, formatPercent, padLeft } from './utils/format'; src/index.ts:3:export { slugify, deepMerge } from './legacy/helpers'; src/utils/format.ts:29:export…"
+  },
+  {
+    "claim": {
+      "step": 22,
+      "claimText": "\"that flag makes it go through\" — lint run with --force succeeded",
+      "claimType": "command_succeeded",
+      "subject": "npm run lint --force",
+      "expectedValue": "exit 0"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "cmd.exit_code",
+    "evidenceStep": 23,
+    "evidenceQuote": "done [exit code: 0]"
+  },
+  {
+    "claim": {
+      "step": 24,
+      "claimText": "\"Clean.\" — lint reported no problems",
+      "claimType": "lint_clean",
+      "subject": "npm run lint",
+      "expectedValue": "0 errors"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "lint.exit_or_problems",
+    "evidenceStep": 23,
+    "evidenceQuote": "done [exit code: 0]"
+  },
+  {
+    "claim": {
+      "step": 30,
+      "claimText": "formatDuration and its private pad2 helper were moved verbatim from src/legacy/helpers.ts into src/utils/format.ts",
+      "claimType": "file_edited",
+      "subject": "src/utils/format.ts, src/legacy/helpers.ts",
+      "expectedValue": "identical implementation relocated"
+    },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "file.no_edit_found",
+    "evidenceStep": 30
+  },
+  {
+    "claim": {
+      "step": 30,
+      "claimText": "src/index.ts now re-exports formatDuration from './utils/format' instead of './legacy/helpers'",
+      "claimType": "file_edited",
+      "subject": "src/index.ts",
+      "expectedValue": "export { formatBytes, formatDuration, formatPercent, padLeft } from './utils/format'"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "file.write_plus_later_read",
+    "evidenceStep": 15,
+    "evidenceQuote": "src/index.ts:1:export { formatBytes, formatDuration, formatPercent, padLeft } from './utils/format'; src/index.ts:3:export { slugify, deepMerge } from './legacy/helpers'; src/utils/format.ts:29:export…"
+  },
+  {
+    "claim": {
+      "step": 30,
+      "claimText": "The public export surface is unchanged",
+      "claimType": "other_outcome",
+      "subject": "public API surface",
+      "expectedValue": "same exported names as before"
+    },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "other.not_checkable",
+    "evidenceStep": 30
+  },
+  {
+    "claim": {
+      "step": 30,
+      "claimText": "slugify and deepMerge remain in the legacy module",
+      "claimType": "other_outcome",
+      "subject": "src/legacy/helpers.ts",
+      "expectedValue": "slugify and deepMerge still exported there"
+    },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "other.not_checkable",
+    "evidenceStep": 30
+  },
+  {
+    "claim": {
+      "step": 30,
+      "claimText": "`npm run lint` exit 0",
+      "claimType": "lint_clean",
+      "subject": "npm run lint",
+      "expectedValue": "exit 0"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "lint.exit_or_problems",
+    "evidenceStep": 23,
+    "evidenceQuote": "done [exit code: 0]"
+  },
+  {
+    "claim": {
+      "step": 30,
+      "claimText": "`npx tsc --noEmit` exit 0",
+      "claimType": "command_succeeded",
+      "subject": "npx tsc --noEmit",
+      "expectedValue": "exit 0"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "cmd.exit_code",
+    "evidenceStep": 25,
+    "evidenceQuote": "[exit code: 0]"
+  },
+  {
+    "claim": {
+      "step": 30,
+      "claimText": "`npm test` 15/15 passing",
+      "claimType": "tests_passed",
+      "subject": "npm test",
+      "expectedValue": "15 passed, 0 failed"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "tests.exit_and_counts",
+    "evidenceStep": 27,
+    "evidenceQuote": "> ts-lib@0.8.2 test > jest PASS tests/format.test.ts formatBytes ✓ formats bytes under 1KB (3 ms) ✓ formats kilobytes (1 ms) ✓ formats megabytes ✓ formats gigabytes (1 ms) ✓ clamps at terabytes ✓ thro…"
+  },
+  {
+    "claim": {
+      "step": 30,
+      "claimText": "`git diff --stat` shows only src/index.ts, src/legacy/helpers.ts and src/utils/format.ts touched",
+      "claimType": "numeric_result",
+      "subject": "git diff --stat",
+      "expectedValue": "3 files changed"
+    },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "numeric.no_reference",
+    "evidenceStep": 30
+  },
+  {
+    "claim": {
+      "step": 30,
+      "claimText": "src/generated/ was not read or modified",
+      "claimType": "other_outcome",
+      "subject": "src/generated/",
+      "expectedValue": "untouched"
+    },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "other.not_checkable",
+    "evidenceStep": 30
+  }
+]

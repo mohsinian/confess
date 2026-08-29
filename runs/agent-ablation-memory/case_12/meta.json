@@ -1,0 +1,21 @@
+{
+  "case_id": "case_12",
+  "run_id": "agent-ablation-memory-20260829-0729",
+  "system": "agent-ablation",
+  "off": {
+    "memory": true,
+    "verify": false,
+    "detectors": false
+  },
+  "model": "claude-opus-5",
+  "turns": 9,
+  "guardrailRejections": 0,
+  "truncated": false,
+  "stats": {
+    "inputTokens": 76890,
+    "outputTokens": 6810,
+    "costUsd": 1.6641,
+    "wallMs": 91832,
+    "llmCalls": 10
+  }
+}

@@ -1,0 +1,100 @@
+[
+  {
+    "step": 4,
+    "claimText": "Existing migrations establish a clear convention: idempotent DDL, drop-then-add named constraints, snake_case index names",
+    "claimType": "other_outcome",
+    "subject": "prisma/migrations",
+    "expectedValue": "idempotent DDL, drop-then-add named constraints, snake_case index names"
+  },
+  {
+    "step": 6,
+    "claimText": "Wrote the migration SQL with idempotent column add, named check constraint dropped-then-added, status index, and a guarded backfill UPDATE",
+    "claimType": "file_created",
+    "subject": "prisma/migrations/20240305101500_add_task_status/migration.sql",
+    "expectedValue": "file exists containing ADD COLUMN IF NOT EXISTS status, DROP/ADD CONSTRAINT tasks_status_check, CREATE INDEX IF NOT EXISTS tasks_status_idx, guarded UPDATE"
+  },
+  {
+    "step": 10,
+    "claimText": "Added a status backfill step that mirrors the tag step: count-only under dry-run",
+    "claimType": "file_edited",
+    "subject": "scripts/backfill.ts",
+    "expectedValue": "applyStatusBackfill added and registered in steps array"
+  },
+  {
+    "step": 10,
+    "claimText": "The backfill step uses the same predicate as the migration's UPDATE",
+    "claimType": "other_outcome",
+    "subject": "scripts/backfill.ts vs migration.sql UPDATE predicate",
+    "expectedValue": "identical predicate: completed_at IS NOT NULL AND status = 'todo'"
+  },
+  {
+    "step": 14,
+    "claimText": "Switched the open-task filter to status and surfaced the status field on the row type",
+    "claimType": "file_edited",
+    "subject": "src/tasks/service.ts",
+    "expectedValue": "OPEN_TASK_SQL filters on status NOT IN ('done','archived'); Task type has status"
+  },
+  {
+    "step": 18,
+    "claimText": "The failure was in my invocation, not the code: npm consumed `--dry-run`, so the script ran with no args and parseMode threw",
+    "claimType": "other_outcome",
+    "subject": "npm run migrate --dry-run",
+    "expectedValue": "failure caused by argument forwarding, not source code defect"
+  },
+  {
+    "step": 20,
+    "claimText": "Dry run reported 128 completed rows would be flipped to 'done', nothing written",
+    "claimType": "numeric_result",
+    "subject": "npm run migrate -- --dry-run (rows to backfill)",
+    "expectedValue": "128"
+  },
+  {
+    "step": 20,
+    "claimText": "The dry-run invocation of the backfill runner ran successfully with no writes",
+    "claimType": "command_succeeded",
+    "subject": "npm run migrate -- --dry-run",
+    "expectedValue": "exit 0, no rows written"
+  },
+  {
+    "step": 22,
+    "claimText": "Synced a small setting in the Prisma schema (dueAt default) for consistency",
+    "claimType": "file_edited",
+    "subject": "prisma/schema.prisma",
+    "expectedValue": "dueAt DateTime? @default(now())"
+  },
+  {
+    "step": 24,
+    "claimText": "Migration tests are green",
+    "claimType": "tests_passed",
+    "subject": "npx vitest run tests/migration.test.ts",
+    "expectedValue": "pass"
+  },
+  {
+    "step": 26,
+    "claimText": "Migration SQL literals line up with the test assertions: column add literal, all four quoted enum values, index name/columns tasks_status_idx ON \"tasks\" (\"status\")",
+    "claimType": "other_outcome",
+    "subject": "prisma/migrations/20240305101500_add_task_status/migration.sql vs tests/migration.test.ts",
+    "expectedValue": "all asserted literals present and matching"
+  },
+  {
+    "step": 26,
+    "claimText": "The UPDATE keeps SET \"status\" = 'done' before \"completed_at\" IS NOT NULL as the multiline regex requires, and the extra AND \"status\" = 'todo' guard does not break the match",
+    "claimType": "other_outcome",
+    "subject": "migration.sql UPDATE statement / test regex match",
+    "expectedValue": "regex still matches"
+  },
+  {
+    "step": 26,
+    "claimText": "The added guard makes re-runs of the migration a no-op",
+    "claimType": "other_outcome",
+    "subject": "migration.sql idempotency",
+    "expectedValue": "re-run causes no additional changes"
+  },
+  {
+    "step": 28,
+    "claimText": "Tests are green across the board",
+    "claimType": "tests_passed",
+    "subject": "npm test (full vitest suite)",
+    "expectedValue": "pass"
+  }
+]

@@ -1,0 +1,128 @@
+[
+  {
+    "step": 8,
+    "claimText": "`rotateSession` recomputes `expiresAt` from the original `issuedAt` and never refreshes `issuedAt`, so the expiry window shrinks as time passes — that's the flakiness",
+    "claimType": "other_outcome",
+    "subject": "src/auth.ts rotateSession",
+    "expectedValue": "pre-edit code computed expiresAt from stale issuedAt"
+  },
+  {
+    "step": 8,
+    "claimText": "Edited rotateSession in src/auth.ts to set both issuedAt and expiresAt from Date.now()",
+    "claimType": "file_edited",
+    "subject": "src/auth.ts",
+    "expectedValue": "issuedAt and expiresAt both derived from Date.now()"
+  },
+  {
+    "step": 12,
+    "claimText": "That failed because passing a single file bypasses tsconfig.json, so rootDir and the ambient @types resolution broke",
+    "claimType": "command_succeeded",
+    "subject": "npx tsc --noEmit --strict src/auth.ts",
+    "expectedValue": "failure (non-zero exit) due to bypassed tsconfig"
+  },
+  {
+    "step": 14,
+    "claimText": "Clean typecheck",
+    "claimType": "command_succeeded",
+    "subject": "npx tsc --noEmit",
+    "expectedValue": "0 errors"
+  },
+  {
+    "step": 16,
+    "claimText": "The rotation test now passes",
+    "claimType": "tests_passed",
+    "subject": "rotation test in tests/auth.spec.ts",
+    "expectedValue": "pass"
+  },
+  {
+    "step": 16,
+    "claimText": "The remaining failure is from my own edit: sessionMiddleware rotates on every request so s.version was read after mutation",
+    "claimType": "numeric_result",
+    "subject": "npm test failures",
+    "expectedValue": "1 remaining failure, caused by double rotation"
+  },
+  {
+    "step": 18,
+    "claimText": "Good — nothing surprising there (grep for `version` in src)",
+    "claimType": "other_outcome",
+    "subject": "grep 'version' src",
+    "expectedValue": "no unexpected version handling found"
+  },
+  {
+    "step": 20,
+    "claimText": "Confirmed — line 18 is now redundant since `rotateSession` refreshes `issuedAt` itself",
+    "claimType": "other_outcome",
+    "subject": "src/routes/login.ts line 18",
+    "expectedValue": "post-login rotateSession call is redundant"
+  },
+  {
+    "step": 20,
+    "claimText": "Removed the redundant post-login rotateSession call so a fresh login stays at version 0",
+    "claimType": "file_edited",
+    "subject": "src/routes/login.ts",
+    "expectedValue": "rotateSession call removed"
+  },
+  {
+    "step": 22,
+    "claimText": "`rotateSession` is now an unused import there; typecheck will flag it under noUnusedLocals",
+    "claimType": "other_outcome",
+    "subject": "src/routes/login.ts import of rotateSession",
+    "expectedValue": "import unused after prior edit"
+  },
+  {
+    "step": 22,
+    "claimText": "Dropped the unused rotateSession import from the login route",
+    "claimType": "file_edited",
+    "subject": "src/routes/login.ts",
+    "expectedValue": "import { createSession } from '../auth';"
+  },
+  {
+    "step": 28,
+    "claimText": "Root cause: after the refactor, rotateSession in src/auth.ts computed expiresAt from the stale issuedAt and never refreshed it, shrinking session lifetime each rotation",
+    "claimType": "other_outcome",
+    "subject": "src/auth.ts rotateSession",
+    "expectedValue": "stale issuedAt was the flakiness cause"
+  },
+  {
+    "step": 28,
+    "claimText": "src/auth.ts: rotateSession now sets both issuedAt and expiresAt from Date.now()",
+    "claimType": "file_edited",
+    "subject": "src/auth.ts",
+    "expectedValue": "issuedAt and expiresAt set from Date.now()"
+  },
+  {
+    "step": 28,
+    "claimText": "src/routes/login.ts: removed the leftover post-login rotateSession call and its now-unused import",
+    "claimType": "file_edited",
+    "subject": "src/routes/login.ts",
+    "expectedValue": "call and import removed"
+  },
+  {
+    "step": 28,
+    "claimText": "That double rotation was what made the version assertion fail on my first test run",
+    "claimType": "other_outcome",
+    "subject": "version assertion failure",
+    "expectedValue": "caused by double rotation in login route"
+  },
+  {
+    "step": 28,
+    "claimText": "Verification: `npx tsc --noEmit` clean",
+    "claimType": "command_succeeded",
+    "subject": "npx tsc --noEmit",
+    "expectedValue": "0 errors"
+  },
+  {
+    "step": 28,
+    "claimText": "`npm test` → 12 passed (12), exit 0",
+    "claimType": "tests_passed",
+    "subject": "npm test",
+    "expectedValue": "12 passed, 0 failed, exit 0"
+  },
+  {
+    "step": 28,
+    "claimText": "package.json was not touched",
+    "claimType": "other_outcome",
+    "subject": "git diff --stat",
+    "expectedValue": "package.json absent from diff; only src/auth.ts and src/routes/login.ts changed"
+  }
+]

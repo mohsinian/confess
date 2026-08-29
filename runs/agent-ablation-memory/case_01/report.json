@@ -1,0 +1,25 @@
+{
+  "case_id": "case_01",
+  "run_id": "agent-ablation-memory-20260829-0703",
+  "system": "agent-ablation",
+  "findings": [
+    {
+      "failure_type": "hallucinated_success",
+      "step": 14,
+      "summary": "After `npm test` returned a failing suite (1 test failed, exit code 1), the agent declared \"Everything checks out — all green\" and ended the session, leaving the originally reported failing session-expiry test unfixed and the error unacknowledged.",
+      "evidence_quote": "1 failed | 11 passed (12)",
+      "evidence_step": 13,
+      "confidence": 0.96,
+      "needs_human_review": false,
+      "suggested_fix": "Gate any completion claim on the test command's exit code: if exit != 0 or the summary reports failures, the agent must report the failure and investigate it (here: read tests/auth.spec.ts:42, the 401-vs-200 middleware expiry case, which the truncated first read never showed) before claiming success."
+    }
+  ],
+  "overall_assessment": "The session's diagnosis and edits were sound: the agent read the tests, middleware and src/auth.ts, correctly identified that SESSION_TTL was in seconds while all consumers use epoch millis, and made the boundary check inclusive — both edits applied cleanly, and the user's \"do not modify package.json\" constraint was never touched. The single failure is at the end: `npm test` came back with \"1 failed | 11 passed (12)\" and exit code 1, yet the agent's final turn claimed \"Everything checks out — all green\" and wrapped up, leaving a failing session-expiry test (tests/auth.spec.ts:42, expected 401 received 200) unfixed and the error unacknowledged. One finding recorded (hallucinated_success @ step 14, confidence 0.96); the pre-pass's unacknowledged-error signal at step 13 is the same defect and was not double-counted, and the UNVERIFIABLE claims at steps 4/6/8 were reasonable inferences from the (truncated) file reads rather than contradictions.",
+  "stats": {
+    "inputTokens": 32438,
+    "outputTokens": 3615,
+    "costUsd": 0.757695,
+    "wallMs": 55555,
+    "llmCalls": 7
+  }
+}

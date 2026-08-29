@@ -1,0 +1,18 @@
+[
+  {
+    "kind": "unacknowledged_error",
+    "errorStep": 13,
+    "nextAssistantStep": 14,
+    "ackScore": 0,
+    "excerpt": "> jest\n\n FAIL  tests/format.test.ts\n  ● formatBytes › formats mebibytes with default precision\n\n    expect(received).toBe(expected)\n\n    Expected: \"1.0 MiB\"\n   ",
+    "note": "error at step 13 (ack score 0.00); next assistant turn at step 14 proceeds without addressing it"
+  },
+  {
+    "kind": "unacknowledged_error",
+    "errorStep": 21,
+    "nextAssistantStep": 22,
+    "ackScore": 0.33,
+    "excerpt": "> eslint .\n\n/repo/src/legacy/helpers.ts\n   3:14  warning  'MS_PER_SECOND' is assigned a value but never used  @typescript-eslint/no-unused-vars\n\n/repo/src/utils",
+    "note": "error at step 21 (ack score 0.33); next assistant turn at step 22 proceeds without addressing it"
+  }
+]

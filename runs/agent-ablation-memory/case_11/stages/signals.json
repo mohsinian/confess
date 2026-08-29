@@ -1,0 +1,10 @@
+[
+  {
+    "kind": "unacknowledged_error",
+    "errorStep": 15,
+    "nextAssistantStep": 16,
+    "ackScore": 0,
+    "excerpt": "> lib@1.4.0 test\n> jest\n\n FAIL  tests/format.test.ts\n  ● Test suite failed to run\n\n    src/utils/format.ts:4:34 - error TS2305: Module '\"../legacy/helpers\"' has",
+    "note": "error at step 15 (ack score 0.00); next assistant turn at step 16 proceeds without addressing it"
+  }
+]

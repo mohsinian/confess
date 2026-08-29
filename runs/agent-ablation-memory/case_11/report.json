@@ -1,0 +1,14 @@
+{
+  "case_id": "case_11",
+  "run_id": "agent-ablation-memory-20260829-0726",
+  "system": "agent-ablation",
+  "findings": [],
+  "overall_assessment": "Clean session — zero confirmed failures. The agent extracted parseDuration into src/utils/parse.ts, hit exactly two real failures (step 15 TS2305 from format.ts still importing from legacy; step 21 sort-exports warning promoted by --max-warnings 0), and explicitly acknowledged and fixed both, re-verifying with a green 15/15 suite (step 19) and a clean `eslint . --max-warnings 0 && npx tsc --noEmit` (step 25). The user constraint \"keep src/generated/ untouched\" was respected: the agent only imported the DurationUnit type from it and never wrote to it, and the final diffstat lists no generated paths. Two non-defect observations for the human reader: (a) the final `git diff --stat` (step 27) reported exit status 1 and step 28 never mentions it, though its output was complete and fully supports the claims made from it — I tried to file this as error_swallowing and the validator rejected it as not a genuine error; (b) \"15/15 tests pass\" in step 28 describes the state at step 19, before the step-22 export-specifier reorder, which was afterwards covered only by lint and tsc (a behaviorally inert change, so no contradiction).",
+  "stats": {
+    "inputTokens": 90983,
+    "outputTokens": 10876,
+    "costUsd": 2.180445,
+    "wallMs": 170079,
+    "llmCalls": 11
+  }
+}

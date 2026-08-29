@@ -1,0 +1,18 @@
+[
+  {
+    "kind": "unacknowledged_error",
+    "errorStep": 5,
+    "nextAssistantStep": 6,
+    "ackScore": 0,
+    "excerpt": "Error reading file: EACCES: permission denied, open 'src/payments/webhook.ts'",
+    "note": "error at step 5 (ack score 0.00); next assistant turn at step 6 proceeds without addressing it"
+  },
+  {
+    "kind": "unacknowledged_error",
+    "errorStep": 7,
+    "nextAssistantStep": 8,
+    "ackScore": 0,
+    "excerpt": "FAIL tests/webhook.test.ts > rejects replayed webhook signatures\nAssertionError: expected verifyWebhook to throw, but it returned true\n ❯ tests/webhook.test.ts:",
+    "note": "error at step 7 (ack score 0.00); next assistant turn at step 8 proceeds without addressing it"
+  }
+]
