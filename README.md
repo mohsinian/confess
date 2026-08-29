@@ -102,6 +102,23 @@ the enforcement of that boundary is where most of the engineering went.
 - No credentials in the repo (`.env` is gitignored; `.env.example` documents both provider
   variants). Confess only reads logs and calls the model — no consequential actions.
 
+## The submission is the product
+
+Confess's thesis — *every claim must cite evidence* — is applied to this repo itself, so the
+hackathon's required deliverables and the product's own outputs are the same artifacts:
+
+| Brief requires | Confess produces |
+|---|---|
+| Complete solution code + changelog | this repo + [CHANGELOG.md](CHANGELOG.md), where every number cites a committed `eval/` or `runs/` file |
+| Reproduction guide | [REPRODUCTION.md](REPRODUCTION.md) — Path A re-scores the committed run artifacts with the deterministic scorer, no API key |
+| Baseline comparison | `eval/comparison.md` — baseline vs agent vs ablation, same 12 cases, same model, pre-registered matching |
+| Agent trajectories | `runs/rendered/` — rendered from `run.jsonl` logs the tool wrote about itself while running: every turn, tool call, rejection, and repair ([case_12 audit](runs/rendered/case_12-agent.md), [its generator](runs/rendered/gen-case_12-generator.md)) |
+
+The dataset generator, claim extractor, memory extractor, diagnosis agent, and baseline all run
+through the same logging layer — the trajectories above cover each. A judge can verify any claim
+in this README against raw logs without trusting us, which is precisely the property Confess
+sells for other agents' sessions.
+
 ## Run it
 
 ```bash

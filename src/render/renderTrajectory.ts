@@ -25,14 +25,13 @@ function block(entry: RunLogEntry): string {
   return "```json\n" + json.slice(0, 1600) + "\n… [" + (json.length - 1600) + " more chars]\n```";
 }
 
-function renderCase(caseId: string, system: string, outDir: string): string | null {
-  const file = path.join(runDir(system, caseId), "run.jsonl");
+function renderFile(file: string, reportPath: string | null, title: string): string | null {
   if (!fs.existsSync(file)) return null;
   const entries = fs.readFileSync(file, "utf8")
     .split("\n").filter((l) => l.trim()).map((l) => JSON.parse(l) as RunLogEntry);
 
   const out: string[] = [
-    `# Confess trajectory — ${caseId} (${system})`,
+    `# Confess trajectory — ${title}`,
     "",
     `Rendered ${new Date().toISOString()} from \`${path.relative(ROOT, file)}\`.`,
     "Every LLM turn, tool call + response, repair, and guardrail rejection, in order.",
@@ -40,8 +39,8 @@ function renderCase(caseId: string, system: string, outDir: string): string | nu
   ];
   let turn = 0;
   for (const e of entries) {
-    if (e.kind === "run_start") {
-      out.push(`## run start — ${e.ts}`, "", "```json", JSON.stringify(e.payload), "```", "");
+    if (e.kind === "run_start" || e.kind === "stage_start") {
+      out.push(`## ${e.kind} — ${e.ts}`, "", "```json", JSON.stringify(e.payload), "```", "");
     } else if (e.kind === "request") {
       turn++;
       const p = e.payload as { turn?: number; nMessages?: number };
@@ -71,25 +70,47 @@ function renderCase(caseId: string, system: string, outDir: string): string | nu
       out.push(`## ⚠ repair round-trip`, "", block(e), "");
     } else if (e.kind === "error") {
       out.push(`## ⚠ error`, "", block(e), "");
-    } else if (e.kind === "run_end") {
-      out.push(`## run end`, "", "```json", JSON.stringify(e.payload, null, 2).slice(0, 1200), "```", "");
+    } else if (e.kind === "run_end" || e.kind === "stage_end") {
+      out.push(`## ${e.kind}`, "", "```json", JSON.stringify(e.payload, null, 2).slice(0, 1200), "```", "");
     }
   }
   // Append the final report if present.
-  const reportPath = path.join(runDir(system, caseId), "report.md");
-  if (fs.existsSync(reportPath)) {
+  if (reportPath && fs.existsSync(reportPath)) {
     out.push("---", "", fs.readFileSync(reportPath, "utf8"));
   }
   return out.join("\n");
 }
 
+function renderCase(caseId: string, system: string): string | null {
+  const dir = runDir(system, caseId);
+  return renderFile(path.join(dir, "run.jsonl"), path.join(dir, "report.md"), `${caseId} (${system})`);
+}
+
 async function main(): Promise<void> {
   const { caseId, system, outDir } = parseArgs();
-  const ids = caseId ? [caseId] : await listCases();
   await ensureDir(outDir);
+
+  // --file <path>: render any JSONL run log directly (e.g. the dataset generator's
+  // dataset/.cache/gen-case_XX.jsonl) — deliverable 04 asks for every agent we used.
+  const fileIdx = process.argv.indexOf("--file");
+  if (fileIdx !== -1) {
+    const src = process.argv[fileIdx + 1];
+    const md = renderFile(src, null, `${path.basename(src, ".jsonl")} (dataset generator)`);
+    if (!md) {
+      console.error(`no such file: ${src}`);
+      process.exit(1);
+    }
+    const base = path.basename(src, ".jsonl");
+    const out = path.join(outDir, `${base}-generator.md`);
+    await fs.promises.writeFile(out, md, "utf8");
+    console.log(`  ${base} → ${path.relative(ROOT, out)} (${md.split("\n").length} lines)`);
+    return;
+  }
+
+  const ids = caseId ? [caseId] : await listCases();
   let rendered = 0;
   for (const id of ids) {
-    const md = renderCase(id, system, outDir);
+    const md = renderCase(id, system);
     if (!md) {
       console.log(`  ${id}: no run.jsonl for system "${system}" — skipped`);
       continue;
