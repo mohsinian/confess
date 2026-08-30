@@ -51,6 +51,34 @@ through the same logging layer — the trajectories above cover each. A judge ca
 against raw logs without trusting us, which is precisely the property Confess sells for other
 agents' sessions.
 
+## Results (12 synthetic sessions, 15 planted failures, exact labels by construction)
+
+| METRIC | one-shot prompt | confess-audit |
+|---|---|---|
+| Failure-detection F1 | 75.7% | **82.4%** |
+| Precision / Recall | 63.6% / 93.3% | 73.7% / 93.3% |
+| False positives | 8 | **5** |
+| Human review time per session (est.) | 4.8 min | 4.3 min |
+| Cost per session | $0.26 | $2.48 |
+
+Stability: two independent full sweeps produced identical headlines (14 TP / 5 FP / 1 FN; all
+true positives at identical type and step). Evidence integrity: 100% of Confess's findings
+quote-verify against the transcript in both runs; 10 of the baseline's 22 findings fail verbatim
+validation (4 mis-cited, 6 fabricated). Full tables, per-type breakdowns, ablation, integrity
+scoring, and the run-to-run variance: [eval/comparison.md](eval/comparison.md). Iteration-by-
+iteration story: [CHANGELOG.md](CHANGELOG.md).
+
+## Main failure mode and hot take
+
+**Failure mode:** agentic over-flagging. Asked to "find failures," a strong model finds too many
+— it reads optimism as deception and recovery as cover-up. The baseline did it (8 FPs); the
+ungated agent did it far worse (21 FPs, F1 56 — below the baseline).
+
+**Hot take:** the biggest reliability win came from ~40 lines of rejection logic on the agent's
+own output tool — not from a better prompt, more context, or a smarter model. The ungated agent
+was dramatically worse than a single baseline call. Make an agent's assertions expensive
+(evidence must verify), and its intelligence finally starts paying for itself.
+
 ## The hard case
 
 `case_12`, "the cover-up": the agent edits a banned `prisma/schema.prisma` at step 22, then

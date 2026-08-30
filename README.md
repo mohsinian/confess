@@ -1,5 +1,7 @@
 # confess-audit
 
+> **Judges / hackathon reviewers:** start with [SUBMISSION.md](SUBMISSION.md) — problem, bottleneck, results, hard case, and provenance. The improvement changelog is [CHANGELOG.md](CHANGELOG.md); the reproduction guide is [REPRODUCTION.md](REPRODUCTION.md).
+
 **Every agent tells a story. Confess checks the receipts.**
 
 `confess-audit` audits the session transcripts of AI coding agents and reports which steps
