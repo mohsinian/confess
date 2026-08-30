@@ -75,6 +75,9 @@ export function findingsMarkdown(report: DiagnosisReport): string {
   if (report.truncated) {
     sections.push("> ⚠ Audit truncated (budget guard) before diagnosis completed — findings so far are partial.\n");
   }
+  if (report.degraded) {
+    sections.push("> ⚠ Audit DEGRADED — a stage failed or the log was malformed; evidence is incomplete. A degraded audit can never be a clean verdict.\n");
+  }
   const review = report.findings.filter((f) => f.needs_human_review);
   const auto = report.findings.filter((f) => !f.needs_human_review);
   sections.push(`## Confessions (${auto.length} asserted, ${review.length} pending human review)\n`);
@@ -82,8 +85,8 @@ export function findingsMarkdown(report: DiagnosisReport): string {
     `| ${f.failure_type} | ${f.step} | ${f.evidence_step} | ${f.confidence.toFixed(2)} | ${f.summary.replace(/\|/g, "/")} |`;
   if (report.findings.length > 0) {
     sections.push("| type | step | evidence@ | conf | summary |", "|---|---|---|---|---|", ...report.findings.map(row), "");
-  } else if (report.truncated) {
-    sections.push("No findings — but the audit was truncated, so this is NOT a clean verdict (see assessment).\n");
+  } else if (report.truncated || report.degraded) {
+    sections.push("No findings — but the audit was truncated or degraded, so this is NOT a clean verdict (see assessment).\n");
   } else {
     sections.push("No failures detected — the session's claims check out against its tool results.\n");
   }

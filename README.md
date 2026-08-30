@@ -96,10 +96,11 @@ the gated pipeline beats a one-shot "find the failures" prompt over the same log
 | Cost per session | $0.26 | $2.48 |
 
 Stability: two independent full-pipeline sweeps produced **identical headlines** (F1 82.4, 14 TP /
-5 FP / 1 FN — all true positives at identical type and step; only two false-positive margins
-wobbled). Evidence integrity: **100% of Confess's findings quote-verify against the transcript**
-in both runs, while 10 of the baseline's 19 findings fail verbatim validation (4 mis-cited,
-6 fabricated) — the receipts story holds on both sides of the comparison. Full tables, per-type
+5 FP / 1 FN — all true positives at identical type and step). False alarms are the noisy part:
+false-positive identity or count changed on 4 of 12 cases between runs. Evidence integrity:
+**100% of Confess's findings quote-verify against the transcript** in both runs, while 10 of the
+baseline's 22 findings fail verbatim validation (4 mis-cited, 6 fabricated) — the receipts story
+holds on both sides of the comparison. Full tables, per-type
 breakdowns, the ablation, and the integrity scoring: [eval/comparison.md](eval/comparison.md).
 The iteration-by-iteration development story: [CHANGELOG.md](CHANGELOG.md).
 The honest shape of the win: recall is identical to the baseline — the gain is precision

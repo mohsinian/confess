@@ -21,5 +21,6 @@
     "costUsd": 1.54182,
     "wallMs": 108608,
     "llmCalls": 11
-  }
+  },
+  "degraded": true
 }

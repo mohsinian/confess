@@ -65,7 +65,13 @@ function normalizeBlocks(content: unknown, warnings: string[], stats: IngestResu
       // Cap at ingest — the audit reads the same capped text it cites, so
       // verbatim-evidence checks stay consistent.
       const CAP = 2400;
-      if (text.length > CAP) text = text.slice(0, CAP) + `\n[… truncated ${text.length - CAP} chars at ingestion]`;
+      if (text.length > CAP) {
+        stats.truncatedResults++;
+        // Preserve the verdict tail: real transcripts end with the exit marker
+        // AFTER long preamble, and that marker is what evidence checks key on.
+        const tail = /\[exit code: \d+\]\s*$/.exec(text)?.[0];
+        text = text.slice(0, CAP) + `\n[… truncated ${text.length - CAP} chars at ingestion]` + (tail ? `\n${tail}` : "");
+      }
       const out: ToolResultBlock = {
         type: "tool_result",
         tool_use_id: b.tool_use_id,

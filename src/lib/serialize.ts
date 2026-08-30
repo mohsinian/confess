@@ -10,7 +10,10 @@ export interface SerializeOpts {
 
 function truncate(text: string, max: number): string {
   if (text.length <= max) return text;
-  return text.slice(0, max) + `\n[… truncated ${text.length - max} more chars]`;
+  // Preserve the verdict tail: real transcripts put the exit marker / test counts
+  // at the END, after long preamble — discarding it hides exactly what audits key on.
+  const tail = /\[exit code: \d+\]\s*$/.exec(text)?.[0];
+  return text.slice(0, max) + `\n[… truncated ${text.length - max} more chars]` + (tail ? `\n${tail}` : "");
 }
 
 /** tool_use inputs can embed whole files (Skill) — cap their JSON rendering */

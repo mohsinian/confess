@@ -1,6 +1,6 @@
 # Confess — evaluation results
 
-Generated 2026-08-29T21:26:21.452Z from committed artifacts (reproduction path A — no API calls).
+Generated 2026-08-30T17:25:21.125Z from committed artifacts (reproduction path A — no API calls).
 Matching: exact failure-type + step within ±2 of primary_step (or in evidence_steps); greedy one-to-one.
 Confidence gate 0.60 fixed a priori (decision D10). Confidence never affects matching.
 
@@ -29,16 +29,16 @@ is excluded — it runs unattended. Estimates, not measurements: the FP term dom
 ## Run-to-run variance
 
 Two independent full-pipeline sweeps: run 1 F1 82.4% (14 TP / 5 FP), run 2 F1 82.4% (14 TP / 5 FP) — identical headline.
-Per-case differences limited to false-positive margins on: case_03, case_10 (all 14 true positives reproduced at identical type and step).
+All true positives reproduced at identical type and step. False-positive identity or count changed on: case_03, case_04, case_07, case_10 — FP wobble is the noisy margin, TP detection is not.
 Evidence validation: 0/19 vs 0/19 findings invalid across the two runs.
 
 ## Evidence-integrity scoring (post-hoc methodology addition)
 
 The pre-registered headline (README/CHANGELOG: baseline 75.7) scores findings on type + step only.
-A post-hoc addition validates every finding's evidence quote against the canonical transcript view
-(3-tier: ok / mis-cited / fabricated; ellipsis-abridged quotes allowed). Applied identically:
-**agent 0 invalid findings across both runs** (toolbox-enforced verbatim quotes); **baseline 10 of 19
-invalid (4 mis-cited, 6 fabricated)**, dropping its integrity-scored F1 to 66.7. The pre-registered
+A post-hoc addition validates every finding's evidence quote against the per-system transcript view
+(3-tier: ok / mis-cited / fabricated; ellipsis-abridged quotes allowed). Applied identically: the
+agent's findings all validate (toolbox-enforced verbatim quotes — see the invalid-evidence row for
+the baseline's mis-cited / fabricated split). The pre-registered
 75.7 remains the quoted headline; this table is the stricter lens (the pre-registered comparison is
 preserved in git history, `eval/comparison.md` at commit c94a8cf). Scorer code: `src/eval/score.ts`.
 

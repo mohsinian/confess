@@ -17,5 +17,9 @@
     "costUsd": 1.54182,
     "wallMs": 108608,
     "llmCalls": 11
-  }
+  },
+  "degraded": true,
+  "stageErrors": [
+    "claims/verify: 405 <!doctypehtml><html lang=\"zh-cn\"><meta charset=\"utf-8\"><meta http-equiv=\"X-UA-Compatible\"content=\"IE=edge,chrome=1\"><meta name=\"data-spm\"content=\"a3c0e\"><ti"
+  ]
 }

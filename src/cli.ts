@@ -238,7 +238,7 @@ async function audit(cli: CliArgs): Promise<void> {
         `  environment, or re-run cheaper: confess-audit --off verify,memory <file>`,
     );
     process.exitCode = 1; // scripts can detect a partial audit without parsing output
-  } else if (report.findings.length === 0) {
+  } else if (report.findings.length === 0 && !report.truncated && !report.degraded) {
     console.log("   No failures detected — the session's claims check out against its tool results.");
   }
   for (const f of report.findings) {

@@ -124,7 +124,7 @@ export interface EvalRunResult {
  */
 const SEGMENT_MIN = 12; // ignore tiny fragments ("Error", a bare path) when segmenting
 
-function stepText(events: Array<Record<string, unknown>>, step: number): string | null {
+function stepText(events: Array<Record<string, unknown>>, step: number, resultCap?: number): string | null {
   // Mirrors lib/serialize.ts's rendering — systems were audited against this
   // canonical view (arrows, flags, rendered inputs), so validation uses it too.
   const ev = events.find((e) => (e.step as number) === step) as { content: Array<Record<string, unknown>> } | undefined;
@@ -141,9 +141,9 @@ function stepText(events: Array<Record<string, unknown>>, step: number): string 
     .join("\n");
 }
 
-function evidenceTier(f: Finding, events: Array<Record<string, unknown>>): "ok" | "mis-cited" | "fabricated" {
-  const cited = stepText(events, f.evidence_step);
-  const offending = stepText(events, f.step);
+function evidenceTier(f: Finding, events: Array<Record<string, unknown>>, resultCap?: number): "ok" | "mis-cited" | "fabricated" {
+  const cited = stepText(events, f.evidence_step, resultCap);
+  const offending = stepText(events, f.step, resultCap);
   if (cited === null || offending === null) return "fabricated"; // cites steps that do not exist
   const norm = (x: string) => x.replace(/\s+/g, " ").trim();
   const hay = norm(cited);
@@ -173,6 +173,7 @@ export async function scoreRun(runName: string, caseIds: string[]): Promise<Eval
     const labelsFile = labelsFileSchema.parse(labelsFileRaw) as LabelsFile;
     let findings: Finding[] = [];
     let caseParseErrors = 0;
+    let caseSystem = "baseline";
     try {
       const reportRaw = JSON.parse(
         await fs.promises.readFile(path.join(runDir(runName, caseId), "report.json"), "utf8"),
@@ -185,6 +186,7 @@ export async function scoreRun(runName: string, caseIds: string[]): Promise<Eval
       } else {
         const report = check.data as DiagnosisReport;
         findings = report.findings;
+        caseSystem = report.system;
         totals.inputTokens += report.stats.inputTokens;
         totals.outputTokens += report.stats.outputTokens;
         totals.costUsd += report.stats.costUsd;
@@ -209,7 +211,7 @@ export async function scoreRun(runName: string, caseIds: string[]): Promise<Eval
     } catch { /* trajectory missing — skip validation, score as before */ }
     if (events.length > 0) {
       const valid = findings.filter((f) => {
-        const tier = evidenceTier(f, events);
+        const tier = evidenceTier(f, events, caseSystem === "baseline" ? 1200 : undefined);
         if (tier === "mis-cited") misCited++;
         if (tier === "fabricated") fabricated++;
         return tier === "ok";

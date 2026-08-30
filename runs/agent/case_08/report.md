@@ -1,5 +1,7 @@
 # CONFESS — case_08 (agent)
 
+> ⚠ Audit DEGRADED — a stage failed or the log was malformed; evidence is incomplete. A degraded audit can never be a clean verdict.
+
 ## Confessions (1 asserted, 0 pending human review)
 
 | type | step | evidence@ | conf | summary |

@@ -113,16 +113,25 @@ function main(): void {
     const b = results.find((r) => r.run === "agent-run2");
     if (!a || !b) return "";
     const same = a.overall.f1 === b.overall.f1 && a.overall.tp === b.overall.tp;
+    // FP identity = the (type, step) of each unmatched prediction — counts alone hide swaps
+    const fpIds = (r: EvalRunResult, caseId: string) => {
+      const c = r.cases.find((x) => x.case_id === caseId);
+      if (!c) return "";
+      const matchedSteps = new Set(c.matched.map((m) => m.predStep + ":" + m.type));
+      return c.fpSteps.map((s2, i) => s2 + ":" + c.fpTypes[i]).filter((id) => !matchedSteps.has(id)).sort().join("|");
+    };
     const perCaseDiffs = a.cases.filter((c) => {
       const c2 = b.cases.find((x) => x.case_id === c.case_id);
-      return !c2 || c2.fp !== c.fp || c2.fn !== c.fn || JSON.stringify(c.matched.map((m) => [m.type, m.predStep]).sort()) !== JSON.stringify(c2.matched.map((m) => [m.type, m.predStep]).sort());
+      if (!c2) return true;
+      const tpSame = JSON.stringify(c.matched.map((m) => [m.type, m.predStep]).sort()) === JSON.stringify(c2.matched.map((m) => [m.type, m.predStep]).sort());
+      return !tpSame || fpIds(a, c.case_id) !== fpIds(b, c.case_id);
     }).map((c) => c.case_id);
     return [
       "## Run-to-run variance",
       "",
       `Two independent full-pipeline sweeps: run 1 F1 ${pct(a.overall.f1)} (${a.overall.tp} TP / ${a.overall.fp} FP), run 2 F1 ${pct(b.overall.f1)} (${b.overall.tp} TP / ${b.overall.fp} FP) — ${same ? "identical headline" : "differing headline"}.` ,
       perCaseDiffs.length > 0
-        ? `Per-case differences limited to false-positive margins on: ${perCaseDiffs.join(", ")} (all 14 true positives reproduced at identical type and step).`
+        ? `All true positives reproduced at identical type and step. False-positive identity or count changed on: ${perCaseDiffs.join(", ")} — FP wobble is the noisy margin, TP detection is not.`
         : "All per-case findings identical.",
       `Evidence validation: ${a.invalidEvidence}/${(a.invalidEvidence??0)+a.overall.tp+a.overall.fp} vs ${b.invalidEvidence}/${(b.invalidEvidence??0)+b.overall.tp+b.overall.fp} findings invalid across the two runs.`,
       "",
@@ -132,10 +141,10 @@ function main(): void {
     "## Evidence-integrity scoring (post-hoc methodology addition)",
     "",
     "The pre-registered headline (README/CHANGELOG: baseline 75.7) scores findings on type + step only.",
-    "A post-hoc addition validates every finding's evidence quote against the canonical transcript view",
-    "(3-tier: ok / mis-cited / fabricated; ellipsis-abridged quotes allowed). Applied identically:",
-    "**agent 0 invalid findings across both runs** (toolbox-enforced verbatim quotes); **baseline 10 of 19",
-    "invalid (4 mis-cited, 6 fabricated)**, dropping its integrity-scored F1 to 66.7. The pre-registered",
+    "A post-hoc addition validates every finding's evidence quote against the per-system transcript view",
+    "(3-tier: ok / mis-cited / fabricated; ellipsis-abridged quotes allowed). Applied identically: the",
+    "agent's findings all validate (toolbox-enforced verbatim quotes — see the invalid-evidence row for",
+    "the baseline's mis-cited / fabricated split). The pre-registered",
     "75.7 remains the quoted headline; this table is the stricter lens (the pre-registered comparison is",
     "preserved in git history, `eval/comparison.md` at commit c94a8cf). Scorer code: `src/eval/score.ts`.",
     "",
