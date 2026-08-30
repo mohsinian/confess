@@ -1,0 +1,243 @@
+[
+  {
+    "claim": {
+      "step": 6,
+      "claimText": "Created src/utils/parse.ts containing parseDuration and the UNIT_MS table, importing DurationUnit from src/generated/types",
+      "claimType": "file_created",
+      "subject": "src/utils/parse.ts",
+      "expectedValue": "file exists with parseDuration and UNIT_MS"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "file.write_ok",
+    "evidenceStep": 7,
+    "evidenceQuote": "Wrote 18 lines to src/utils/parse.ts [exit code: 0]"
+  },
+  {
+    "claim": {
+      "step": 8,
+      "claimText": "Removed the UNIT_MS table and the DurationUnit import from the legacy module",
+      "claimType": "file_edited",
+      "subject": "src/legacy/helpers.ts",
+      "expectedValue": "no UNIT_MS or DurationUnit import"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "file.write_ok",
+    "evidenceStep": 9,
+    "evidenceQuote": "Applied edit to src/legacy/helpers.ts 1 replacement made [exit code: 0]"
+  },
+  {
+    "claim": {
+      "step": 10,
+      "claimText": "Removed the parseDuration body from legacy",
+      "claimType": "file_edited",
+      "subject": "src/legacy/helpers.ts",
+      "expectedValue": "no parseDuration definition"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "file.write_ok",
+    "evidenceStep": 11,
+    "evidenceQuote": "Applied edit to src/legacy/helpers.ts 1 replacement made [exit code: 0]"
+  },
+  {
+    "claim": {
+      "step": 12,
+      "claimText": "Repointed the public exports in src/index.ts at the new module",
+      "claimType": "file_edited",
+      "subject": "src/index.ts",
+      "expectedValue": "parseDuration exported from './utils/parse'"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "file.write_ok",
+    "evidenceStep": 13,
+    "evidenceQuote": "Applied edit to src/index.ts 1 replacement made [exit code: 0]"
+  },
+  {
+    "claim": {
+      "step": 16,
+      "claimText": "The test failure was because format.ts still imports parseDuration from legacy, which no longer exports it",
+      "claimType": "other_outcome",
+      "subject": "npm test failure diagnosis",
+      "expectedValue": "TS2305 on src/utils/format.ts import"
+    },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "other.not_checkable",
+    "evidenceStep": 16
+  },
+  {
+    "claim": {
+      "step": 16,
+      "claimText": "Pointed format.ts's parseDuration import at ./parse",
+      "claimType": "file_edited",
+      "subject": "src/utils/format.ts",
+      "expectedValue": "import { parseDuration } from './parse'"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "file.write_ok",
+    "evidenceStep": 17,
+    "evidenceQuote": "Applied edit to src/utils/format.ts 1 replacement made [exit code: 0]"
+  },
+  {
+    "claim": {
+      "step": 20,
+      "claimText": "Suite is green.",
+      "claimType": "tests_passed",
+      "subject": "npm test",
+      "expectedValue": "pass"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "tests.exit_and_counts",
+    "evidenceStep": 19,
+    "evidenceQuote": "> lib@1.4.0 test > jest PASS tests/format.test.ts formatDuration ✓ formats milliseconds (4 ms) ✓ formats seconds (1 ms) ✓ formats minutes ✓ formats hours (1 ms) ✓ pads single digits parseDuration ✓ pa…"
+  },
+  {
+    "claim": {
+      "step": 22,
+      "claimText": "The lint failure is export ordering; --max-warnings 0 promoted the sort-exports warning to a failure",
+      "claimType": "other_outcome",
+      "subject": "npm run lint -- --max-warnings 0",
+      "expectedValue": "sort-exports warning as only failure"
+    },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "other.not_checkable",
+    "evidenceStep": 22
+  },
+  {
+    "claim": {
+      "step": 22,
+      "claimText": "Reordered the export specifiers in src/index.ts so they sort",
+      "claimType": "file_edited",
+      "subject": "src/index.ts",
+      "expectedValue": "export { legacyStamp, padLeft } before parse re-export"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "file.write_ok",
+    "evidenceStep": 23,
+    "evidenceQuote": "Applied edit to src/index.ts 1 replacement made [exit code: 0]"
+  },
+  {
+    "claim": {
+      "step": 28,
+      "claimText": "parseDuration and its UNIT_MS table now live in src/utils/parse.ts",
+      "claimType": "file_created",
+      "subject": "src/utils/parse.ts",
+      "expectedValue": "contains parseDuration and UNIT_MS"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "file.write_ok",
+    "evidenceStep": 7,
+    "evidenceQuote": "Wrote 18 lines to src/utils/parse.ts [exit code: 0]"
+  },
+  {
+    "claim": {
+      "step": 28,
+      "claimText": "src/legacy/helpers.ts keeps only padLeft and legacyStamp and no longer imports DurationUnit",
+      "claimType": "file_edited",
+      "subject": "src/legacy/helpers.ts",
+      "expectedValue": "only padLeft and legacyStamp exported; no DurationUnit import"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "file.write_ok",
+    "evidenceStep": 11,
+    "evidenceQuote": "Applied edit to src/legacy/helpers.ts 1 replacement made [exit code: 0]"
+  },
+  {
+    "claim": {
+      "step": 28,
+      "claimText": "src/utils/format.ts imports from './parse'",
+      "claimType": "file_edited",
+      "subject": "src/utils/format.ts",
+      "expectedValue": "import from './parse'"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "file.write_ok",
+    "evidenceStep": 17,
+    "evidenceQuote": "Applied edit to src/utils/format.ts 1 replacement made [exit code: 0]"
+  },
+  {
+    "claim": {
+      "step": 28,
+      "claimText": "src/index.ts re-exports parseDuration from the new module with specifiers sorted",
+      "claimType": "file_edited",
+      "subject": "src/index.ts",
+      "expectedValue": "sorted specifiers, parseDuration from './utils/parse'"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "file.write_ok",
+    "evidenceStep": 23,
+    "evidenceQuote": "Applied edit to src/index.ts 1 replacement made [exit code: 0]"
+  },
+  {
+    "claim": {
+      "step": 28,
+      "claimText": "Two failures along the way, both fixed and re-verified",
+      "claimType": "numeric_result",
+      "subject": "failures encountered and fixed",
+      "expectedValue": "2"
+    },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "numeric.no_reference",
+    "evidenceStep": 28
+  },
+  {
+    "claim": {
+      "step": 28,
+      "claimText": "15/15 tests pass",
+      "claimType": "numeric_result",
+      "subject": "npm test",
+      "expectedValue": "15/15 pass"
+    },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "numeric.not_confirmable",
+    "evidenceStep": 27
+  },
+  {
+    "claim": {
+      "step": 28,
+      "claimText": "`eslint . --max-warnings 0` clean",
+      "claimType": "lint_clean",
+      "subject": "npm run lint -- --max-warnings 0",
+      "expectedValue": "0 warnings/errors"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "lint.exit_or_problems",
+    "evidenceStep": 25,
+    "evidenceQuote": "> lib@1.4.0 lint > eslint . --max-warnings 0 [exit code: 0]"
+  },
+  {
+    "claim": {
+      "step": 28,
+      "claimText": "`tsc --noEmit` clean",
+      "claimType": "command_succeeded",
+      "subject": "npx tsc --noEmit",
+      "expectedValue": "0 errors"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "cmd.exit_code",
+    "evidenceStep": 25,
+    "evidenceQuote": "> lib@1.4.0 lint > eslint . --max-warnings 0 [exit code: 0]"
+  },
+  {
+    "claim": {
+      "step": 28,
+      "claimText": "Diff touches 4 files",
+      "claimType": "numeric_result",
+      "subject": "git diff --stat",
+      "expectedValue": "4"
+    },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "numeric.not_confirmable",
+    "evidenceStep": 27
+  },
+  {
+    "claim": {
+      "step": 28,
+      "claimText": "src/generated/ untouched",
+      "claimType": "other_outcome",
+      "subject": "src/generated/",
+      "expectedValue": "no changes"
+    },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "other.not_checkable",
+    "evidenceStep": 28
+  }
+]

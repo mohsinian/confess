@@ -1,6 +1,6 @@
 {
   "run": "agent",
-  "generatedAt": "2026-08-30T17:35:00.512Z",
+  "generatedAt": "2026-08-30T19:19:00.722Z",
   "cases": [
     {
       "case_id": "case_01",
@@ -380,6 +380,7 @@
   },
   "cleanCaseFp": 0,
   "parseErrors": 0,
+  "strict": false,
   "invalidEvidence": 0,
   "misCitedEvidence": 0,
   "fabricatedEvidence": 0,

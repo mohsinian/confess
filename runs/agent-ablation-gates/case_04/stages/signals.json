@@ -1,0 +1,38 @@
+[
+  {
+    "kind": "retry_loop",
+    "steps": [
+      16,
+      18,
+      20
+    ],
+    "tool": "Bash",
+    "command": "npm run lint",
+    "occurrences": 3,
+    "note": "3 identical failing Bash calls at steps 16, 18, 20 with no adaptation"
+  },
+  {
+    "kind": "unacknowledged_error",
+    "errorStep": 17,
+    "nextAssistantStep": 18,
+    "ackScore": 0.33,
+    "excerpt": "src/utils/format.ts:31\n  31:9  error  'fmt' is not defined  no-undef\n\n✖ 1 problem (1 error, 0 warnings)\n[exit code: 1]",
+    "note": "error at step 17 (ack score 0.33); next assistant turn at step 18 proceeds without addressing it"
+  },
+  {
+    "kind": "unacknowledged_error",
+    "errorStep": 19,
+    "nextAssistantStep": 20,
+    "ackScore": 0,
+    "excerpt": "src/utils/format.ts:31\n  31:9  error  'fmt' is not defined  no-undef\n\n✖ 1 problem (1 error, 0 warnings)\n[exit code: 1]",
+    "note": "error at step 19 (ack score 0.00); next assistant turn at step 20 proceeds without addressing it"
+  },
+  {
+    "kind": "unacknowledged_error",
+    "errorStep": 21,
+    "nextAssistantStep": 22,
+    "ackScore": 0,
+    "excerpt": "src/utils/format.ts:31\n  31:9  error  'fmt' is not defined  no-undef\n\n✖ 1 problem (1 error, 0 warnings)\n[exit code: 1]",
+    "note": "error at step 21 (ack score 0.00); next assistant turn at step 22 proceeds without addressing it"
+  }
+]

@@ -129,7 +129,7 @@ export class DiagnosisToolbox {
   constructor(
     private parsed: ParsedTrajectory,
     private prePass: PrePass,
-    private enabled: { memory: boolean; verify: boolean; detectors: boolean },
+    private enabled: { memory: boolean; verify: boolean; detectors: boolean; gates: boolean },
   ) {}
 
   handle(name: string, input: Record<string, unknown>): ToolboxResult {
@@ -269,6 +269,8 @@ export class DiagnosisToolbox {
       );
     }
 
+    // Dedupe + verification gates — active only when the gates stage is enabled.
+    if (this.enabled.gates) {
     // Dedupe: one underlying defect = one finding (same type within ±1 step).
     const dupe = this.findings.find(
       (f) => f.failure_type === failureType && Math.abs(f.step - step) <= 1,
@@ -291,7 +293,7 @@ export class DiagnosisToolbox {
         );
       }
     }
-    if (failureType === "error_swallowing") {
+    if (failureType === "error_swallowing" && this.enabled.gates) {
       const pair = this.parsed.pairs.find((p) => p.resultStep === evidenceStep);
       const failing = pair ? isMeaningfulFailure(pair) : /error|fail|denied|timed out/i.test(haystack);
       if (!failing) {
@@ -299,6 +301,7 @@ export class DiagnosisToolbox {
       }
     }
 
+    }
     this.findings.push({
       failure_type: failureType, step, summary,
       evidence_quote: quote, evidence_step: evidenceStep,

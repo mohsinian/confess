@@ -106,3 +106,17 @@ npm run report                      # aggregates all results-*.json into the com
 - [ ] Duplicate-prediction case → one TP + one FP (one-to-one holds).
 - [ ] Cross-type near-miss (right step, wrong type) → FN + FP (no partial credit).
 - [ ] Baseline run over 12 cases completes; results committed.
+
+---
+
+## Amendment (2026-08-31, post-benchmark — kept visible, not retro-fitted)
+
+§4.1's human-time model (wall time + reading constant) proved too coarse to be informative, so
+the final comparison table adds a **parametric** reviewer-effort model (report reading + 1 min/TP
+confirmed + 4 min/FP debunked + 2 min/queue triage). This formula was added AFTER the benchmark
+ran — it is labeled "modeled" wherever it appears and is NOT part of the pre-registered
+methodology. The pre-registered primary metric (evidence-tier F1) is unchanged.
+
+A later amendment also adds an evidence-tier diagnostic (ok / mis-cited / fabricated per finding,
+reported but NOT score-affecting by default; `--strict` opts into exclusion). The pre-registered
+matching rules above remain the primary metric in all headline tables.

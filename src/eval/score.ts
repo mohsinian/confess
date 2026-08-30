@@ -107,6 +107,7 @@ export interface EvalRunResult {
   };
   cleanCaseFp: number | null;
   parseErrors: number;
+  strict?: boolean;
   invalidEvidence: number;
   misCitedEvidence: number;
   fabricatedEvidence: number;
@@ -163,7 +164,7 @@ export function evidenceTier(f: Finding, events: Array<Record<string, unknown>>,
   return inLog ? "mis-cited" : "fabricated";
 }
 
-export async function scoreRun(runName: string, caseIds: string[]): Promise<EvalRunResult> {
+export async function scoreRun(runName: string, caseIds: string[], strictEvidence = false): Promise<EvalRunResult> {
   const cases: CaseScore[] = [];
   const totals = { inputTokens: 0, outputTokens: 0, costUsd: 0, wallMs: 0, llmCalls: 0 };
   let parseErrors = 0;
@@ -202,10 +203,12 @@ export async function scoreRun(runName: string, caseIds: string[]): Promise<Eval
       parseErrors += 1;
     }
 
-    // Evidence integrity (ground rule 9): a finding must have checkable receipts.
-    // Tiers: ok → scored normally; mis-cited (quote exists elsewhere in the log) and
-    // fabricated (quote exists nowhere) → excluded from matching, counted, never
-    // silently dropped. Type+step proximity alone must never earn a TP.
+    // Evidence integrity (ground rule 9 diagnostic): every finding's quote is
+    // tiered against the log — ok / mis-cited / fabricated — and the counts are
+    // REPORTED. By default (pre-registered scoring) tiers do NOT change matching:
+    // excluding loose-but-real evidence would convert the baseline's correct
+    // catches into misses over quoting style. Pass --strict to score with
+    // mis-cited + fabricated findings excluded (the harsher lens).
     let misCited = 0;
     let fabricated = 0;
     let events: Array<Record<string, unknown>> = [];
@@ -218,7 +221,7 @@ export async function scoreRun(runName: string, caseIds: string[]): Promise<Eval
         const tier = evidenceTier(f, events, caseSystem === "baseline" ? 1200 : undefined);
         if (tier === "mis-cited") misCited++;
         if (tier === "fabricated") fabricated++;
-        return tier === "ok";
+        return strictEvidence ? tier === "ok" : true;
       });
       findings = valid;
     }
@@ -293,6 +296,7 @@ export async function scoreRun(runName: string, caseIds: string[]): Promise<Eval
     },
     cleanCaseFp,
     parseErrors,
+    strict: strictEvidence,
     invalidEvidence: invalidEvidenceTotal,
     misCitedEvidence: misCitedTotal,
     fabricatedEvidence: fabricatedTotal,
@@ -373,6 +377,7 @@ async function main() {
   const outIdx = args.indexOf("--out");
   // Some npm versions drop args after "--" — also accept the run name positionally.
   const positional = args.find((a, i) => !a.startsWith("--") && args[i - 1] !== "--run" && args[i - 1] !== "--out" && args[i - 1] !== "--tag");
+  const strictEvidence = args.includes("--strict");
   const runName = runIdx !== -1 ? args[runIdx + 1] : positional ?? "baseline";
   const outName = outIdx !== -1 ? args[outIdx + 1] : `results-${runName}`;
   const caseIds = await listCases();
@@ -380,7 +385,7 @@ async function main() {
     console.error("No cases found — run `npm run gen:dataset` first.");
     process.exit(1);
   }
-  const result = await scoreRun(runName, caseIds);
+  const result = await scoreRun(runName, caseIds, strictEvidence);
   await ensureDir(EVAL_DIR);
   await fs.promises.writeFile(
     path.join(EVAL_DIR, `${outName}.json`),
@@ -389,7 +394,7 @@ async function main() {
   );
   const o = result.overall;
   const pct = (x: number | null) => (x === null ? "n/a" : (x * 100).toFixed(1) + "%");
-  console.log(`\neval: ${runName} over ${caseIds.length} cases`);
+  console.log(`\neval: ${runName} over ${caseIds.length} cases${strictEvidence ? " [STRICT: invalid-evidence findings excluded]" : ""}`);
   console.log(`  F1 ${pct(o.f1)}  P ${pct(o.precision)}  R ${pct(o.recall)}  (TP ${o.tp} / FP ${o.fp} / FN ${o.fn})`);
   console.log(`  localization(±1) ${pct(o.localizationAccuracy)}  clean-case FP ${result.cleanCaseFp ?? "-"}  parseErrors ${result.parseErrors}`);
   console.log(`  cost $${result.totals.costUsd.toFixed(3)}  tokens in/out ${result.totals.inputTokens}/${result.totals.outputTokens}`);

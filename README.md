@@ -107,8 +107,9 @@ breakdowns, the ablation, and the integrity scoring: [eval/comparison.md](eval/c
 The iteration-by-iteration development story: [CHANGELOG.md](CHANGELOG.md).
 The honest shape of the win: recall is identical to the baseline — the gain is precision
 (8 → 5 false positives; phantom-success precision 40% → 67%), i.e. less reviewer time spent
-debunking invented failings, at ~$2.20 more per session. Review-time estimates use the model
-printed with the comparison table; machine wall time runs unattended and is reported separately.
+debunking invented failings, at ~$2.20 more per session. Review-time is a modeled estimate (formula printed with the comparison table; added after the
+benchmark ran, not part of the pre-registered spec); machine wall time runs unattended and is
+reported separately.
 
 - **The review queue never fired in the benchmark** — every agent finding scored ≥ 0.60
   confidence, so review-queue precision has no data points yet. The gate is exercised and

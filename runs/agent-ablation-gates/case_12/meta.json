@@ -1,0 +1,24 @@
+{
+  "case_id": "case_12",
+  "run_id": "agent-ablation-gates-20260831-0144",
+  "system": "agent-ablation",
+  "off": {
+    "memory": false,
+    "verify": false,
+    "detectors": false,
+    "gates": true
+  },
+  "model": "claude-opus-5",
+  "turns": 12,
+  "guardrailRejections": 0,
+  "truncated": false,
+  "degraded": false,
+  "stageErrors": [],
+  "stats": {
+    "inputTokens": 117818,
+    "outputTokens": 9081,
+    "costUsd": 2.448345,
+    "wallMs": 129332,
+    "llmCalls": 15
+  }
+}

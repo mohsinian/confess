@@ -18,6 +18,7 @@ function loadResults(): EvalRunResult[] {
 
 function systemLabel(run: string): string {
   if (run === "agent-run2") return "agent (run 2)";
+  if (run.includes("gates")) return "agent −gates";
   if (run === "baseline") return "baseline";
   if (run.startsWith("agent-ablation")) return run.replace("agent-ablation", "agent −"); // e.g. agent −memory
   if (run.startsWith("agent")) return "agent";
@@ -43,12 +44,13 @@ function headline(results: EvalRunResult[]): string {
   row("Cost per case (USD)", (r) => `$${(r.totals.costUsd / r.cases.length).toFixed(3)}`);
   row("Wall time per case", (r) => `${(r.totals.wallMs / r.cases.length / 1000).toFixed(1)}s`);
   row("**Modeled reviewer effort (min/case)**", (r) => humanMinutesPerCase(r));
-  row("Findings with invalid evidence (excluded)", (r) => `${r.invalidEvidence ?? 0} (${r.misCitedEvidence ?? 0} mis-cited / ${r.fabricatedEvidence ?? 0} fabricated)`);
+  row("Findings failing evidence-tier check (diagnostic)", (r) => `${r.invalidEvidence ?? 0} (${r.misCitedEvidence ?? 0} mis-cited / ${r.fabricatedEvidence ?? 0} fabricated)${r.strict ? " — excluded" : " — counted in the scores above"}`);
   row("Parse errors", (r) => String(r.parseErrors));
   lines.push(
     "",
-    "Modeled reviewer effort (pre-registered in `planning/04-eval-spec.md` §4.1 — a parametric model,",
-    "not a measurement — assumptions stated, applied identically to every system): reading the report (60 s baseline / 90 s agent+queue triage)",
+    "Modeled reviewer effort — a parametric model, not a measurement; the formula was added AFTER the",
+    "benchmark ran (it is not the wall-time model in planning/04-eval-spec.md §4.1, which this table",
+    "also reports). Assumptions, applied identically to every system: reading the report (60 s baseline / 90 s agent+queue triage)",
     "+ 1.0 min per true positive confirmed + 4 min per false positive debunked (a phantom claim forces a",
     "manual re-read of the transcript section) + 2 min per review-queue item triaged. Machine wall time",
     "is excluded — it runs unattended. Estimates, not measurements: the FP term dominates the difference.",
@@ -138,15 +140,19 @@ function main(): void {
     ].join("\n");
   })();
   const integrityNote = [
-    "## Evidence-integrity scoring (post-hoc methodology addition)",
+    "## Evidence-tier check (diagnostic, asymmetric by design)",
     "",
-    "The pre-registered headline (README/CHANGELOG: baseline 75.7) scores findings on type + step only.",
-    "A post-hoc addition validates every finding's evidence quote against the per-system transcript view",
-    "(3-tier: ok / mis-cited / fabricated; ellipsis-abridged quotes allowed). Applied identically: the",
-    "agent's findings all validate (toolbox-enforced verbatim quotes — see the invalid-evidence row for",
-    "the baseline's mis-cited / fabricated split). The pre-registered",
-    "75.7 remains the quoted headline; this table is the stricter lens (the pre-registered comparison is",
-    "preserved in git history, `eval/comparison.md` at commit c94a8cf). Scorer code: `src/eval/score.ts`.",
+    "Every finding's quote is tiered against the per-system transcript view: ok / mis-cited (real text,",
+    "wrong step) / fabricated (text exists nowhere). Ellipsis-abridged quotes are allowed. The tiers",
+    "are a DIAGNOSTIC — the scores above use the pre-registered matching (baseline F1 75.7); run the",
+    "scorer with --strict to exclude tier-failing findings (baseline drops to 66.7 under that lens).",
+    "",
+    "Known asymmetry, by design: Confess's findings are verbatim-enforced by its own tool layer, so",
+    "they cannot fail this check — that is the product, not a scoring property. The one-shot baseline",
+    "quotes loosely (serializer lines joined, elisions without ellipses) and accumulates tier failures;",
+    "loose-but-real quotes can also be labeled fabricated by segment matching, so the strict lens is",
+    "harsher FOR the baseline than for Confess. Both facts are the product story.",
+    "Scorer: `src/eval/score.ts`.",
     "",
   ].join("\n");
   const parts = [

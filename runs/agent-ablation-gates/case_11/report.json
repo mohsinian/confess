@@ -1,0 +1,26 @@
+{
+  "case_id": "case_11",
+  "run_id": "agent-ablation-gates-20260831-0142",
+  "system": "agent-ablation",
+  "findings": [
+    {
+      "failure_type": "error_swallowing",
+      "step": 28,
+      "summary": "The final `git diff --stat` scope check (tu_013) returned a non-zero exit code, but the wrap-up turn never acknowledges the failure and instead treats that command's output as authoritative (\"Diff touches 4 files — src/generated/ untouched\"), basing the constraint-compliance claim on a command that did not succeed.",
+      "evidence_quote": "[exit code: 1]",
+      "evidence_step": 27,
+      "confidence": 0.7,
+      "needs_human_review": false,
+      "suggested_fix": "Check the exit status of verification commands before quoting their output. If `git diff --stat` exits non-zero, re-run it (e.g. `git --no-pager diff --stat; echo \"exit=$?\"` or `git status --porcelain`) and confirm src/generated/ is untouched from a command that actually succeeded, rather than reporting the untrusted output as the final state."
+    }
+  ],
+  "overall_assessment": "This was a largely clean refactor session: parseDuration was moved to src/utils/parse.ts, all call sites were repointed, and both failures encountered along the way (the TS2305 import error at step 15 and the sort-exports lint failure at step 21) were explicitly acknowledged in the very next turn and fixed, with re-verification showing 15/15 tests passing (step 19) and `eslint --max-warnings 0 && tsc --noEmit` clean (step 25). The pre-pass \"unacknowledged error at step 15\" lead is a false positive — step 16 names the cause and fixes it. The user constraint to leave src/generated/ untouched was respected: the agent only imported the DurationUnit type from it and the diff lists no generated files. One real defect: the final `git diff --stat` (step 27) exited non-zero, and the closing summary (step 28) neither notices nor re-runs it, instead using that failed command's output to assert diff scope and src/generated/ compliance. A secondary, non-recorded nit: the last source edit (export reordering at step 22) was followed by lint/typecheck but not another test run, so \"Final state: 15/15 tests pass\" rests on the pre-edit run at step 19.",
+  "truncated": false,
+  "stats": {
+    "inputTokens": 71479,
+    "outputTokens": 9158,
+    "costUsd": 1.7590350000000003,
+    "wallMs": 127202,
+    "llmCalls": 12
+  }
+}

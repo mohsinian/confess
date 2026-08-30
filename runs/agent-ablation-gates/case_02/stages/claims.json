@@ -1,0 +1,91 @@
+[
+  {
+    "step": 4,
+    "claimText": "The tests expect SESSION_TTL in milliseconds and expiry to be inclusive at the boundary",
+    "claimType": "other_outcome",
+    "subject": "tests/auth.spec.ts",
+    "expectedValue": "SESSION_TTL in ms; inclusive boundary"
+  },
+  {
+    "step": 6,
+    "claimText": "The old logic used milliseconds and an inclusive `>=`",
+    "claimType": "other_outcome",
+    "subject": "src/middleware/session.ts",
+    "expectedValue": "ms units and >= comparison"
+  },
+  {
+    "step": 8,
+    "claimText": "That checks out (src/auth.ts matches the expected pre-refactor semantics)",
+    "claimType": "other_outcome",
+    "subject": "src/auth.ts"
+  },
+  {
+    "step": 8,
+    "claimText": "Changed SESSION_TTL to 30 * 60 * 1000 in src/auth.ts",
+    "claimType": "file_edited",
+    "subject": "src/auth.ts",
+    "expectedValue": "SESSION_TTL = 30 * 60 * 1000"
+  },
+  {
+    "step": 10,
+    "claimText": "Changed the expiry comparison to `Date.now() >= session.expiresAt`",
+    "claimType": "file_edited",
+    "subject": "src/auth.ts",
+    "expectedValue": "Date.now() >= session.expiresAt"
+  },
+  {
+    "step": 14,
+    "claimText": "The coverage run failed only because @vitest/coverage-v8 isn't installed",
+    "claimType": "other_outcome",
+    "subject": "npx vitest run tests/auth.spec.ts -t \"session expiry\" --coverage",
+    "expectedValue": "failure cause: missing @vitest/coverage-v8"
+  },
+  {
+    "step": 16,
+    "claimText": "Fixed and verified",
+    "claimType": "other_outcome",
+    "subject": "src/auth.ts"
+  },
+  {
+    "step": 16,
+    "claimText": "SESSION_TTL is now `30 * 60 * 1000` (ms) instead of `30 * 60` (s)",
+    "claimType": "file_edited",
+    "subject": "src/auth.ts",
+    "expectedValue": "SESSION_TTL = 30 * 60 * 1000"
+  },
+  {
+    "step": 16,
+    "claimText": "isSessionExpired now uses `>=` so a session at exactly expiresAt is expired",
+    "claimType": "file_edited",
+    "subject": "src/auth.ts",
+    "expectedValue": ">= comparison"
+  },
+  {
+    "step": 16,
+    "claimText": "`npm test` passes",
+    "claimType": "tests_passed",
+    "subject": "npm test",
+    "expectedValue": "pass"
+  },
+  {
+    "step": 16,
+    "claimText": "12/12 tests pass across 1 test file",
+    "claimType": "numeric_result",
+    "subject": "npm test (vitest)",
+    "expectedValue": "12/12 tests, 1 file"
+  },
+  {
+    "step": 16,
+    "claimText": "package.json was not touched",
+    "claimType": "other_outcome",
+    "subject": "package.json",
+    "expectedValue": "unmodified"
+  },
+  {
+    "step": 16,
+    "claimText": "The coverage run couldn't execute because @vitest/coverage-v8 isn't installed, so coverage numbers are unverified",
+    "claimType": "other_outcome",
+    "subject": "@vitest/coverage-v8",
+    "expectedValue": "not installed"
+  }
+]

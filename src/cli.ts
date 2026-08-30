@@ -50,7 +50,7 @@ interface CliArgs {
 
 function parseArgs(): CliArgs {
   const argv = process.argv.slice(2);
-  const cli: CliArgs = { list: false, yes: false, help: false, off: { memory: false, verify: false, detectors: false } };
+  const cli: CliArgs = { list: false, yes: false, help: false, off: { memory: false, verify: false, detectors: false, gates: false } };
   const flagValue = (name: string): string | undefined => {
     const i = argv.indexOf(name);
     return i !== -1 ? argv[i + 1] : undefined;
@@ -62,6 +62,7 @@ function parseArgs(): CliArgs {
       if (comp === "memory") cli.off.memory = true;
       else if (comp === "verify") cli.off.verify = true;
       else if (comp === "detectors") cli.off.detectors = true;
+      else if (comp === "gates") cli.off.gates = true;
     }
   }
   cli.list = argv.includes("--list");

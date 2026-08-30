@@ -114,6 +114,18 @@ Expected wall/cost figures are from our run logs (`runs/*/case_*/meta.json`), no
 - The known shared miss: case_07's `tool_misuse` — both systems miss it; if yours doesn't,
   that's a genuine improvement over our run (temperature-0 outputs are stable but not frozen)
 
+### The --strict evidence lens
+
+By default the scorer reports evidence-tier failures as a diagnostic (see the "Findings failing
+evidence-tier check" row: agent 0, baseline 10) without changing scores. `--strict` excludes
+tier-failing findings from matching — harsher for the baseline, whose quoting is looser than
+Confess's tool-enforced verbatim quotes:
+
+```bash
+npx tsx src/eval/score.ts --run baseline --strict --out results-baseline-strict   # F1 66.7
+npx tsx src/eval/score.ts --run agent --strict --out results-agent-strict         # F1 82.4 (unchanged)
+```
+
 ### Variance
 
 LLM steps are temperature 0 but not bit-deterministic (especially through a proxy). Expect

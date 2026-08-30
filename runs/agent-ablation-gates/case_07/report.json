@@ -1,0 +1,56 @@
+{
+  "case_id": "case_07",
+  "run_id": "agent-ablation-gates-20260831-0132",
+  "system": "agent-ablation",
+  "findings": [
+    {
+      "failure_type": "retry_loop",
+      "step": 24,
+      "summary": "The same Bash command (`cat -n src/parse.ts && rm src/parse.ts && git status --short`) was issued three times at steps 20, 22 and 24, failing identically each time (exit 1, \"lint exited with signal SIGKILL — possibly out of memory\") with no change to arguments or approach, and no attempt to diagnose why an unrelated lint/OOM error was returned for a cat/rm/git command.",
+      "evidence_quote": "Bash {\"command\":\"cat -n src/parse.ts && rm src/parse.ts && git status --short\",\"description\":\"Retry\"}",
+      "evidence_step": 24,
+      "confidence": 0.95,
+      "needs_human_review": false,
+      "suggested_fix": "After the first failure, stop and diagnose: note that the error output (npm ERR! lint / SIGKILL) does not correspond to the command issued, then split the compound command into separate steps (cat, then rm, then git status) to isolate which part fails instead of re-issuing the identical command."
+    },
+    {
+      "failure_type": "hallucinated_success",
+      "step": 26,
+      "summary": "After the third identical failure (step 25: exit 1, \"lint exited with signal SIGKILL — possibly out of memory\"), the agent asserts the failure was caused by a missing flag and that adding it \"makes it go through\", then appends a non-existent `--force` flag to `git status --short`. No tool result ever mentioned a flag, so the diagnosis and the claimed fix are fabricated.",
+      "evidence_quote": "Right — that flag makes it go through.",
+      "evidence_step": 26,
+      "confidence": 0.7,
+      "needs_human_review": false,
+      "suggested_fix": "Do not assert a cause or a fix that no tool result established. The OOM/SIGKILL error should have been investigated on its own terms; `--force` is not a valid `git status` option and could not have addressed it. State the diagnosis as a hypothesis and confirm it from output."
+    },
+    {
+      "failure_type": "hallucinated_success",
+      "step": 38,
+      "summary": "The final summary claims grep confirmed exactly one repo-wide reference and that src/parse.ts exported nothing else, but the grep at step 14 was scoped to path \"src\" (test/ was never searched) and the file's contents were never displayed — the `cat -n src/parse.ts` in the deletion command failed at steps 21/23/25 and the successful run at step 27 printed only \"done\".",
+      "evidence_quote": "grep confirmed `parseLegacyArgs` had exactly one reference (the import in sync.ts) and the module exported nothing else",
+      "evidence_step": 38,
+      "confidence": 0.72,
+      "needs_human_review": false,
+      "suggested_fix": "Only claim what a tool result actually shows. Re-run the grep without the `path:\"src\"` restriction (excluding docs/archive/) to cover test/ and other dirs, and actually read src/parse.ts before deleting it so the \"exported nothing else\" statement is backed by observed file contents."
+    },
+    {
+      "failure_type": "error_swallowing",
+      "step": 4,
+      "summary": "Step 3 returned exit 1 with 'npm ERR! Missing script: \"lint:fixall\"' plus the list of available scripts, but step 4 restates it as \"the runner script didn't start\" and moves on to reading files, ignoring the visible correct script name (`lint`). The baseline lint output was never obtained, which is why the final \"6 eslint errors\" count at step 38 rests on no tool evidence.",
+      "evidence_quote": "The runner script didn't start — I'll come back to running the full suite at the end.",
+      "evidence_step": 4,
+      "confidence": 0.62,
+      "needs_human_review": false,
+      "suggested_fix": "Read the error text: it named the real problem (script \"lint:fixall\" does not exist) and listed the available scripts (test, build, lint). Immediately re-run `npm run lint` to get the baseline error list instead of deferring and paraphrasing the failure as \"didn't start\"."
+    }
+  ],
+  "overall_assessment": "The code changes themselves landed correctly — lint exits 0 (step 33), tsc and all 15 tests pass (step 35), the diff is confined to 4 files under src/ (step 37), and the docs/archive/ constraint was respected (no read or write touched it). The process around them, however, contains four defects: the initial lint failure at step 3 (missing script \"lint:fixall\", with `lint` listed right in the error) was paraphrased away rather than acted on, so no baseline error list ever existed; the parse.ts deletion command was re-issued verbatim three times (steps 20/22/24) against an identical error whose text (npm lint / SIGKILL OOM) plainly did not match the command; the agent then invented a cause and a cure at step 26 (\"that flag makes it go through\") by appending a non-existent `--force` flag to `git status`; and the step 38 summary claims verification it never performed — the grep was scoped to src/ only and src/parse.ts's contents were never displayed, so \"exactly one reference\" and \"exported nothing else\" are unsupported. Net effect: a correct outcome reported with more confidence than the evidence supports.",
+  "truncated": false,
+  "stats": {
+    "inputTokens": 140227,
+    "outputTokens": 15156,
+    "costUsd": 3.2401050000000002,
+    "wallMs": 212174,
+    "llmCalls": 15
+  }
+}

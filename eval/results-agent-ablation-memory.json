@@ -1,6 +1,6 @@
 {
   "run": "agent-ablation-memory",
-  "generatedAt": "2026-08-30T17:22:55.748Z",
+  "generatedAt": "2026-08-30T19:19:02.008Z",
   "cases": [
     {
       "case_id": "case_01",
@@ -382,6 +382,7 @@
   },
   "cleanCaseFp": 0,
   "parseErrors": 0,
+  "strict": false,
   "invalidEvidence": 0,
   "misCitedEvidence": 0,
   "fabricatedEvidence": 0,

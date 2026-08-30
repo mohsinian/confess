@@ -19,7 +19,7 @@ import { GATE_THRESHOLD, type DiagnosisReport, type Finding, type Trajectory } f
 
 export interface Options {
   only?: string;
-  off: { memory: boolean; verify: boolean; detectors: boolean };
+  off: { memory: boolean; verify: boolean; detectors: boolean; gates?: boolean };
   /** label run directory runs/<tag>/<case> (e.g. run2 for variance measurement) */
   tag?: string;
   /** pre-audit degradation reasons (e.g. ingest warnings: malformed log, unparseable lines) */
@@ -38,12 +38,13 @@ function parseArgs(): Options {
   const args = process.argv.slice(2);
   const caseIdx = args.indexOf("--case");
   const offIdx = args.indexOf("--off");
-  const off = { memory: false, verify: false, detectors: false };
+  const off = { memory: false, verify: false, detectors: false, gates: false };
   if (offIdx !== -1) {
     for (const comp of args[offIdx + 1].split(",")) {
       if (comp === "memory") off.memory = true;
       else if (comp === "verify") off.verify = true;
       else if (comp === "detectors") off.detectors = true;
+      else if (comp === "gates") off.gates = true;
     }
   }
   const tagIdx = args.indexOf("--tag");
@@ -128,7 +129,7 @@ async function runAudit(
 ): Promise<DiagnosisReport> {
   const client = makeClient(cfg);
   const budget = new Budget(cfg.maxRunCost);
-  const systemName = opts.off.memory || opts.off.verify || opts.off.detectors ? "agent-ablation" : "agent";
+  const systemName = opts.off.memory || opts.off.verify || opts.off.detectors || opts.off.gates ? "agent-ablation" : "agent";
   const dir = hooks.outBase ? path.join(hooks.outBase, caseId) : runDir(runTag, caseId);
   await ensureDir(dir);
   const stagesDir = path.join(dir, "stages");
@@ -197,7 +198,7 @@ async function runAudit(
     const diag = await runAgentLoop(
       client, cfg, budget, log, caseId, parsed,
       { signals, verdicts, constraints, violations },
-      { memory: !opts.off.memory, verify: !opts.off.verify, detectors: !opts.off.detectors },
+      { memory: !opts.off.memory, verify: !opts.off.verify, detectors: !opts.off.detectors, gates: !opts.off.gates },
     );
     findings = findingsFromDrafts(diag.findings);
     assessment = diag.assessment;
@@ -262,8 +263,8 @@ async function runAudit(
 
 /** Audit a case from the committed dataset (derives the run tag from ablation flags). */
 export async function runCase(caseId: string, cfg: ReturnType<typeof loadProviderConfig>, opts: Options): Promise<DiagnosisReport> {
-  const runTag = opts.off.memory || opts.off.verify || opts.off.detectors
-    ? `agent-ablation${opts.off.memory ? "-memory" : ""}${opts.off.verify ? "-verify" : ""}${opts.off.detectors ? "-detectors" : ""}`
+  const runTag = opts.off.memory || opts.off.verify || opts.off.detectors || opts.off.gates
+    ? `agent-ablation${opts.off.memory ? "-memory" : ""}${opts.off.verify ? "-verify" : ""}${opts.off.detectors ? "-detectors" : ""}${opts.off.gates ? "-gates" : ""}`
     : opts.tag ?? "agent";
   const events = await loadTrajectory(caseId);
   return runAudit(caseId, events, cfg, opts, runTag);
@@ -280,7 +281,7 @@ async function main(): Promise<void> {
     console.error("No cases found — run `npm run gen:dataset` first.");
     process.exit(1);
   }
-  const label = opts.off.memory || opts.off.verify || opts.off.detectors ? `agent (−${[opts.off.memory && "memory", opts.off.verify && "verify", opts.off.detectors && "detectors"].filter(Boolean).join(", −")})` : "agent";
+  const label = opts.off.memory || opts.off.verify || opts.off.detectors || opts.off.gates ? `agent (−${[opts.off.memory && "memory", opts.off.verify && "verify", opts.off.detectors && "detectors", opts.off.gates && "gates"].filter(Boolean).join(", −")})` : "agent";
   console.log(`confess v0.1 — ${label} over ${caseIds.length} cases (model ${cfg.model})`);
   let totalCost = 0;
   for (const caseId of caseIds) {

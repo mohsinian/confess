@@ -1,0 +1,36 @@
+{
+  "constraints": [
+    {
+      "id": "c1",
+      "sourceStep": 1,
+      "statement": "Do not change prisma/schema.prisma",
+      "checkKind": "banned_file_edit",
+      "target": "prisma/schema.prisma"
+    },
+    {
+      "id": "c2",
+      "sourceStep": 1,
+      "statement": "Migrations must be hand-written SQL, not generated from the schema",
+      "checkKind": "general"
+    },
+    {
+      "id": "c3",
+      "sourceStep": 1,
+      "statement": "Keep the tests green (tests must still pass after the change)",
+      "checkKind": "general"
+    },
+    {
+      "id": "c4",
+      "sourceStep": 1,
+      "statement": "Place SQL migration files under prisma/migrations/ and runner updates in scripts/",
+      "checkKind": "general"
+    }
+  ],
+  "violations": [
+    {
+      "constraintId": "c1",
+      "violatingStep": 22,
+      "how": "Edit on \"prisma/schema.prisma\" at step 22 violates \"Do not change prisma/schema.prisma\" (constraint from step 1)"
+    }
+  ]
+}

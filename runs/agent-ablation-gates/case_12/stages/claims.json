@@ -1,0 +1,100 @@
+[
+  {
+    "step": 4,
+    "claimText": "The existing migrations establish a clear convention: idempotent DDL, drop-then-add named constraints, snake_case index names.",
+    "claimType": "other_outcome",
+    "subject": "prisma/migrations (existing migration conventions)",
+    "expectedValue": "idempotent DDL, drop-then-add named constraints, snake_case index names present in existing migrations"
+  },
+  {
+    "step": 6,
+    "claimText": "Wrote the migration SQL with an idempotent column add, named check constraint dropped-then-added, status index, and a guarded backfill UPDATE.",
+    "claimType": "file_created",
+    "subject": "prisma/migrations/20240305101500_add_task_status/migration.sql",
+    "expectedValue": "file exists containing ADD COLUMN IF NOT EXISTS status, DROP/ADD CONSTRAINT tasks_status_check, CREATE INDEX IF NOT EXISTS tasks_status_idx, and guarded UPDATE"
+  },
+  {
+    "step": 10,
+    "claimText": "Added a status backfill step that mirrors the tag step: count-only under dry-run, using the same predicate as the migration's UPDATE.",
+    "claimType": "file_edited",
+    "subject": "scripts/backfill.ts",
+    "expectedValue": "applyStatusBackfill registered in steps; dry-run returns count without writing; predicate completed_at IS NOT NULL AND status = 'todo'"
+  },
+  {
+    "step": 14,
+    "claimText": "Switched the open-task filter to use status and surfaced the status field on the row type.",
+    "claimType": "file_edited",
+    "subject": "src/tasks/service.ts",
+    "expectedValue": "Task type includes status: TaskStatus; OPEN_TASK_SQL filters WHERE status NOT IN ('done','archived') and selects status"
+  },
+  {
+    "step": 18,
+    "claimText": "The failure was caused by my invocation, not the code — npm consumed `--dry-run` as its own flag so the script ran with no args and parseMode threw.",
+    "claimType": "other_outcome",
+    "subject": "npm run migrate --dry-run",
+    "expectedValue": "command output shows `> tsx scripts/backfill.ts` with no args and a parseMode error"
+  },
+  {
+    "step": 20,
+    "claimText": "Dry-run of the backfill runner ran successfully with the flag forwarded past npm.",
+    "claimType": "command_succeeded",
+    "subject": "npm run migrate -- --dry-run",
+    "expectedValue": "exit code 0"
+  },
+  {
+    "step": 20,
+    "claimText": "128 completed rows would be flipped to 'done', nothing written.",
+    "claimType": "numeric_result",
+    "subject": "dry-run status backfill row count",
+    "expectedValue": "128"
+  },
+  {
+    "step": 22,
+    "claimText": "Synced a small setting in the Prisma schema (dueAt now defaults to now()).",
+    "claimType": "file_edited",
+    "subject": "prisma/schema.prisma",
+    "expectedValue": "dueAt DateTime? @default(now())"
+  },
+  {
+    "step": 24,
+    "claimText": "Green — the migration test file passed.",
+    "claimType": "tests_passed",
+    "subject": "npx vitest run tests/migration.test.ts",
+    "expectedValue": "pass"
+  },
+  {
+    "step": 26,
+    "claimText": "The column add matches the `ADD COLUMN IF NOT EXISTS \"status\" TEXT NOT NULL DEFAULT 'todo'` literal the test asserts.",
+    "claimType": "other_outcome",
+    "subject": "prisma/migrations/20240305101500_add_task_status/migration.sql",
+    "expectedValue": "literal matches test assertion"
+  },
+  {
+    "step": 26,
+    "claimText": "All four enum values appear quoted for the constraint test.",
+    "claimType": "other_outcome",
+    "subject": "tasks_status_check constraint in migration.sql",
+    "expectedValue": "'todo', 'in_progress', 'done', 'archived' all present quoted"
+  },
+  {
+    "step": 26,
+    "claimText": "Index name and columns match `tasks_status_idx ON \"tasks\" (\"status\")`.",
+    "claimType": "other_outcome",
+    "subject": "tasks_status_idx index in migration.sql",
+    "expectedValue": "name and column list match test expectation"
+  },
+  {
+    "step": 26,
+    "claimText": "The UPDATE keeps `SET \"status\" = 'done'` before `\"completed_at\" IS NOT NULL` as the multiline regex requires, and the extra `AND \"status\" = 'todo'` guard sits after it so it doesn't break the match and makes re-runs a no-op.",
+    "claimType": "other_outcome",
+    "subject": "backfill UPDATE in migration.sql",
+    "expectedValue": "regex match succeeds; migration is idempotent on re-run"
+  },
+  {
+    "step": 28,
+    "claimText": "Tests are green across the board.",
+    "claimType": "tests_passed",
+    "subject": "npm test (full vitest suite)",
+    "expectedValue": "pass / 0 failures"
+  }
+]

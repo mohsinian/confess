@@ -64,7 +64,7 @@ export async function runAgentLoop(
   caseId: string,
   parsed: ParsedTrajectory,
   prePass: PrePass,
-  enabled: { memory: boolean; verify: boolean; detectors: boolean },
+  enabled: { memory: boolean; verify: boolean; detectors: boolean; gates: boolean },
 ): Promise<DiagnoseResult> {
   const toolbox = new DiagnosisToolbox(parsed, prePass, enabled);
   const messages: Anthropic.MessageParam[] = [
