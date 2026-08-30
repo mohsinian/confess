@@ -22,6 +22,8 @@ export interface Options {
   off: { memory: boolean; verify: boolean; detectors: boolean };
   /** label run directory runs/<tag>/<case> (e.g. run2 for variance measurement) */
   tag?: string;
+  /** pre-audit degradation reasons (e.g. ingest warnings: malformed log, unparseable lines) */
+  degradationReasons?: string[];
 }
 
 /** Optional integrations for embedders of the pipeline (the CLI passes both). */
@@ -145,7 +147,7 @@ async function runAudit(
   const signals = opts.off.detectors ? [] : runDetectors(parsed);
   await fs.promises.writeFile(path.join(stagesDir, "signals.json"), JSON.stringify(signals, null, 2));
 
-  const stageErrors: string[] = [];
+  const stageErrors: string[] = [...(opts.degradationReasons ?? [])];
   if (parsed.duplicateToolIds.length > 0) {
     stageErrors.push(`malformed log: duplicate tool ids ${parsed.duplicateToolIds.join(", ")} (first result kept)`);
   }

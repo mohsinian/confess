@@ -139,6 +139,7 @@ If args are dropped on your setup, invoke the scripts directly:
 ```bash
 npx tsx src/eval/score.ts --run agent        # identical to npm run eval -- --run agent
 npx tsx src/agent/run.ts --case case_12      # identical to npm run agent -- --case case_12
+npx tsx src/render/renderTrajectory.ts --case case_12   # identical to npm run demo -- --case case_12
 ```
 
 ## Troubleshooting

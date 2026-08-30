@@ -1,6 +1,6 @@
 # Confess — evaluation results
 
-Generated 2026-08-30T17:25:21.125Z from committed artifacts (reproduction path A — no API calls).
+Generated 2026-08-30T17:35:01.106Z from committed artifacts (reproduction path A — no API calls).
 Matching: exact failure-type + step within ±2 of primary_step (or in evidence_steps); greedy one-to-one.
 Confidence gate 0.60 fixed a priori (decision D10). Confidence never affects matching.
 

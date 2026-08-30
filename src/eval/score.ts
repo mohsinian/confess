@@ -124,7 +124,7 @@ export interface EvalRunResult {
  */
 const SEGMENT_MIN = 12; // ignore tiny fragments ("Error", a bare path) when segmenting
 
-function stepText(events: Array<Record<string, unknown>>, step: number, resultCap?: number): string | null {
+export function stepText(events: Array<Record<string, unknown>>, step: number, resultCap?: number): string | null {
   // Mirrors lib/serialize.ts's rendering — systems were audited against this
   // canonical view (arrows, flags, rendered inputs), so validation uses it too.
   const ev = events.find((e) => (e.step as number) === step) as { content: Array<Record<string, unknown>> } | undefined;
@@ -136,12 +136,16 @@ function stepText(events: Array<Record<string, unknown>>, step: number, resultCa
       const isErr = b.is_error === true;
       const exit = /\[exit code: (\d+)\]\s*$/.exec(String(b.content ?? ""));
       const flag = isErr ? "[ERROR]" : exit && exit[1] !== "0" ? `[exit ${exit[1]}]` : "[ok]";
-      return `  ← tool_result for ${b.tool_use_id} ${flag}\n${String(b.content ?? "")}`;
+      let content = String(b.content ?? "");
+      if (resultCap !== undefined && content.length > resultCap) {
+        content = content.slice(0, resultCap) + `[… truncated ${content.length - resultCap} more chars]` + (exit ? `\n${exit[0]}` : "");
+      }
+      return `  ← tool_result for ${b.tool_use_id} ${flag}\n${content}`;
     })
     .join("\n");
 }
 
-function evidenceTier(f: Finding, events: Array<Record<string, unknown>>, resultCap?: number): "ok" | "mis-cited" | "fabricated" {
+export function evidenceTier(f: Finding, events: Array<Record<string, unknown>>, resultCap?: number): "ok" | "mis-cited" | "fabricated" {
   const cited = stepText(events, f.evidence_step, resultCap);
   const offending = stepText(events, f.step, resultCap);
   if (cited === null || offending === null) return "fabricated"; // cites steps that do not exist

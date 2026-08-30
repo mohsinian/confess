@@ -24,7 +24,7 @@
     "baseline": "tsx src/baseline/runBaseline.ts",
     "eval": "tsx src/eval/score.ts",
     "report": "tsx src/eval/report.ts",
-    "selftest": "tsx src/eval/score.ts --selftest && tsx tests/runTests.ts && tsx tests/agentSelfTest.ts",
+    "selftest": "tsx src/eval/score.ts --selftest && tsx tests/runTests.ts && tsx tests/agentSelfTest.ts && tsx tests/evidenceTier.test.ts",
     "typecheck": "tsc --noEmit",
     "agent": "tsx src/agent/run.ts",
     "ablate": "tsx src/agent/run.ts",
@@ -34,14 +34,14 @@
     "prepublishOnly": "npm run typecheck && npm run build && npm run selftest"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.122.0",
-    "dotenv": "^17.4.2",
-    "jsonrepair": "^3.15.0",
-    "zod": "^4.5.1"
+    "@anthropic-ai/sdk": "0.122.0",
+    "dotenv": "17.4.2",
+    "jsonrepair": "3.15.0",
+    "zod": "4.5.1"
   },
   "devDependencies": {
-    "@types/node": "^26.4.0",
-    "tsx": "^4.23.12",
-    "typescript": "^7.0.2"
+    "@types/node": "26.4.0",
+    "tsx": "4.23.12",
+    "typescript": "7.0.2"
   }
 }

@@ -12,8 +12,13 @@ function parseArgs(): { caseId?: string; system: string; outDir: string } {
   const caseIdx = args.indexOf("--case");
   const sysIdx = args.indexOf("--system");
   const outIdx = args.indexOf("--out");
+  // Positional fallback: `npm run demo case_12` must survive npm versions that
+  // drop args after "--" (observed on npm 10.9.0).
+  const positional = args.find(
+    (a, i) => /^case_\d+$/.test(a) && args[i - 1] !== "--out" && args[i - 1] !== "--system" && args[i - 1] !== "--case" && args[i - 1] !== "--file",
+  );
   return {
-    caseId: caseIdx !== -1 ? args[caseIdx + 1] : undefined,
+    caseId: caseIdx !== -1 ? args[caseIdx + 1] : positional,
     system: sysIdx !== -1 ? args[sysIdx + 1] : "agent",
     outDir: outIdx !== -1 ? args[outIdx + 1] : path.join(ROOT, "runs", "rendered"),
   };

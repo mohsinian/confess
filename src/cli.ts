@@ -206,11 +206,14 @@ async function audit(cli: CliArgs): Promise<void> {
   const configTag = offLabel ? "-off-" + [cli.off.memory && "memory", cli.off.verify && "verify", cli.off.detectors && "detectors"].filter(Boolean).join("-") : "";
   const reportDir = path.join(outBase, session + configTag);
   const started = Date.now();
+  // Structural warnings degrade the audit (evidence may be incomplete); cosmetic
+  // ones (trimming leading/trailing events) only print.
+  const degradationReasons = warnings.filter((w) => w.startsWith("invariant:") || w.startsWith("line "));
   const report = await runAudit(
     session + configTag,
     events,
     cfg,
-    { off: cli.off },
+    { off: cli.off, degradationReasons },
     "claude-code",
     {
       onStage: (stage) => console.log(`  · ${stage}`),
