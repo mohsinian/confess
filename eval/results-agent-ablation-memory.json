@@ -1,6 +1,6 @@
 {
   "run": "agent-ablation-memory",
-  "generatedAt": "2026-08-31T14:29:11.049Z",
+  "generatedAt": "2026-08-31T14:36:01.099Z",
   "cases": [
     {
       "case_id": "case_01",
@@ -89,7 +89,7 @@
         22
       ],
       "fpTypes": [
-        "error_swallowing"
+        "tool_misuse"
       ],
       "invalidEvidence": 0,
       "localizationWithin1": 0,
@@ -343,11 +343,11 @@
       "gtCount": 3
     },
     "tool_misuse": {
-      "precision": 0.6666666666666666,
+      "precision": 0.5,
       "recall": 0.6666666666666666,
-      "f1": 0.6666666666666666,
+      "f1": 0.5714285714285715,
       "tp": 2,
-      "fp": 1,
+      "fp": 2,
       "fn": 1,
       "gtCount": 3
     },
@@ -361,11 +361,11 @@
       "gtCount": 2
     },
     "error_swallowing": {
-      "precision": 0.75,
+      "precision": 1,
       "recall": 1,
-      "f1": 0.8571428571428571,
+      "f1": 1,
       "tp": 3,
-      "fp": 1,
+      "fp": 0,
       "fn": 0,
       "gtCount": 3
     }
@@ -387,10 +387,10 @@
   "misCitedEvidence": 0,
   "fabricatedEvidence": 1,
   "totals": {
-    "inputTokens": 1069741,
-    "outputTokens": 114435,
-    "costUsd": 24.62874,
-    "wallMs": 1661922,
+    "inputTokens": 1058801,
+    "outputTokens": 114931,
+    "costUsd": 24.501839999999998,
+    "wallMs": 1661480,
     "llmCalls": 123
   }
 }
