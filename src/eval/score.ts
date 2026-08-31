@@ -402,7 +402,7 @@ async function main() {
   );
   const o = result.overall;
   const pct = (x: number | null) => (x === null ? "n/a" : (x * 100).toFixed(1) + "%");
-  console.log(`\neval: ${runName} over ${caseIds.length} cases${strictEvidence ? "" : " [LOOSE: evidence-tier diagnostic only]"}`);
+  console.log(`\neval: ${runName} over ${scoped.length} cases${strictEvidence ? "" : " [LOOSE: evidence-tier diagnostic only]"}`);
   console.log(`  F1 ${pct(o.f1)}  P ${pct(o.precision)}  R ${pct(o.recall)}  (TP ${o.tp} / FP ${o.fp} / FN ${o.fn})`);
   console.log(`  localization(±1) ${pct(o.localizationAccuracy)}  clean-case FP ${result.cleanCaseFps ? Object.entries(result.cleanCaseFps).map(([k, v]) => `${k}:${v}`).join(" ") : "-"}  parseErrors ${result.parseErrors}`);
   console.log(`  cost $${result.totals.costUsd.toFixed(3)}  tokens in/out ${result.totals.inputTokens}/${result.totals.outputTokens}`);
