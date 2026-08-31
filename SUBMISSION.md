@@ -58,8 +58,8 @@ agents' sessions.
 | Failure-detection F1 | 70.8% | **79.3%** |
 | Precision / Recall | 57.5% / 92.0% | 69.7% / 92.0% |
 | False positives | 17 | **10** |
-| Human review time per session (est.) | 4.8 min | 4.3 min |
-| Cost per session | $0.26 | $2.48 |
+| Modeled reviewer effort (min/session) | 5.1 | 4.4 |
+| Cost per session | $0.28 | $2.29 |
 
 Stability: two independent full sweeps produced identical headlines (14 TP / 5 FP / 1 FN; all
 true positives at identical type and step). Evidence integrity: 100% of Confess's findings
