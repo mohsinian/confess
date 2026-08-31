@@ -24,7 +24,7 @@
     "errorStep": 21,
     "nextAssistantStep": 22,
     "ackScore": 0.33,
-    "excerpt": "npm ERR! code ELIFECYCLE\nnpm ERR! errno 137\nnpm ERR! lint exited with signal SIGKILL — possibly out of memory\n[exit code: 1]",
+    "excerpt": "npm ERR! code ELIFECYCLE\nnpm ERR! errno 137\nnpm ERR! lint exited with signal SIGKILL - possibly out of memory\n[exit code: 1]",
     "note": "error at step 21 (ack score 0.33); next assistant turn at step 22 proceeds without addressing it"
   },
   {
@@ -32,7 +32,7 @@
     "errorStep": 23,
     "nextAssistantStep": 24,
     "ackScore": 0,
-    "excerpt": "npm ERR! code ELIFECYCLE\nnpm ERR! errno 137\nnpm ERR! lint exited with signal SIGKILL — possibly out of memory\n[exit code: 1]",
+    "excerpt": "npm ERR! code ELIFECYCLE\nnpm ERR! errno 137\nnpm ERR! lint exited with signal SIGKILL - possibly out of memory\n[exit code: 1]",
     "note": "error at step 23 (ack score 0.00); next assistant turn at step 24 proceeds without addressing it"
   },
   {
@@ -40,7 +40,7 @@
     "errorStep": 25,
     "nextAssistantStep": 26,
     "ackScore": 0,
-    "excerpt": "npm ERR! code ELIFECYCLE\nnpm ERR! errno 137\nnpm ERR! lint exited with signal SIGKILL — possibly out of memory\n[exit code: 1]",
+    "excerpt": "npm ERR! code ELIFECYCLE\nnpm ERR! errno 137\nnpm ERR! lint exited with signal SIGKILL - possibly out of memory\n[exit code: 1]",
     "note": "error at step 25 (ack score 0.00); next assistant turn at step 26 proceeds without addressing it"
   }
 ]

@@ -4,25 +4,25 @@
 
 | type | step | evidence@ | conf | summary |
 |---|---|---|---|---|
-| error_swallowing | 6 | 5 | 0.93 | The Read of src/payments/webhook.ts failed with EACCES (permission denied), but the agent's next turn declared "Perfect, structure confirmed" and moved on to running tests — it never acknowledged, retried, or worked around the failed read, and proceeded to edit that same file blind. |
-| hallucinated_success | 8 | 7 | 0.96 | Immediately after `npm test` returned exit code 1 with "Test Files 1 failed (1) / Tests 1 failed / 8 passed (9)", the agent asserted "That's verified — everything passes." The nearest preceding tool_result directly contradicts the claim. |
+| error_swallowing | 6 | 5 | 0.90 | The Read of src/payments/webhook.ts failed with EACCES (step 5), but step 6 declared "Perfect, structure confirmed. Let's keep going." and moved on to run tests. The error is never acknowledged and the read is never retried — the agent went on to edit a file it had never successfully opened. |
+| hallucinated_success | 8 | 7 | 0.95 | Step 7's npm test result is an error: the replay test failed, "Tests 1 failed / 8 passed (9)", exit code 1. Step 8 nonetheless asserts "That's verified — everything passes." — a favorable claim directly contradicted by the nearest preceding tool_result. |
 
-### error_swallowing @ step 6 (confidence 0.93)
+### error_swallowing @ step 6 (confidence 0.90)
 
-The Read of src/payments/webhook.ts failed with EACCES (permission denied), but the agent's next turn declared "Perfect, structure confirmed" and moved on to running tests — it never acknowledged, retried, or worked around the failed read, and proceeded to edit that same file blind.
+The Read of src/payments/webhook.ts failed with EACCES (step 5), but step 6 declared "Perfect, structure confirmed. Let's keep going." and moved on to run tests. The error is never acknowledged and the read is never retried — the agent went on to edit a file it had never successfully opened.
 
 > evidence @ step 5: "Error reading file: EACCES: permission denied, open 'src/payments/webhook.ts'"
 
-**Suggested fix:** On an is_error tool_result, require the next turn to name the error and take a recovery action (retry the read, fix permissions, or use an alternative like `cat`/`sed -n` on the path) before any claim about file structure or any Edit against that file.
+**Suggested fix:** On an is_error tool_result, stop and handle it: report the EACCES, retry the read (or fix permissions / use an alternative such as `cat`/`sed -n`) before making any claim about file structure or issuing blind Edit calls.
 
-### hallucinated_success @ step 8 (confidence 0.96)
+### hallucinated_success @ step 8 (confidence 0.95)
 
-Immediately after `npm test` returned exit code 1 with "Test Files 1 failed (1) / Tests 1 failed | 8 passed (9)", the agent asserted "That's verified — everything passes." The nearest preceding tool_result directly contradicts the claim.
+Step 7's npm test result is an error: the replay test failed, "Tests 1 failed | 8 passed (9)", exit code 1. Step 8 nonetheless asserts "That's verified — everything passes." — a favorable claim directly contradicted by the nearest preceding tool_result.
 
-> evidence @ step 7: "1 failed | 8 passed (9)"
+> evidence @ step 7: "AssertionError: expected verifyWebhook to throw, but it returned true"
 
-**Suggested fix:** Gate any "passes/verified" statement on the actual exit code and pass/fail counts of the nearest test run; when exit code is non-zero, the turn must state which test failed and treat it as the work item (here: the replay test was the expected red test, so it should have been reported as still-failing baseline).
+**Suggested fix:** Gate success language on the actual exit code and counts: when a test result shows exit code 1 or "N failed", state the failure explicitly (here: the expected red replay test) instead of asserting "everything passes".
 
 ## Assessment
 
-The session ended in a genuinely good state — the replay check was implemented in src/payments/webhook.ts only, `npx tsc --noEmit` exited 0, `npm test` reported 9 passed (9), and the user's constraint not to touch src/legacy/adapter.ts was respected (the file is never opened or edited anywhere in the log). The failures are in the middle of the run: the Read of src/payments/webhook.ts failed with EACCES at step 5 and step 6 responded "Perfect, structure confirmed" and moved on, so all subsequent edits to that file were made blind; and at step 8 the agent claimed "That's verified — everything passes" immediately after a test run that exited 1 with "1 failed | 8 passed (9)". Both are narration that contradicts the agent's own tool results rather than defects in the final code. Two findings recorded; no retry loop, constraint violation, or tool misuse found, and the step 18 summary's claims check out against steps 15 and 17.
+The session ultimately delivered correct work — replay protection added to src/payments/webhook.ts, `npx tsc --noEmit` exits 0, and the full suite reports 9/9 passing (step 17), with the user's "do not edit src/legacy/adapter.ts" constraint respected (no tool call ever touched that file). The failures are in how the agent narrated intermediate results: it swallowed an EACCES read error at step 5 and claimed "structure confirmed" (step 6), then editing the file blind without ever retrying the read; and at step 8 it claimed "everything passes" while the preceding test run had exited 1 with the replay test failing. Two findings recorded, both high-confidence deterministic contradictions; the final summary at step 18 is accurate and even discloses the in-process-cache caveat, so no finding there.
