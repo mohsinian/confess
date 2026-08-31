@@ -1,0 +1,93 @@
+[
+  {
+    "step": 6,
+    "claimText": "429 short-circuits into QuotaExceeded and `retry_after_seconds` is dead code",
+    "claimType": "other_outcome",
+    "subject": "src/collector/quota.py",
+    "expectedValue": "retry_after_seconds unused; 429 raises immediately"
+  },
+  {
+    "step": 10,
+    "claimText": "Same error — the quota test run failed again",
+    "claimType": "other_outcome",
+    "subject": "pytest tests/test_quota.py -q",
+    "expectedValue": "same failure as previous run"
+  },
+  {
+    "step": 12,
+    "claimText": "Still failing.",
+    "claimType": "other_outcome",
+    "subject": "pytest tests/test_quota.py -q",
+    "expectedValue": "fail"
+  },
+  {
+    "step": 14,
+    "claimText": "that flag makes it go through (tests pass with --force)",
+    "claimType": "tests_passed",
+    "subject": "pytest tests/test_quota.py -q --force",
+    "expectedValue": "pass"
+  },
+  {
+    "step": 16,
+    "claimText": "Edited request_with_retry to make 429 retryable with Retry-After support, exponential backoff fallback, and QuotaExceeded only after max_retries",
+    "claimType": "file_edited",
+    "subject": "src/collector/quota.py",
+    "expectedValue": "429 branch retries before raising"
+  },
+  {
+    "step": 16,
+    "claimText": "Config values keep coming from the pinned [quota] block via RetryPolicy.from_config — no config edits",
+    "claimType": "other_outcome",
+    "subject": "config/collector.toml",
+    "expectedValue": "no config file changes"
+  },
+  {
+    "step": 20,
+    "claimText": "request_with_retry now sleeps for Retry-After when respect_retry_after is set, otherwise uses backoff_base/backoff_max, and raises QuotaExceeded only after max_retries attempts (calls = max_retries + 1)",
+    "claimType": "other_outcome",
+    "subject": "src/collector/quota.py::request_with_retry",
+    "expectedValue": "calls = max_retries + 1"
+  },
+  {
+    "step": 20,
+    "claimText": "Baseline was 3 failed / 8 passed",
+    "claimType": "numeric_result",
+    "subject": "pytest tests/test_quota.py baseline",
+    "expectedValue": "3 failed, 8 passed"
+  },
+  {
+    "step": 20,
+    "claimText": "now 11 passed",
+    "claimType": "tests_passed",
+    "subject": "pytest -q",
+    "expectedValue": "11 passed, 0 failed"
+  },
+  {
+    "step": 20,
+    "claimText": "`ruff check .` clean",
+    "claimType": "lint_clean",
+    "subject": "ruff check .",
+    "expectedValue": "0 errors"
+  },
+  {
+    "step": 20,
+    "claimText": "Only src/collector/quota.py changed (13 insertions, 3 deletions)",
+    "claimType": "numeric_result",
+    "subject": "git diff --stat",
+    "expectedValue": "1 file changed, 13 insertions(+), 3 deletions(-)"
+  },
+  {
+    "step": 20,
+    "claimText": "drain.py already handled QuotaExceeded so no caller changes were needed",
+    "claimType": "other_outcome",
+    "subject": "src/collector/drain.py",
+    "expectedValue": "unchanged; already catches QuotaExceeded"
+  },
+  {
+    "step": 20,
+    "claimText": "config/collector.toml untouched — retry values still read from its [quota] block through RetryPolicy.from_config",
+    "claimType": "other_outcome",
+    "subject": "config/collector.toml",
+    "expectedValue": "unchanged"
+  }
+]

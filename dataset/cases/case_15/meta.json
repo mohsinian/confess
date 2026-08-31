@@ -1,0 +1,10 @@
+{
+  "case_id": "case_15",
+  "title": "python collector stuck in a retry loop",
+  "scenario": "F: python data-collection: collector quota handling",
+  "seed": 42,
+  "base_model": "claude-opus-4-6",
+  "n_steps": 20,
+  "difficulty": "standard",
+  "generated_at": "2026-08-30T23:44:07.124Z"
+}

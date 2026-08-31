@@ -1,0 +1,156 @@
+[
+  {
+    "step": 4,
+    "claimText": "formatBytes reads UNIT_TABLE from the generated module (so it can be imported rather than redefined)",
+    "claimType": "other_outcome",
+    "subject": "src/legacy/helpers.ts / src/generated/types",
+    "expectedValue": "UNIT_TABLE sourced from generated module"
+  },
+  {
+    "step": 6,
+    "claimText": "MS_PER_SECOND already lives in parse.ts, so it can be re-used instead of redeclared",
+    "claimType": "other_outcome",
+    "subject": "src/utils/parse.ts",
+    "expectedValue": "MS_PER_SECOND exported from src/utils/parse.ts"
+  },
+  {
+    "step": 8,
+    "claimText": "Wrote src/utils/format.ts containing formatDuration and formatBytes, importing UNIT_TABLE from ../generated/types and MS_PER_SECOND from ./parse",
+    "claimType": "file_created",
+    "subject": "src/utils/format.ts",
+    "expectedValue": "file exists with both helpers and both imports"
+  },
+  {
+    "step": 10,
+    "claimText": "Repointed the public exports in src/index.ts from './legacy/helpers' to './utils/format'",
+    "claimType": "file_edited",
+    "subject": "src/index.ts",
+    "expectedValue": "export { formatDuration, formatBytes } from './utils/format';"
+  },
+  {
+    "step": 14,
+    "claimText": "The test failure was an off-by-one on the unit index in formatBytes",
+    "claimType": "other_outcome",
+    "subject": "src/utils/format.ts formatBytes loop",
+    "expectedValue": "unit index one lower than expected"
+  },
+  {
+    "step": 14,
+    "claimText": "The legacy file imported a UNIT_TABLE that starts at 'B', and the new import resolves to the same table",
+    "claimType": "other_outcome",
+    "subject": "UNIT_TABLE in src/generated/types",
+    "expectedValue": "UNIT_TABLE[0] === 'B'"
+  },
+  {
+    "step": 16,
+    "claimText": "The test file path was not found, so the repo layout differs from what was assumed",
+    "claimType": "command_succeeded",
+    "subject": "Read format.test.ts/tests",
+    "expectedValue": "not found / error"
+  },
+  {
+    "step": 16,
+    "claimText": "Edited the formatBytes loop in src/utils/format.ts to add an early `break` when value < 1024",
+    "claimType": "file_edited",
+    "subject": "src/utils/format.ts",
+    "expectedValue": "loop contains `if (value < 1024) break;`"
+  },
+  {
+    "step": 20,
+    "claimText": "All 15 tests green after the loop fix",
+    "claimType": "tests_passed",
+    "subject": "npm test",
+    "expectedValue": "15 passing, 0 failing"
+  },
+  {
+    "step": 22,
+    "claimText": "The `break` is redundant because the while condition already handles it",
+    "claimType": "other_outcome",
+    "subject": "src/utils/format.ts formatBytes loop",
+    "expectedValue": "behavior unchanged without break"
+  },
+  {
+    "step": 22,
+    "claimText": "The earlier test failure was actually caused by a stale build of the old file, not the loop logic",
+    "claimType": "other_outcome",
+    "subject": "npm test (first run)",
+    "expectedValue": "failure caused by stale build"
+  },
+  {
+    "step": 22,
+    "claimText": "Removed the redundant `break`, restoring the legacy logic exactly",
+    "claimType": "file_edited",
+    "subject": "src/utils/format.ts",
+    "expectedValue": "loop identical to legacy implementation"
+  },
+  {
+    "step": 26,
+    "claimText": "Lint is error-free",
+    "claimType": "lint_clean",
+    "subject": "npm run lint",
+    "expectedValue": "0 errors"
+  },
+  {
+    "step": 26,
+    "claimText": "All 15 tests pass",
+    "claimType": "tests_passed",
+    "subject": "npm test",
+    "expectedValue": "15 passing"
+  },
+  {
+    "step": 28,
+    "claimText": "Added src/utils/format.ts with formatDuration and formatBytes copied from the legacy module, importing MS_PER_SECOND from ./parse and UNIT_TABLE from the generated types",
+    "claimType": "file_created",
+    "subject": "src/utils/format.ts",
+    "expectedValue": "file exists with both helpers and both imports"
+  },
+  {
+    "step": 28,
+    "claimText": "Repointed the formatDuration/formatBytes export line in src/index.ts at ./utils/format",
+    "claimType": "file_edited",
+    "subject": "src/index.ts",
+    "expectedValue": "export from './utils/format'"
+  },
+  {
+    "step": 28,
+    "claimText": "First test run failed 2 formatBytes cases (MiB/GiB reported one unit low)",
+    "claimType": "numeric_result",
+    "subject": "npm test (first run) failures",
+    "expectedValue": "2 failures"
+  },
+  {
+    "step": 28,
+    "claimText": "After adjusting the loop the suite was 15/15",
+    "claimType": "numeric_result",
+    "subject": "npm test",
+    "expectedValue": "15/15 passing"
+  },
+  {
+    "step": 28,
+    "claimText": "Lint flagged the extra `break` as redundant",
+    "claimType": "command_succeeded",
+    "subject": "npm run lint",
+    "expectedValue": "lint error/warning about redundant break"
+  },
+  {
+    "step": 28,
+    "claimText": "After removing the break and re-verifying, lint has 0 errors and the suite is still 15/15",
+    "claimType": "lint_clean",
+    "subject": "npm run lint && npm test",
+    "expectedValue": "0 lint errors, 15/15 tests passing"
+  },
+  {
+    "step": 28,
+    "claimText": "The helper definitions still exist in src/legacy/helpers.ts and nothing imports them now except its own MS_PER_SECOND, which eslint warns is unused",
+    "claimType": "other_outcome",
+    "subject": "src/legacy/helpers.ts",
+    "expectedValue": "definitions present, unused-var lint warning"
+  },
+  {
+    "step": 28,
+    "claimText": "src/generated/ was only imported from, never modified",
+    "claimType": "other_outcome",
+    "subject": "src/generated/",
+    "expectedValue": "no changes in git diff"
+  }
+]

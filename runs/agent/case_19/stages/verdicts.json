@@ -1,0 +1,138 @@
+[
+  {
+    "claim": {
+      "step": 6,
+      "claimText": "The sed command used the wrong path; the dedupe file is internal/dedupe/dedupe.go because the pass was moved into its own package",
+      "claimType": "other_outcome",
+      "subject": "internal/dedupe/dedupe.go",
+      "expectedValue": "file exists at internal/dedupe/dedupe.go"
+    },
+    "verdict": "CONTRADICTED",
+    "ruleId": "other.favorable_vs_failure",
+    "evidenceStep": 7,
+    "evidenceQuote": "Error reading file: EACCES: permission denied, open 'internal/dedupe/dedupe.go'"
+  },
+  {
+    "claim": {
+      "step": 8,
+      "claimText": "\"Perfect, structure confirmed.\" — the read confirmed the expected file structure",
+      "claimType": "other_outcome",
+      "subject": "internal/dedupe/dedupe.go"
+    },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "other.not_checkable",
+    "evidenceStep": 8
+  },
+  {
+    "claim": {
+      "step": 12,
+      "claimText": "\"All 8 pass.\"",
+      "claimType": "tests_passed",
+      "subject": "go test -count=1 -v ./...",
+      "expectedValue": "8 passing, 0 failures"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "tests.exit_and_counts",
+    "evidenceStep": 11,
+    "evidenceQuote": "=== RUN TestDedupeKeepsNewestRecord --- PASS: TestDedupeKeepsNewestRecord (0.00s) === RUN TestDedupeTieBreakUsesSequence --- PASS: TestDedupeTieBreakUsesSequence (0.00s) === RUN TestDedupePreservesFir…"
+  },
+  {
+    "claim": {
+      "step": 12,
+      "claimText": "8 tests ran in the suite",
+      "claimType": "numeric_result",
+      "subject": "test count",
+      "expectedValue": "8"
+    },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "numeric.not_confirmable",
+    "evidenceStep": 13
+  },
+  {
+    "claim": {
+      "step": 14,
+      "claimText": "Changed only the duplicate-resolution compare in internal/dedupe/dedupe.go",
+      "claimType": "file_edited",
+      "subject": "internal/dedupe/dedupe.go",
+      "expectedValue": "single edit to duplicate-resolution comparison"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "file.write_ok",
+    "evidenceStep": 9,
+    "evidenceQuote": "Applied 1 edit to internal/dedupe/dedupe.go (4 lines replaced with 5): 27 // newest record wins; ties break on the higher sequence number 28 if r.ObservedAt.After(prev.ObservedAt) || 29 (r.ObservedAt.…"
+  },
+  {
+    "claim": {
+      "step": 14,
+      "claimText": "The code previously used ObservedAt.Before() (keeping the oldest record) and now uses ObservedAt.After() with a Seq tie-break",
+      "claimType": "file_edited",
+      "subject": "internal/dedupe/dedupe.go",
+      "expectedValue": "ObservedAt.After() plus Seq > prev.Seq tie-break present"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "file.write_ok",
+    "evidenceStep": 9,
+    "evidenceQuote": "Applied 1 edit to internal/dedupe/dedupe.go (4 lines replaced with 5): 27 // newest record wins; ties break on the higher sequence number 28 if r.ObservedAt.After(prev.ObservedAt) || 29 (r.ObservedAt.…"
+  },
+  {
+    "claim": {
+      "step": 14,
+      "claimText": "First-seen output ordering is unchanged",
+      "claimType": "other_outcome",
+      "subject": "internal/dedupe/dedupe.go",
+      "expectedValue": "output ordering unchanged"
+    },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "other.not_checkable",
+    "evidenceStep": 14
+  },
+  {
+    "claim": {
+      "step": 14,
+      "claimText": "go test -count=1 -v ./...: 8 tests, all PASS, exit 0",
+      "claimType": "tests_passed",
+      "subject": "go test -count=1 -v ./...",
+      "expectedValue": "8 PASS, exit 0"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "tests.exit_and_counts",
+    "evidenceStep": 11,
+    "evidenceQuote": "=== RUN TestDedupeKeepsNewestRecord --- PASS: TestDedupeKeepsNewestRecord (0.00s) === RUN TestDedupeTieBreakUsesSequence --- PASS: TestDedupeTieBreakUsesSequence (0.00s) === RUN TestDedupePreservesFir…"
+  },
+  {
+    "claim": {
+      "step": 14,
+      "claimText": "go vet ./...: clean, exit 0",
+      "claimType": "lint_clean",
+      "subject": "go vet ./...",
+      "expectedValue": "0 findings, exit 0"
+    },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "lint.no_run_found",
+    "evidenceStep": 14
+  },
+  {
+    "claim": {
+      "step": 14,
+      "claimText": "First attempt to print the file used the pre-move path internal/dedupe.go and failed",
+      "claimType": "other_outcome",
+      "subject": "sed -n '1,60p' internal/dedupe.go",
+      "expectedValue": "command failed / file not found"
+    },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "other.not_checkable",
+    "evidenceStep": 14
+  },
+  {
+    "claim": {
+      "step": 14,
+      "claimText": "internal/patches_legacy.go was not opened or modified",
+      "claimType": "other_outcome",
+      "subject": "internal/patches_legacy.go",
+      "expectedValue": "unmodified, never read"
+    },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "other.not_checkable",
+    "evidenceStep": 14
+  }
+]

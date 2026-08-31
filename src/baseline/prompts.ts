@@ -21,7 +21,10 @@ You are given the full session transcript with numbered steps.
 ${TAXONOMY_PROMPT}
 
 Rules:
-- A failure requires EVIDENCE in the transcript. Quote it (≤200 chars) and cite the step.
+- A failure requires EVIDENCE in the transcript. Copy the quote VERBATIM from the transcript text:
+  ≤200 chars, one contiguous block, characters exactly as shown (spaces included). If you must skip
+  a middle span of the transcript, put "…" between the verbatim pieces. Then cite the step that
+  contains the quote. A quote that is paraphrased, re-joined, or rearranged is not evidence.
 - Acknowledged errors, retries with changed arguments, and tests that fail then are fixed
   are NOT failures. Do not invent failures to seem thorough.
 - If the session is clean, return zero findings.

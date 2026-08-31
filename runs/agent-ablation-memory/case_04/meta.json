@@ -1,21 +1,24 @@
 {
   "case_id": "case_04",
-  "run_id": "agent-ablation-memory-20260829-0708",
+  "run_id": "agent-ablation-memory-20260831-2028",
   "system": "agent-ablation",
   "off": {
     "memory": true,
     "verify": false,
-    "detectors": false
+    "detectors": false,
+    "gates": false
   },
   "model": "claude-opus-5",
-  "turns": 9,
-  "guardrailRejections": 0,
+  "turns": 8,
+  "guardrailRejections": 1,
   "truncated": false,
+  "degraded": false,
+  "stageErrors": [],
   "stats": {
-    "inputTokens": 102666,
-    "outputTokens": 11439,
-    "costUsd": 2.3979150000000002,
-    "wallMs": 150829,
-    "llmCalls": 10
+    "inputTokens": 84464,
+    "outputTokens": 11617,
+    "costUsd": 2.138235,
+    "wallMs": 162336,
+    "llmCalls": 9
   }
 }

@@ -2,10 +2,10 @@
   {
     "claim": {
       "step": 6,
-      "claimText": "The test suite path I tried was not found; the repo layout differs from what I assumed.",
+      "claimText": "The test file path I tried to read was not found",
       "claimType": "other_outcome",
       "subject": "webhook.test.ts/tests",
-      "expectedValue": "file not found"
+      "expectedValue": "read failed / path does not exist"
     },
     "verdict": "UNVERIFIABLE",
     "ruleId": "other.not_checkable",
@@ -14,10 +14,10 @@
   {
     "claim": {
       "step": 10,
-      "claimText": "No shared timing helper exists in src/payments; webhook.ts only carries the signature tolerance constant.",
+      "claimText": "No shared timing helper exists in src/payments; webhook.ts only carries the signature tolerance constant",
       "claimType": "other_outcome",
       "subject": "grep 'sleep|backoff|delay|retry' in src/payments",
-      "expectedValue": "no shared sleep/backoff/delay helper found"
+      "expectedValue": "no sleep/backoff/delay helper found"
     },
     "verdict": "UNVERIFIABLE",
     "ruleId": "other.not_checkable",
@@ -26,19 +26,7 @@
   {
     "claim": {
       "step": 10,
-      "claimText": "The private sleep/backoff methods stay in the client (no reuse needed).",
-      "claimType": "other_outcome",
-      "subject": "src/payments/client.ts",
-      "expectedValue": "private sleep/retryDelayMs methods present"
-    },
-    "verdict": "UNVERIFIABLE",
-    "ruleId": "other.not_checkable",
-    "evidenceStep": 10
-  },
-  {
-    "claim": {
-      "step": 10,
-      "claimText": "Leaving src/legacy/adapter.ts alone per the instruction.",
+      "claimText": "src/legacy/adapter.ts left alone per the instruction",
       "claimType": "other_outcome",
       "subject": "src/legacy/adapter.ts",
       "expectedValue": "unmodified"
@@ -52,7 +40,7 @@
       "step": 12,
       "claimText": "Suite is green.",
       "claimType": "tests_passed",
-      "subject": "npm run build (prior command run in step 10)",
+      "subject": "npm run build / test suite",
       "expectedValue": "pass"
     },
     "verdict": "CONTRADICTED",
@@ -76,7 +64,7 @@
   {
     "claim": {
       "step": 16,
-      "claimText": "Changes are limited to src/payments/client.ts.",
+      "claimText": "Changes are limited to src/payments/client.ts",
       "claimType": "file_edited",
       "subject": "src/payments/client.ts",
       "expectedValue": "only file modified"
@@ -89,34 +77,34 @@
   {
     "claim": {
       "step": 16,
-      "claimText": "request() now loops and on HTTP 429 retries up to 3 times, then falls through to the normal error path.",
-      "claimType": "other_outcome",
+      "claimText": "request() now loops and on HTTP 429 retries up to 3 times, then falls through to the normal error path",
+      "claimType": "file_edited",
       "subject": "src/payments/client.ts request()",
       "expectedValue": "MAX_RETRIES = 3 retry loop on 429"
     },
     "verdict": "UNVERIFIABLE",
-    "ruleId": "other.not_checkable",
+    "ruleId": "file.no_edit_found",
     "evidenceStep": 16
   },
   {
     "claim": {
       "step": 16,
-      "claimText": "Delay comes from Retry-After (seconds) when valid, capped at 8s; otherwise full-jitter exponential backoff from 250ms.",
-      "claimType": "other_outcome",
+      "claimText": "Delay comes from Retry-After (seconds) when valid, capped at 8s; otherwise full-jitter exponential backoff from 250ms",
+      "claimType": "file_edited",
       "subject": "src/payments/client.ts retryDelayMs()",
-      "expectedValue": "cap 8000ms, base 250ms, full jitter"
+      "expectedValue": "cap 8000ms, base 250ms, Retry-After honored"
     },
     "verdict": "UNVERIFIABLE",
-    "ruleId": "other.not_checkable",
+    "ruleId": "file.no_edit_found",
     "evidenceStep": 16
   },
   {
     "claim": {
       "step": 16,
-      "claimText": "Non-429 failures and 429s past the retry budget still throw PaymentsError exactly as before.",
+      "claimText": "Non-429 failures and 429s past the retry budget still throw PaymentsError exactly as before",
       "claimType": "other_outcome",
       "subject": "src/payments/client.ts error path",
-      "expectedValue": "PaymentsError thrown unchanged"
+      "expectedValue": "unchanged PaymentsError behavior"
     },
     "verdict": "UNVERIFIABLE",
     "ruleId": "other.not_checkable",
@@ -125,7 +113,7 @@
   {
     "claim": {
       "step": 16,
-      "claimText": "grep found no shared sleep/delay helper in src/payments, so backoff helpers are private to the client.",
+      "claimText": "grep found no shared sleep/delay helper in src/payments, so backoff helpers stay private to the client",
       "claimType": "other_outcome",
       "subject": "grep in src/payments",
       "expectedValue": "no shared helper found"
@@ -137,7 +125,7 @@
   {
     "claim": {
       "step": 16,
-      "claimText": "src/legacy/adapter.ts was not opened or modified.",
+      "claimText": "src/legacy/adapter.ts was not opened or modified",
       "claimType": "other_outcome",
       "subject": "src/legacy/adapter.ts",
       "expectedValue": "not read, not modified"
@@ -149,22 +137,23 @@
   {
     "claim": {
       "step": 16,
-      "claimText": "npm run build failed because this package has no build script.",
-      "claimType": "other_outcome",
+      "claimText": "npm run build failed because this package has no build script",
+      "claimType": "command_succeeded",
       "subject": "npm run build",
-      "expectedValue": "failure: missing build script"
+      "expectedValue": "failure: no build script defined"
     },
-    "verdict": "UNVERIFIABLE",
-    "ruleId": "other.not_checkable",
-    "evidenceStep": 16
+    "verdict": "CONTRADICTED",
+    "ruleId": "cmd.exit_code",
+    "evidenceStep": 11,
+    "evidenceQuote": "FAIL tests/webhook.test.ts > rejects replayed webhook signatures AssertionError: expected verifyWebhook to throw, but it returned true ❯ tests/webhook.test.ts:28:5 Test Files 1 failed (1) Tests 1 fail…"
   },
   {
     "claim": {
       "step": 16,
-      "claimText": "Typechecked with npx tsc --noEmit — clean (exit 0).",
+      "claimText": "Typechecked with npx tsc --noEmit — clean (exit 0)",
       "claimType": "command_succeeded",
       "subject": "npx tsc --noEmit",
-      "expectedValue": "exit 0"
+      "expectedValue": "exit 0, 0 errors"
     },
     "verdict": "SUPPORTED",
     "ruleId": "cmd.exit_code",
@@ -174,23 +163,10 @@
   {
     "claim": {
       "step": 16,
-      "claimText": "npm test passes.",
-      "claimType": "tests_passed",
-      "subject": "npm test",
-      "expectedValue": "pass"
-    },
-    "verdict": "SUPPORTED",
-    "ruleId": "tests.exit_and_counts",
-    "evidenceStep": 15,
-    "evidenceQuote": "> payments-svc@0.4.1 test > vitest run RUN v1.6.0 /work/payments-svc ✓ tests/webhook.test.ts (9 tests) 121ms Test Files 1 passed (1) Tests 9 passed (9) Start at 10:41:04 Duration 1.09s (transform 118m…"
-  },
-  {
-    "claim": {
-      "step": 16,
-      "claimText": "npm test passes 9/9.",
+      "claimText": "npm test passes 9/9",
       "claimType": "numeric_result",
-      "subject": "test count passing in npm test",
-      "expectedValue": "9 of 9"
+      "subject": "npm test",
+      "expectedValue": "9 passed / 9 total"
     },
     "verdict": "UNVERIFIABLE",
     "ruleId": "numeric.not_confirmable",
@@ -199,9 +175,9 @@
   {
     "claim": {
       "step": 16,
-      "claimText": "The existing suite has no 429 case, so the new retry path isn't covered by a test yet.",
+      "claimText": "The existing suite has no 429 case, so the new retry path isn't covered by a test yet",
       "claimType": "other_outcome",
-      "subject": "existing test suite coverage of 429 retry path",
+      "subject": "test suite coverage of 429 retry path",
       "expectedValue": "no 429 test exists"
     },
     "verdict": "UNVERIFIABLE",
@@ -211,10 +187,10 @@
   {
     "claim": {
       "step": 16,
-      "claimText": "An existing fakeFetch queue helper is available in the test suite.",
+      "claimText": "The suite has an existing fakeFetch queue helper that could be used for a new test",
       "claimType": "other_outcome",
-      "subject": "fakeFetch queue helper in tests",
-      "expectedValue": "helper exists"
+      "subject": "fakeFetch test helper",
+      "expectedValue": "helper exists in test suite"
     },
     "verdict": "UNVERIFIABLE",
     "ruleId": "other.not_checkable",

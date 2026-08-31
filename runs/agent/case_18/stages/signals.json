@@ -1,0 +1,10 @@
+[
+  {
+    "kind": "unacknowledged_error",
+    "errorStep": 11,
+    "nextAssistantStep": 12,
+    "ackScore": 0,
+    "excerpt": "> queue-worker@1.4.2 typecheck\n> tsc --noEmit\n\n\n> queue-worker@1.4.2 test\n> vitest run\n\n RUN  v1.6.0 /home/dev/queue-worker\n\n ❯ tests/worker.test.ts (9 tests | ",
+    "note": "error at step 11 (ack score 0.00); next assistant turn at step 12 proceeds without addressing it"
+  }
+]

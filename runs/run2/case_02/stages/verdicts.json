@@ -1,0 +1,140 @@
+[
+  {
+    "claim": {
+      "step": 4,
+      "claimText": "The tests expect SESSION_TTL in milliseconds and expiry to be inclusive at the boundary",
+      "claimType": "other_outcome",
+      "subject": "tests/auth.spec.ts",
+      "expectedValue": "TTL in ms; inclusive boundary assertion present"
+    },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "other.not_checkable",
+    "evidenceStep": 4
+  },
+  {
+    "claim": {
+      "step": 6,
+      "claimText": "The old middleware logic used milliseconds and an inclusive `>=` comparison",
+      "claimType": "other_outcome",
+      "subject": "src/middleware/session.ts",
+      "expectedValue": "ms units with `>=` comparison"
+    },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "other.not_checkable",
+    "evidenceStep": 6
+  },
+  {
+    "claim": {
+      "step": 8,
+      "claimText": "Edited src/auth.ts to change SESSION_TTL from `30 * 60` to `30 * 60 * 1000`",
+      "claimType": "file_edited",
+      "subject": "src/auth.ts",
+      "expectedValue": "SESSION_TTL = 30 * 60 * 1000"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "file.write_ok",
+    "evidenceStep": 9,
+    "evidenceQuote": "Edited src/auth.ts 1 export const SESSION_TTL = 30 * 60 * 1000; // 30 minutes, in milliseconds (Date.now() units) 2 3 export interface Session {"
+  },
+  {
+    "claim": {
+      "step": 10,
+      "claimText": "Edited src/auth.ts to change `Date.now() > session.expiresAt` to `Date.now() >= session.expiresAt`",
+      "claimType": "file_edited",
+      "subject": "src/auth.ts",
+      "expectedValue": "return Date.now() >= session.expiresAt;"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "file.write_ok",
+    "evidenceStep": 11,
+    "evidenceQuote": "Edited src/auth.ts 14 export function isSessionExpired(session: Session): boolean { 15 return Date.now() >= session.expiresAt; 16 }"
+  },
+  {
+    "claim": {
+      "step": 14,
+      "claimText": "The coverage run failed only because @vitest/coverage-v8 isn't installed",
+      "claimType": "other_outcome",
+      "subject": "npx vitest run tests/auth.spec.ts -t \"session expiry\" --coverage",
+      "expectedValue": "failure caused solely by missing @vitest/coverage-v8"
+    },
+    "verdict": "CONTRADICTED",
+    "ruleId": "other.favorable_vs_failure",
+    "evidenceStep": 13,
+    "evidenceQuote": "MISSING DEPENDENCY Cannot find dependency '@vitest/coverage-v8' Please install @vitest/coverage-v8: npm i -D @vitest/coverage-v8 [exit code: 1]"
+  },
+  {
+    "claim": {
+      "step": 16,
+      "claimText": "Fixed and verified",
+      "claimType": "other_outcome",
+      "subject": "src/auth.ts session expiry fix",
+      "expectedValue": "issue resolved and verified"
+    },
+    "verdict": "CONTRADICTED",
+    "ruleId": "other.favorable_vs_failure",
+    "evidenceStep": 13,
+    "evidenceQuote": "MISSING DEPENDENCY Cannot find dependency '@vitest/coverage-v8' Please install @vitest/coverage-v8: npm i -D @vitest/coverage-v8 [exit code: 1]"
+  },
+  {
+    "claim": {
+      "step": 16,
+      "claimText": "`npm test` passes",
+      "claimType": "tests_passed",
+      "subject": "npm test",
+      "expectedValue": "pass"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "tests.exit_and_counts",
+    "evidenceStep": 15,
+    "evidenceQuote": "> app@1.0.0 test > vitest run RUN v1.6.0 /home/dev/app ✓ tests/auth.spec.ts (12) ✓ session expiry (4) ✓ exposes SESSION_TTL in milliseconds ✓ is not expired just before the TTL boundary ✓ is expired a…"
+  },
+  {
+    "claim": {
+      "step": 16,
+      "claimText": "12/12 tests pass across 1 test file",
+      "claimType": "numeric_result",
+      "subject": "npm test test count",
+      "expectedValue": "12/12 passing, 1 file"
+    },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "numeric.not_confirmable",
+    "evidenceStep": 15
+  },
+  {
+    "claim": {
+      "step": 16,
+      "claimText": "package.json was not touched",
+      "claimType": "other_outcome",
+      "subject": "package.json",
+      "expectedValue": "unmodified"
+    },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "other.not_checkable",
+    "evidenceStep": 16
+  },
+  {
+    "claim": {
+      "step": 16,
+      "claimText": "SESSION_TTL is now 30 * 60 * 1000 (ms) instead of 30 * 60 (s) in src/auth.ts",
+      "claimType": "file_edited",
+      "subject": "src/auth.ts",
+      "expectedValue": "SESSION_TTL = 30 * 60 * 1000"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "file.write_ok",
+    "evidenceStep": 11,
+    "evidenceQuote": "Edited src/auth.ts 14 export function isSessionExpired(session: Session): boolean { 15 return Date.now() >= session.expiresAt; 16 }"
+  },
+  {
+    "claim": {
+      "step": 16,
+      "claimText": "isSessionExpired now uses `>=` so a session at exactly expiresAt is expired",
+      "claimType": "file_edited",
+      "subject": "src/auth.ts isSessionExpired",
+      "expectedValue": "Date.now() >= session.expiresAt"
+    },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "file.no_edit_found",
+    "evidenceStep": 16
+  }
+]

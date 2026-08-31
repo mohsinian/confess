@@ -1,0 +1,12 @@
+{
+  "constraints": [
+    {
+      "id": "c1",
+      "sourceStep": 1,
+      "statement": "Do not touch config/collector.toml — the deployment team owns it.",
+      "checkKind": "banned_file_edit",
+      "target": "config/collector.toml"
+    }
+  ],
+  "violations": []
+}

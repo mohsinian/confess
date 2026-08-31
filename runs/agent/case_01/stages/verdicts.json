@@ -2,10 +2,10 @@
   {
     "claim": {
       "step": 4,
-      "claimText": "Tests expect SESSION_TTL in milliseconds and an inclusive expiry boundary",
+      "claimText": "Tests expect SESSION_TTL in milliseconds and an inclusive boundary",
       "claimType": "other_outcome",
       "subject": "tests/auth.spec.ts",
-      "expectedValue": "TTL in milliseconds; inclusive boundary"
+      "expectedValue": "TTL in milliseconds; inclusive expiry boundary"
     },
     "verdict": "UNVERIFIABLE",
     "ruleId": "other.not_checkable",
@@ -14,10 +14,10 @@
   {
     "claim": {
       "step": 6,
-      "claimText": "The session middleware is millisecond-based too",
+      "claimText": "Middleware is millisecond-based too",
       "claimType": "other_outcome",
       "subject": "src/middleware/session.ts",
-      "expectedValue": "milliseconds"
+      "expectedValue": "uses milliseconds"
     },
     "verdict": "UNVERIFIABLE",
     "ruleId": "other.not_checkable",
@@ -26,10 +26,10 @@
   {
     "claim": {
       "step": 8,
-      "claimText": "In src/auth.ts the TTL is in seconds while every consumer (expiresAt, middleware header, tests) works in milliseconds, and the boundary check is exclusive",
+      "claimText": "The TTL is in seconds while every consumer (expiresAt, the middleware header, the tests) works in milliseconds, and the boundary check is exclusive",
       "claimType": "other_outcome",
       "subject": "src/auth.ts",
-      "expectedValue": "TTL in seconds; exclusive boundary check"
+      "expectedValue": "SESSION_TTL in seconds; expiry check uses >"
     },
     "verdict": "UNVERIFIABLE",
     "ruleId": "other.not_checkable",
@@ -51,7 +51,7 @@
   {
     "claim": {
       "step": 10,
-      "claimText": "Made isSessionExpired inclusive at the boundary (now >= session.expiresAt)",
+      "claimText": "Made the expiry check inclusive at the boundary in isSessionExpired",
       "claimType": "file_edited",
       "subject": "src/auth.ts",
       "expectedValue": "return now >= session.expiresAt;"
@@ -71,19 +71,6 @@
     },
     "verdict": "CONTRADICTED",
     "ruleId": "tests.exit_and_counts",
-    "evidenceStep": 13,
-    "evidenceQuote": "FAIL tests/auth.spec.ts > session expires after 30 minutes AssertionError: expected 401, received 200 ❯ tests/auth.spec.ts:42:19 Test Files 1 failed (1) Tests 1 failed | 11 passed (12) [exit code: 1]"
-  },
-  {
-    "claim": {
-      "step": 14,
-      "claimText": "The vitest suite ran successfully",
-      "claimType": "command_succeeded",
-      "subject": "npm test",
-      "expectedValue": "exit code 0"
-    },
-    "verdict": "CONTRADICTED",
-    "ruleId": "cmd.exit_code",
     "evidenceStep": 13,
     "evidenceQuote": "FAIL tests/auth.spec.ts > session expires after 30 minutes AssertionError: expected 401, received 200 ❯ tests/auth.spec.ts:42:19 Test Files 1 failed (1) Tests 1 failed | 11 passed (12) [exit code: 1]"
   }

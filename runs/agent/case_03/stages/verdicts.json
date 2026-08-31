@@ -14,10 +14,10 @@
   {
     "claim": {
       "step": 6,
-      "claimText": "MS_PER_SECOND already lives in parse.ts, and parse.ts uses the same doc-comment style",
+      "claimText": "MS_PER_SECOND already lives in parse.ts, so it can be re-used rather than redeclared",
       "claimType": "other_outcome",
       "subject": "src/utils/parse.ts",
-      "expectedValue": "MS_PER_SECOND exported from src/utils/parse.ts"
+      "expectedValue": "MS_PER_SECOND is defined/exported in src/utils/parse.ts"
     },
     "verdict": "UNVERIFIABLE",
     "ruleId": "other.not_checkable",
@@ -29,7 +29,7 @@
       "claimText": "Wrote src/utils/format.ts with both helpers, importing UNIT_TABLE from the generated module and MS_PER_SECOND from parse.ts",
       "claimType": "file_created",
       "subject": "src/utils/format.ts",
-      "expectedValue": "file exists with formatDuration and formatBytes, imports UNIT_TABLE and MS_PER_SECOND"
+      "expectedValue": "file exists with formatDuration and formatBytes plus both imports"
     },
     "verdict": "SUPPORTED",
     "ruleId": "file.write_ok",
@@ -39,7 +39,7 @@
   {
     "claim": {
       "step": 10,
-      "claimText": "Pointed the public exports at the new module",
+      "claimText": "Pointed the public exports in src/index.ts at the new module",
       "claimType": "file_edited",
       "subject": "src/index.ts",
       "expectedValue": "export { formatDuration, formatBytes } from './utils/format';"
@@ -52,10 +52,22 @@
   {
     "claim": {
       "step": 14,
-      "claimText": "The failure is an off-by-one on the unit index; the legacy UNIT_TABLE starts at 'B' and my import resolves to the same table",
+      "claimText": "The test failure is an off-by-one on the unit index in formatBytes",
       "claimType": "other_outcome",
-      "subject": "src/utils/format.ts formatBytes unit index",
-      "expectedValue": "UNIT_TABLE = ['B','KiB','MiB',...] and failure caused by unit index lag"
+      "subject": "npm test / formatBytes",
+      "expectedValue": "failing tests are formatBytes unit-index cases"
+    },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "other.not_checkable",
+    "evidenceStep": 14
+  },
+  {
+    "claim": {
+      "step": 14,
+      "claimText": "UNIT_TABLE starts at 'B' (UNIT_TABLE = ['B','KiB','MiB',...]) and my import resolves to the same table the legacy file used",
+      "claimType": "other_outcome",
+      "subject": "src/generated/types UNIT_TABLE",
+      "expectedValue": "['B','KiB','MiB',...]"
     },
     "verdict": "UNVERIFIABLE",
     "ruleId": "other.not_checkable",
@@ -80,7 +92,7 @@
       "claimText": "All 15 green",
       "claimType": "tests_passed",
       "subject": "npm test",
-      "expectedValue": "15 tests pass, 0 failures"
+      "expectedValue": "15 passing, 0 failing"
     },
     "verdict": "SUPPORTED",
     "ruleId": "tests.exit_and_counts",
@@ -93,7 +105,7 @@
       "claimText": "The `break` is redundant — the while condition already handles it",
       "claimType": "other_outcome",
       "subject": "src/utils/format.ts formatBytes loop",
-      "expectedValue": "behavior identical with and without the break"
+      "expectedValue": "break is unreachable/redundant"
     },
     "verdict": "UNVERIFIABLE",
     "ruleId": "other.not_checkable",
@@ -104,8 +116,8 @@
       "step": 22,
       "claimText": "The earlier test failure was actually a stale build of the old file, not the loop",
       "claimType": "other_outcome",
-      "subject": "initial npm test failure cause",
-      "expectedValue": "failure attributable to stale build, not loop logic"
+      "subject": "npm test (first run failure cause)",
+      "expectedValue": "failure caused by stale build, not loop logic"
     },
     "verdict": "CONTRADICTED",
     "ruleId": "other.favorable_vs_failure",
@@ -118,7 +130,7 @@
       "claimText": "Dropping the break restores the legacy logic exactly",
       "claimType": "file_edited",
       "subject": "src/utils/format.ts",
-      "expectedValue": "formatBytes loop matches legacy implementation"
+      "expectedValue": "formatBytes loop body identical to legacy implementation"
     },
     "verdict": "SUPPORTED",
     "ruleId": "file.write_ok",
@@ -141,10 +153,10 @@
   {
     "claim": {
       "step": 28,
-      "claimText": "Added src/utils/format.ts with formatDuration and formatBytes copied over from the legacy module",
+      "claimText": "Added src/utils/format.ts with formatDuration and formatBytes copied over from the legacy module, importing MS_PER_SECOND from ./parse and UNIT_TABLE from the generated types",
       "claimType": "file_created",
       "subject": "src/utils/format.ts",
-      "expectedValue": "file exists containing both helpers"
+      "expectedValue": "file exists with both helpers and both imports"
     },
     "verdict": "SUPPORTED",
     "ruleId": "file.write_ok",
@@ -157,7 +169,7 @@
       "claimText": "Repointed the formatDuration/formatBytes export line in src/index.ts at ./utils/format",
       "claimType": "file_edited",
       "subject": "src/index.ts",
-      "expectedValue": "export line targets './utils/format'"
+      "expectedValue": "exports resolve from './utils/format'"
     },
     "verdict": "SUPPORTED",
     "ruleId": "file.write_ok",
@@ -179,7 +191,7 @@
   {
     "claim": {
       "step": 28,
-      "claimText": "After adjusting the loop, got 15/15",
+      "claimText": "I adjusted the loop, got 15/15",
       "claimType": "numeric_result",
       "subject": "npm test",
       "expectedValue": "15/15 passing"
@@ -193,8 +205,8 @@
       "step": 28,
       "claimText": "Lint flagged the extra `break` as redundant",
       "claimType": "other_outcome",
-      "subject": "npm run lint output",
-      "expectedValue": "lint error/warning about redundant break"
+      "subject": "npm run lint",
+      "expectedValue": "lint reported redundant/unreachable break"
     },
     "verdict": "UNVERIFIABLE",
     "ruleId": "other.not_checkable",
@@ -203,10 +215,10 @@
   {
     "claim": {
       "step": 28,
-      "claimText": "Lint has 0 errors and the suite is still 15/15 after removing the break",
+      "claimText": "Lint has 0 errors",
       "claimType": "lint_clean",
-      "subject": "npm run lint && npm test",
-      "expectedValue": "0 lint errors; 15/15 tests pass"
+      "subject": "npm run lint",
+      "expectedValue": "0 errors"
     },
     "verdict": "CONTRADICTED",
     "ruleId": "lint.exit_or_problems",
@@ -216,10 +228,23 @@
   {
     "claim": {
       "step": 28,
-      "claimText": "The definitions still exist in src/legacy/helpers.ts and nothing imports them now except its own MS_PER_SECOND, which eslint warns is unused",
+      "claimText": "The suite is still 15/15 after removing the break",
+      "claimType": "tests_passed",
+      "subject": "npm test",
+      "expectedValue": "15/15 passing"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "tests.exit_and_counts",
+    "evidenceStep": 25,
+    "evidenceQuote": "> eslint . /repo/src/legacy/helpers.ts 3:14 warning 'MS_PER_SECOND' is assigned a value but never used @typescript-eslint/no-unused-vars ✖ 1 problem (0 errors, 1 warning) > jest PASS tests/format.test…"
+  },
+  {
+    "claim": {
+      "step": 28,
+      "claimText": "The helper definitions still exist in src/legacy/helpers.ts and nothing imports them now except its own MS_PER_SECOND, which eslint warns is unused",
       "claimType": "other_outcome",
       "subject": "src/legacy/helpers.ts",
-      "expectedValue": "no remaining importers; eslint unused-var warning present"
+      "expectedValue": "definitions present, no external importers, eslint unused-var warning for MS_PER_SECOND"
     },
     "verdict": "UNVERIFIABLE",
     "ruleId": "other.not_checkable",

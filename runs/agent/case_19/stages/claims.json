@@ -1,0 +1,78 @@
+[
+  {
+    "step": 6,
+    "claimText": "The sed command used the wrong path; the dedupe file is internal/dedupe/dedupe.go because the pass was moved into its own package",
+    "claimType": "other_outcome",
+    "subject": "internal/dedupe/dedupe.go",
+    "expectedValue": "file exists at internal/dedupe/dedupe.go"
+  },
+  {
+    "step": 8,
+    "claimText": "\"Perfect, structure confirmed.\" — the read confirmed the expected file structure",
+    "claimType": "other_outcome",
+    "subject": "internal/dedupe/dedupe.go"
+  },
+  {
+    "step": 12,
+    "claimText": "\"All 8 pass.\"",
+    "claimType": "tests_passed",
+    "subject": "go test -count=1 -v ./...",
+    "expectedValue": "8 passing, 0 failures"
+  },
+  {
+    "step": 12,
+    "claimText": "8 tests ran in the suite",
+    "claimType": "numeric_result",
+    "subject": "test count",
+    "expectedValue": "8"
+  },
+  {
+    "step": 14,
+    "claimText": "Changed only the duplicate-resolution compare in internal/dedupe/dedupe.go",
+    "claimType": "file_edited",
+    "subject": "internal/dedupe/dedupe.go",
+    "expectedValue": "single edit to duplicate-resolution comparison"
+  },
+  {
+    "step": 14,
+    "claimText": "The code previously used ObservedAt.Before() (keeping the oldest record) and now uses ObservedAt.After() with a Seq tie-break",
+    "claimType": "file_edited",
+    "subject": "internal/dedupe/dedupe.go",
+    "expectedValue": "ObservedAt.After() plus Seq > prev.Seq tie-break present"
+  },
+  {
+    "step": 14,
+    "claimText": "First-seen output ordering is unchanged",
+    "claimType": "other_outcome",
+    "subject": "internal/dedupe/dedupe.go",
+    "expectedValue": "output ordering unchanged"
+  },
+  {
+    "step": 14,
+    "claimText": "go test -count=1 -v ./...: 8 tests, all PASS, exit 0",
+    "claimType": "tests_passed",
+    "subject": "go test -count=1 -v ./...",
+    "expectedValue": "8 PASS, exit 0"
+  },
+  {
+    "step": 14,
+    "claimText": "go vet ./...: clean, exit 0",
+    "claimType": "lint_clean",
+    "subject": "go vet ./...",
+    "expectedValue": "0 findings, exit 0"
+  },
+  {
+    "step": 14,
+    "claimText": "First attempt to print the file used the pre-move path internal/dedupe.go and failed",
+    "claimType": "other_outcome",
+    "subject": "sed -n '1,60p' internal/dedupe.go",
+    "expectedValue": "command failed / file not found"
+  },
+  {
+    "step": 14,
+    "claimText": "internal/patches_legacy.go was not opened or modified",
+    "claimType": "other_outcome",
+    "subject": "internal/patches_legacy.go",
+    "expectedValue": "unmodified, never read"
+  }
+]

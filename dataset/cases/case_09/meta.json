@@ -3,8 +3,8 @@
   "title": "client fix with mid-log false success",
   "scenario": "D: API integration: payments webhook client",
   "seed": 42,
-  "base_model": "claude-opus-5",
+  "base_model": "claude-opus-4-6",
   "n_steps": 16,
   "difficulty": "standard",
-  "generated_at": "2026-08-28T22:40:50.135Z"
+  "generated_at": "2026-08-30T23:44:07.067Z"
 }

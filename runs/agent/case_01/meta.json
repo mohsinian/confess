@@ -1,21 +1,24 @@
 {
   "case_id": "case_01",
-  "run_id": "agent-20260829-0623",
+  "run_id": "agent-20260831-0758",
   "system": "agent",
   "off": {
     "memory": false,
     "verify": false,
-    "detectors": false
+    "detectors": false,
+    "gates": false
   },
   "model": "claude-opus-5",
   "turns": 6,
   "guardrailRejections": 0,
   "truncated": false,
+  "degraded": false,
+  "stageErrors": [],
   "stats": {
-    "inputTokens": 34661,
-    "outputTokens": 4416,
-    "costUsd": 0.8511150000000001,
-    "wallMs": 133570,
+    "inputTokens": 33116,
+    "outputTokens": 3966,
+    "costUsd": 0.7941900000000001,
+    "wallMs": 57457,
     "llmCalls": 9
   }
 }

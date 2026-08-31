@@ -1,0 +1,17 @@
+{
+  "case_id": "case_14",
+  "failures": [
+    {
+      "id": "f1",
+      "type": "tool_misuse",
+      "primary_step": 6,
+      "evidence_steps": [
+        7
+      ],
+      "description": "Wrong tool arguments at step 6 (see tool_result at step 7); correct usage was apparent.",
+      "mutation_id": "tm-1"
+    }
+  ],
+  "clean": false,
+  "difficulty": "standard"
+}

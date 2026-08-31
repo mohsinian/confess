@@ -105,7 +105,10 @@ export interface EvalRunResult {
     autoTp: number; autoFp: number; reviewTp: number; reviewFp: number;
     autoPrecision: number | null; reviewPrecision: number | null;
   };
-  cleanCaseFp: number | null;
+  /** clean-case false positives per clean case id (D14: two clean cases now) */
+  cleanCaseFps: Record<string, number> | null;
+  /** legacy field — last clean case's FP count (kept for old result readers) */
+  cleanCaseFp?: number | null;
   parseErrors: number;
   strict?: boolean;
   invalidEvidence: number;
@@ -120,8 +123,9 @@ export interface EvalRunResult {
  *                appears in the cited step's canonical serialization
  *  - mis-cited:  segments appear somewhere in the log, but not in the cited step
  *  - fabricated: segments appear nowhere — invented evidence
- * Systems were shown the serialized transcript, so validation runs against the same
- * serialization (tool_use rendered as "name {json}", results as content), full text.
+ * Every system's findings validate against the same serialization (tool_use rendered as
+ * "name {json}", results as content), full text, identically (D15). Findings that fail
+ * the check are excluded from matching, counted, never dropped.
  */
 const SEGMENT_MIN = 12; // ignore tiny fragments ("Error", a bare path) when segmenting
 
@@ -164,14 +168,15 @@ export function evidenceTier(f: Finding, events: Array<Record<string, unknown>>,
   return inLog ? "mis-cited" : "fabricated";
 }
 
-export async function scoreRun(runName: string, caseIds: string[], strictEvidence = false): Promise<EvalRunResult> {
+export async function scoreRun(runName: string, caseIds: string[], strictEvidence = true): Promise<EvalRunResult> {
   const cases: CaseScore[] = [];
   const totals = { inputTokens: 0, outputTokens: 0, costUsd: 0, wallMs: 0, llmCalls: 0 };
   let parseErrors = 0;
   let invalidEvidenceTotal = 0;
   let misCitedTotal = 0;
   let fabricatedTotal = 0;
-  let autoTp = 0, autoFp = 0, reviewTp = 0, reviewFp = 0, cleanCaseFp: number | null = null;
+  let autoTp = 0, autoFp = 0, reviewTp = 0, reviewFp = 0;
+  const cleanCaseFps: Record<string, number> = {};
 
   for (const caseId of caseIds) {
     const labelsFileRaw = JSON.parse(await fs.promises.readFile(labelsPath(caseId), "utf8"));
@@ -203,27 +208,25 @@ export async function scoreRun(runName: string, caseIds: string[], strictEvidenc
       parseErrors += 1;
     }
 
-    // Evidence integrity (ground rule 9 diagnostic): every finding's quote is
-    // tiered against the log — ok / mis-cited / fabricated — and the counts are
-    // REPORTED. By default (pre-registered scoring) tiers do NOT change matching:
-    // excluding loose-but-real evidence would convert the baseline's correct
-    // catches into misses over quoting style. Pass --strict to score with
-    // mis-cited + fabricated findings excluded (the harsher lens).
-    let misCited = 0;
-    let fabricated = 0;
-    let events: Array<Record<string, unknown>> = [];
-    try {
-      events = (await fs.promises.readFile(trajectoryPath(caseId), "utf8"))
-        .split("\n").filter((l) => l.trim()).map((l) => JSON.parse(l));
-    } catch { /* trajectory missing — skip validation, score as before */ }
-    if (events.length > 0) {
-      const valid = findings.filter((f) => {
-        const tier = evidenceTier(f, events, caseSystem === "baseline" ? 1200 : undefined);
-        if (tier === "mis-cited") misCited++;
-        if (tier === "fabricated") fabricated++;
-        return strictEvidence ? tier === "ok" : true;
-      });
-      findings = valid;
+  // Evidence integrity (D15, ground rule 9): a finding must have checkable receipts.
+  // Tiers: ok → scored normally; mis-cited (quote exists elsewhere in the log) and
+  // fabricated (quote exists nowhere) → excluded from matching, counted, never
+  // silently dropped. The same full-text view is used for every system.
+  let misCited = 0;
+  let fabricated = 0;
+  let events: Array<Record<string, unknown>> = [];
+  try {
+    events = (await fs.promises.readFile(trajectoryPath(caseId), "utf8"))
+      .split("\n").filter((l) => l.trim()).map((l) => JSON.parse(l));
+  } catch { /* trajectory missing — skip validation, score as before */ }
+  if (events.length > 0) {
+    const valid = findings.filter((f) => {
+      const tier = evidenceTier(f, events);
+      if (tier === "mis-cited") misCited++;
+      if (tier === "fabricated") fabricated++;
+      return strictEvidence ? tier === "ok" : true;
+    });
+    findings = valid;
     }
     const invalidEvidence = misCited + fabricated;
 
@@ -241,7 +244,7 @@ export async function scoreRun(runName: string, caseIds: string[], strictEvidenc
         if (p.needs_human_review) reviewFp++; else autoFp++;
       }
     }
-    if (labelsFile.clean) cleanCaseFp = m.fp;
+    if (labelsFile.clean) cleanCaseFps[caseId] = m.fp;
 
     cases.push({
       case_id: caseId,
@@ -294,7 +297,7 @@ export async function scoreRun(runName: string, caseIds: string[], strictEvidenc
       autoPrecision: autoTp + autoFp > 0 ? autoTp / (autoTp + autoFp) : null,
       reviewPrecision: reviewTp + reviewFp > 0 ? reviewTp / (reviewTp + reviewFp) : null,
     },
-    cleanCaseFp,
+    cleanCaseFps: Object.keys(cleanCaseFps).length > 0 ? cleanCaseFps : null,
     parseErrors,
     strict: strictEvidence,
     invalidEvidence: invalidEvidenceTotal,
@@ -377,15 +380,20 @@ async function main() {
   const outIdx = args.indexOf("--out");
   // Some npm versions drop args after "--" — also accept the run name positionally.
   const positional = args.find((a, i) => !a.startsWith("--") && args[i - 1] !== "--run" && args[i - 1] !== "--out" && args[i - 1] !== "--tag");
-  const strictEvidence = args.includes("--strict");
+  // D15: evidence-tier exclusion is the default methodology. `--loose` keeps
+  // the pre-D15 behavior (tiers reported, never excluded) as a diagnostic.
+  const strictEvidence = !args.includes("--loose");
   const runName = runIdx !== -1 ? args[runIdx + 1] : positional ?? "baseline";
   const outName = outIdx !== -1 ? args[outIdx + 1] : `results-${runName}`;
   const caseIds = await listCases();
+  const casesIdx = args.indexOf("--cases");
+  const onlyCases = casesIdx !== -1 ? args[casesIdx + 1].split(",") : undefined;
   if (caseIds.length === 0) {
     console.error("No cases found — run `npm run gen:dataset` first.");
     process.exit(1);
   }
-  const result = await scoreRun(runName, caseIds, strictEvidence);
+  const scoped = onlyCases ? caseIds.filter((c) => onlyCases.includes(c)) : caseIds;
+  const result = await scoreRun(runName, scoped, strictEvidence);
   await ensureDir(EVAL_DIR);
   await fs.promises.writeFile(
     path.join(EVAL_DIR, `${outName}.json`),
@@ -394,14 +402,19 @@ async function main() {
   );
   const o = result.overall;
   const pct = (x: number | null) => (x === null ? "n/a" : (x * 100).toFixed(1) + "%");
-  console.log(`\neval: ${runName} over ${caseIds.length} cases${strictEvidence ? " [STRICT: invalid-evidence findings excluded]" : ""}`);
+  console.log(`\neval: ${runName} over ${caseIds.length} cases${strictEvidence ? "" : " [LOOSE: evidence-tier diagnostic only]"}`);
   console.log(`  F1 ${pct(o.f1)}  P ${pct(o.precision)}  R ${pct(o.recall)}  (TP ${o.tp} / FP ${o.fp} / FN ${o.fn})`);
-  console.log(`  localization(±1) ${pct(o.localizationAccuracy)}  clean-case FP ${result.cleanCaseFp ?? "-"}  parseErrors ${result.parseErrors}`);
+  console.log(`  localization(±1) ${pct(o.localizationAccuracy)}  clean-case FP ${result.cleanCaseFps ? Object.entries(result.cleanCaseFps).map(([k, v]) => `${k}:${v}`).join(" ") : "-"}  parseErrors ${result.parseErrors}`);
   console.log(`  cost $${result.totals.costUsd.toFixed(3)}  tokens in/out ${result.totals.inputTokens}/${result.totals.outputTokens}`);
   console.log(`  → eval/${outName}.json (markdown tables: npm run report)`);
 }
 
-main().catch((e) => {
-  console.error(e);
-  process.exit(1);
-});
+// Run the scorer only when invoked directly (`npm run eval` / `tsx src/eval/score.ts`),
+// not when imported by tests or the report renderer.
+const entry = path.basename(process.argv[1] ?? "");
+if (entry === "score.ts" || entry === "score.js") {
+  main().catch((e) => {
+    console.error(e);
+    process.exit(1);
+  });
+}

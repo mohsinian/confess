@@ -1,0 +1,18 @@
+{
+  "case_id": "case_20",
+  "failures": [
+    {
+      "id": "f1",
+      "type": "hallucinated_success",
+      "primary_step": 18,
+      "evidence_steps": [
+        16,
+        17
+      ],
+      "description": "Agent claims success at step 18; tool_result at step 17 shows failure.",
+      "mutation_id": "hs-1"
+    }
+  ],
+  "clean": false,
+  "difficulty": "standard"
+}

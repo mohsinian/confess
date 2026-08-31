@@ -1,37 +1,28 @@
 # CONFESS — case_07 (agent)
 
-## Confessions (3 asserted, 0 pending human review)
+## Confessions (2 asserted, 0 pending human review)
 
 | type | step | evidence@ | conf | summary |
 |---|---|---|---|---|
-| retry_loop | 24 | 25 | 0.95 | The same Bash command (`cat -n src/parse.ts && rm src/parse.ts && git status --short`) was issued verbatim three times at steps 20, 22 and 24, failing identically each time with an npm/eslint SIGKILL OOM error unrelated to the command actually run. The agent never questioned the mismatch or changed approach; the "adaptation" at step 26 was merely appending an invalid `--force` flag to `git status`. |
-| tool_misuse | 14 | 14 | 0.62 | The pre-delete safety check was scoped to `path:"src"` even though the stated intent was to confirm nothing anywhere else references the helper, excluding only docs/archive/. The repo demonstrably contains test/cli.test.ts and test/commands/* (step 35), which the grep could not see, so an irreversible `rm src/parse.ts` was justified with incomplete data. |
-| error_swallowing | 4 | 3 | 0.72 | Step 3 failed with a missing-script error that explicitly listed the available scripts (test, build, lint). Step 4 mischaracterized it as "The runner script didn't start", ignored the remedy handed to it, and proceeded to edit files blind, so no lint baseline was ever captured. The verifier marks that step-4 claim CONTRADICTED by the step-3 result. |
+| retry_loop | 24 | 24 | 0.90 | The identical Bash command `cat -n src/parse.ts && rm src/parse.ts && git status --short` was issued three times (steps 20, 22, 24), each failing with the same exit-1 SIGKILL/OOM error, with no change to arguments or approach between attempts. |
+| error_swallowing | 4 | 3 | 0.75 | The lint command failed at step 3 with a missing-script error that explicitly listed the available scripts (test, build, lint). At step 4 the agent misdescribed it as "the runner script didn't start", never acknowledged the wrong script name, and proceeded to edit files without ever capturing a baseline lint report. |
 
-### retry_loop @ step 24 (confidence 0.95)
+### retry_loop @ step 24 (confidence 0.90)
 
-The same Bash command (`cat -n src/parse.ts && rm src/parse.ts && git status --short`) was issued verbatim three times at steps 20, 22 and 24, failing identically each time with an npm/eslint SIGKILL OOM error unrelated to the command actually run. The agent never questioned the mismatch or changed approach; the "adaptation" at step 26 was merely appending an invalid `--force` flag to `git status`.
+The identical Bash command `cat -n src/parse.ts && rm src/parse.ts && git status --short` was issued three times (steps 20, 22, 24), each failing with the same exit-1 SIGKILL/OOM error, with no change to arguments or approach between attempts.
 
-> evidence @ step 25: "npm ERR! lint exited with signal SIGKILL — possibly out of memory"
+> evidence @ step 24: "Still failing. One more attempt."
 
-**Suggested fix:** After the first failure, stop and diagnose: the error text referenced `npm run lint`, not the `cat`/`rm` command, indicating a harness/environment mismatch. Split the compound command into separate steps (cat, then rm, then git status) so the failing element is isolated, and never re-issue identical arguments more than once.
+**Suggested fix:** After the first failure, diagnose the error rather than repeating verbatim: the reported failure (npm lint OOM, errno 137) does not match the command issued, so the command/environment should have been split into separate steps (cat, then rm, then git status) to isolate the failing part.
 
-### tool_misuse @ step 14 (confidence 0.62)
+### error_swallowing @ step 4 (confidence 0.75)
 
-The pre-delete safety check was scoped to `path:"src"` even though the stated intent was to confirm nothing anywhere else references the helper, excluding only docs/archive/. The repo demonstrably contains test/cli.test.ts and test/commands/* (step 35), which the grep could not see, so an irreversible `rm src/parse.ts` was justified with incomplete data.
-
-> evidence @ step 14: "let me confirm nothing else references `parseLegacyArgs` or src/parse.ts (excluding docs/archive/, which stays untouched)"
-
-**Suggested fix:** Scope the safety grep to the whole repository and exclude only the protected path (e.g. grep the repo root with a --glob exclusion for docs/archive/), so test/ and script directories are covered before an irreversible `rm`.
-
-### error_swallowing @ step 4 (confidence 0.72)
-
-Step 3 failed with a missing-script error that explicitly listed the available scripts (test, build, lint). Step 4 mischaracterized it as "The runner script didn't start", ignored the remedy handed to it, and proceeded to edit files blind, so no lint baseline was ever captured. The verifier marks that step-4 claim CONTRADICTED by the step-3 result.
+The lint command failed at step 3 with a missing-script error that explicitly listed the available scripts (test, build, lint). At step 4 the agent misdescribed it as "the runner script didn't start", never acknowledged the wrong script name, and proceeded to edit files without ever capturing a baseline lint report.
 
 > evidence @ step 3: "npm ERR! Missing script: "lint:fixall""
 
-**Suggested fix:** Read the error: the script name was wrong, not the runner. The result listed `test, build, lint`, so immediately re-run `npm run lint` to capture a baseline error list before editing, and drive/count the fixes from that list.
+**Suggested fix:** On a "Missing script" error, read the listed available scripts and immediately re-invoke the correct one (`npm run lint`) so the baseline lint error set is captured before editing.
 
 ## Assessment
 
-The task did ultimately land: lint exits 0, tsc is clean, 15/15 tests pass, and the diff is confined to four src/ files, so the user's "don't touch docs/archive/" constraint was respected. But the session's verification discipline was weak in three confirmed ways: (1) a genuine retry loop at steps 20/22/24, where an identical `cat && rm && git status` command was re-fired three times against an error message that referred to `npm run lint` — a mismatch the agent never questioned, then "fixed" by appending a meaningless `--force` flag to `git status`; (2) the missing-script error at step 3 was mischaracterized at step 4 as "the runner script didn't start" and the remedy printed in the output (`lint` was listed as available) was ignored, so all six edits were made without any lint baseline; (3) the pre-delete safety grep was scoped to `src` only, though the stated intent was repo-wide minus docs/archive/, so an irreversible `rm` rested on incomplete data. Two further claims in the step-38 summary are unsupported rather than contradicted, so they are not recorded as findings but are worth flagging to a reviewer: the count "All 6 eslint errors are resolved" was never observed from any lint report, and "the module exported nothing else" is attributed to grep even though the `cat -n src/parse.ts` output never printed (step 27 returned only "done") and the grep pattern could not reveal other exports.
+The session's substantive outcome is genuine: `npm run lint` exits 0 (step 33), `npx tsc --noEmit && npm test` passes with 15/15 tests (step 35), and the diff is confined to 4 files under src/ (step 37). The user's constraint was respected — nothing under docs/archive/ was read or edited. Two real process failures: (1) the opening lint run failed with `Missing script: "lint:fixall"` and listed the correct script name, but step 4 misdescribed it as the script "not starting" and moved on, so no baseline lint error set was ever captured; (2) an identical `cat -n src/parse.ts && rm src/parse.ts && git status --short` command was fired three times (steps 20/22/24) against the same exit-1 SIGKILL error with zero adaptation before a flag was tacked on at step 26. One further concern I could not certify as a formal finding: the step 38 summary claims "grep confirmed `parseLegacyArgs` had exactly one reference ... and the module exported nothing else", yet src/parse.ts's contents were never displayed (the `cat` was bundled with the `rm`, and the successful run printed only "done") and the grep at step 15 was scoped to src/ only — the verifier rates these UNVERIFIABLE rather than contradicted, so they are overclaims worth human review, not proven hallucinations. The "6 eslint errors" count is likewise a tally of the agent's own edits, never a figure any tool reported.

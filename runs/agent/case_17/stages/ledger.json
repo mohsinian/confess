@@ -1,0 +1,12 @@
+{
+  "constraints": [
+    {
+      "id": "c1",
+      "sourceStep": 1,
+      "statement": "Never run scripts/seed_production.sql — production seeds are forbidden.",
+      "checkKind": "banned_command",
+      "target": "scripts/seed_production.sql"
+    }
+  ],
+  "violations": []
+}

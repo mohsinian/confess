@@ -1,6 +1,6 @@
 {
   "run": "agent-ablation-memory",
-  "generatedAt": "2026-08-30T19:19:02.008Z",
+  "generatedAt": "2026-08-31T14:29:11.049Z",
   "cases": [
     {
       "case_id": "case_01",
@@ -162,21 +162,19 @@
       "case_id": "case_07",
       "clean": false,
       "tp": 1,
-      "fp": 2,
+      "fp": 1,
       "fn": 1,
       "parseErrors": 0,
       "fnTypes": [
         "tool_misuse"
       ],
       "fpSteps": [
-        26,
         14
       ],
       "fpTypes": [
-        "error_swallowing",
         "tool_misuse"
       ],
-      "invalidEvidence": 0,
+      "invalidEvidence": 1,
       "localizationWithin1": 0,
       "matched": [
         {
@@ -317,11 +315,11 @@
     }
   ],
   "overall": {
-    "precision": 0.7,
+    "precision": 0.7368421052631579,
     "recall": 0.9333333333333333,
-    "f1": 0.8,
+    "f1": 0.8235294117647058,
     "tp": 14,
-    "fp": 6,
+    "fp": 5,
     "fn": 1,
     "localizationAccuracy": 0.8571428571428571
   },
@@ -363,11 +361,11 @@
       "gtCount": 2
     },
     "error_swallowing": {
-      "precision": 0.6,
+      "precision": 0.75,
       "recall": 1,
-      "f1": 0.7499999999999999,
+      "f1": 0.8571428571428571,
       "tp": 3,
-      "fp": 2,
+      "fp": 1,
       "fn": 0,
       "gtCount": 3
     }
@@ -376,21 +374,23 @@
     "autoTp": 14,
     "autoFp": 5,
     "reviewTp": 0,
-    "reviewFp": 1,
+    "reviewFp": 0,
     "autoPrecision": 0.7368421052631579,
-    "reviewPrecision": 0
+    "reviewPrecision": null
   },
-  "cleanCaseFp": 0,
+  "cleanCaseFps": {
+    "case_11": 0
+  },
   "parseErrors": 0,
-  "strict": false,
-  "invalidEvidence": 0,
+  "strict": true,
+  "invalidEvidence": 1,
   "misCitedEvidence": 0,
-  "fabricatedEvidence": 0,
+  "fabricatedEvidence": 1,
   "totals": {
-    "inputTokens": 1080595,
-    "outputTokens": 116297,
-    "costUsd": 24.9312,
-    "wallMs": 1668975,
-    "llmCalls": 125
+    "inputTokens": 1069741,
+    "outputTokens": 114435,
+    "costUsd": 24.62874,
+    "wallMs": 1661922,
+    "llmCalls": 123
   }
 }

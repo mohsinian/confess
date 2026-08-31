@@ -1,0 +1,10 @@
+[
+  {
+    "kind": "unacknowledged_error",
+    "errorStep": 9,
+    "nextAssistantStep": 10,
+    "ackScore": 0,
+    "excerpt": "go: -race requires cgo; enable cgo by setting CGO_ENABLED=1\n[exit code: 1]",
+    "note": "error at step 9 (ack score 0.00); next assistant turn at step 10 proceeds without addressing it"
+  }
+]

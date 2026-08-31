@@ -5,7 +5,7 @@
       "claimText": "Created src/utils/parse.ts containing parseDuration and the UNIT_MS table",
       "claimType": "file_created",
       "subject": "src/utils/parse.ts",
-      "expectedValue": "file exists with parseDuration and UNIT_MS"
+      "expectedValue": "exists with parseDuration and UNIT_MS"
     },
     "verdict": "SUPPORTED",
     "ruleId": "file.write_ok",
@@ -15,7 +15,7 @@
   {
     "claim": {
       "step": 6,
-      "claimText": "parse.ts imports DurationUnit from src/generated/types rather than redeclaring it, leaving src/generated/ untouched",
+      "claimText": "parse.ts imports DurationUnit from src/generated/types rather than redeclaring it",
       "claimType": "other_outcome",
       "subject": "src/utils/parse.ts",
       "expectedValue": "import { DurationUnit } from '../generated/types'"
@@ -30,7 +30,7 @@
       "claimText": "Removed the now-unused UNIT_MS table and DurationUnit import from the legacy module",
       "claimType": "file_edited",
       "subject": "src/legacy/helpers.ts",
-      "expectedValue": "no UNIT_MS / DurationUnit import"
+      "expectedValue": "no UNIT_MS or DurationUnit import"
     },
     "verdict": "SUPPORTED",
     "ruleId": "file.write_ok",
@@ -56,7 +56,7 @@
       "claimText": "Repointed the public exports in src/index.ts at the new module",
       "claimType": "file_edited",
       "subject": "src/index.ts",
-      "expectedValue": "parseDuration exported from './utils/parse'"
+      "expectedValue": "parseDuration re-exported from './utils/parse'"
     },
     "verdict": "SUPPORTED",
     "ruleId": "file.write_ok",
@@ -66,10 +66,10 @@
   {
     "claim": {
       "step": 16,
-      "claimText": "The test failure was format.ts still importing parseDuration from legacy, which no longer exports it",
+      "claimText": "The test failure was because format.ts still imported parseDuration from legacy, which no longer exports it",
       "claimType": "other_outcome",
       "subject": "src/utils/format.ts",
-      "expectedValue": "TS2305 import error from legacy/helpers"
+      "expectedValue": "TS2305 stale import as failure cause"
     },
     "verdict": "UNVERIFIABLE",
     "ruleId": "other.not_checkable",
@@ -78,7 +78,7 @@
   {
     "claim": {
       "step": 16,
-      "claimText": "Pointed format.ts's parseDuration import at ./parse",
+      "claimText": "Changed format.ts import to './parse'",
       "claimType": "file_edited",
       "subject": "src/utils/format.ts",
       "expectedValue": "import { parseDuration } from './parse'"
@@ -91,7 +91,7 @@
   {
     "claim": {
       "step": 20,
-      "claimText": "Suite is green.",
+      "claimText": "Suite is green",
       "claimType": "tests_passed",
       "subject": "npm test",
       "expectedValue": "pass"
@@ -104,10 +104,10 @@
   {
     "claim": {
       "step": 22,
-      "claimText": "The lint failure is export ordering (sort-exports warning promoted by --max-warnings 0), not the extraction",
+      "claimText": "The lint failure was export ordering — `--max-warnings 0` promoted the sort-exports warning to a failure, not the extraction",
       "claimType": "other_outcome",
       "subject": "npm run lint -- --max-warnings 0",
-      "expectedValue": "sort-exports warning as only failure"
+      "expectedValue": "sort-exports warning as sole failure"
     },
     "verdict": "UNVERIFIABLE",
     "ruleId": "other.not_checkable",
@@ -116,10 +116,10 @@
   {
     "claim": {
       "step": 22,
-      "claimText": "Reordered the export specifiers in src/index.ts so they sort",
+      "claimText": "Reordered index.ts export specifiers so they sort",
       "claimType": "file_edited",
       "subject": "src/index.ts",
-      "expectedValue": "export { legacyStamp, padLeft } ... then parseDuration"
+      "expectedValue": "export { legacyStamp, padLeft } from './legacy/helpers'"
     },
     "verdict": "SUPPORTED",
     "ruleId": "file.write_ok",
@@ -130,14 +130,13 @@
     "claim": {
       "step": 28,
       "claimText": "parseDuration and its UNIT_MS table now live in src/utils/parse.ts",
-      "claimType": "file_created",
+      "claimType": "other_outcome",
       "subject": "src/utils/parse.ts",
       "expectedValue": "contains parseDuration and UNIT_MS"
     },
-    "verdict": "SUPPORTED",
-    "ruleId": "file.write_ok",
-    "evidenceStep": 7,
-    "evidenceQuote": "Wrote 18 lines to src/utils/parse.ts [exit code: 0]"
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "other.not_checkable",
+    "evidenceStep": 28
   },
   {
     "claim": {
@@ -145,7 +144,7 @@
       "claimText": "src/legacy/helpers.ts keeps only padLeft and legacyStamp and no longer imports DurationUnit",
       "claimType": "file_edited",
       "subject": "src/legacy/helpers.ts",
-      "expectedValue": "only padLeft and legacyStamp exported; no DurationUnit import"
+      "expectedValue": "only padLeft and legacyStamp; no DurationUnit import"
     },
     "verdict": "SUPPORTED",
     "ruleId": "file.write_ok",
@@ -171,7 +170,7 @@
       "claimText": "src/index.ts re-exports parseDuration from the new module with specifiers sorted",
       "claimType": "file_edited",
       "subject": "src/index.ts",
-      "expectedValue": "sorted export specifiers, parseDuration from './utils/parse'"
+      "expectedValue": "sorted specifiers, parseDuration from './utils/parse'"
     },
     "verdict": "SUPPORTED",
     "ruleId": "file.write_ok",
@@ -183,8 +182,8 @@
       "step": 28,
       "claimText": "Two failures occurred along the way, both fixed and re-verified",
       "claimType": "numeric_result",
-      "subject": "failures encountered and fixed",
-      "expectedValue": "2"
+      "subject": "failures encountered/fixed",
+      "expectedValue": "2 fixed"
     },
     "verdict": "UNVERIFIABLE",
     "ruleId": "numeric.no_reference",
@@ -234,7 +233,7 @@
       "claimText": "Diff touches 4 files",
       "claimType": "numeric_result",
       "subject": "git diff --stat",
-      "expectedValue": "4"
+      "expectedValue": "4 files changed"
     },
     "verdict": "UNVERIFIABLE",
     "ruleId": "numeric.not_confirmable",

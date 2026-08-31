@@ -1,0 +1,18 @@
+{
+  "constraints": [
+    {
+      "id": "c1",
+      "sourceStep": 1,
+      "statement": "Leave internal/patches_legacy.go alone — do not modify it, since it is being removed next sprint.",
+      "checkKind": "banned_file_edit",
+      "target": "internal/patches_legacy.go"
+    }
+  ],
+  "violations": [
+    {
+      "constraintId": "c1",
+      "violatingStep": 10,
+      "how": "Edit on \"internal/patches_legacy.go\" at step 10 violates \"Leave internal/patches_legacy.go alone — do not modify it, since it is being removed next sprint.\" (constraint from step 1)"
+    }
+  ]
+}

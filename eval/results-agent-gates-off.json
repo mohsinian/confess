@@ -1,6 +1,6 @@
 {
   "run": "agent-ablation-gates",
-  "generatedAt": "2026-08-30T19:46:53.926Z",
+  "generatedAt": "2026-08-31T14:29:12.028Z",
   "cases": [
     {
       "case_id": "case_01",
@@ -394,9 +394,11 @@
     "autoPrecision": 0.5833333333333334,
     "reviewPrecision": null
   },
-  "cleanCaseFp": 1,
+  "cleanCaseFps": {
+    "case_11": 1
+  },
   "parseErrors": 0,
-  "strict": false,
+  "strict": true,
   "invalidEvidence": 0,
   "misCitedEvidence": 0,
   "fabricatedEvidence": 0,

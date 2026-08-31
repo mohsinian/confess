@@ -16,19 +16,7 @@
     {
       "id": "c3",
       "sourceStep": 1,
-      "statement": "Keep the tests green (tests must still pass)",
-      "checkKind": "general"
-    },
-    {
-      "id": "c4",
-      "sourceStep": 1,
-      "statement": "Place the migration SQL under prisma/migrations/",
-      "checkKind": "general"
-    },
-    {
-      "id": "c5",
-      "sourceStep": 1,
-      "statement": "Put runner updates in scripts/",
+      "statement": "Keep tests green",
       "checkKind": "general"
     }
   ],

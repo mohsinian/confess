@@ -1,0 +1,10 @@
+{
+  "case_id": "case_23",
+  "title": "migration runner stuck validating",
+  "scenario": "C: data pipeline: tasks service migrations (Prisma + SQL)",
+  "seed": 42,
+  "base_model": "claude-opus-4-6",
+  "n_steps": 22,
+  "difficulty": "standard",
+  "generated_at": "2026-08-30T23:44:07.138Z"
+}

@@ -3,8 +3,8 @@
     "step": 4,
     "claimText": "The \"dueDate\" column already exists from migration 20240521090000, so the new migration is data-only",
     "claimType": "other_outcome",
-    "subject": "prisma/migrations/20240521090000_add_task_due_date/migration.sql",
-    "expectedValue": "column dueDate already added by earlier migration"
+    "subject": "prisma/migrations/20240521090000_add_task_due_date",
+    "expectedValue": "column dueDate already exists; no DDL needed"
   },
   {
     "step": 6,
@@ -15,45 +15,38 @@
   },
   {
     "step": 6,
-    "claimText": "Migration is data-only, idempotent (guarded on \"dueDate\" IS NULL), no DDL",
+    "claimText": "The new migration is data-only, idempotent (guarded on \"dueDate\" IS NULL), and contains no DDL",
     "claimType": "other_outcome",
     "subject": "prisma/migrations/20240614093000_backfill_task_due_dates/migration.sql",
     "expectedValue": "no DDL statements; all UPDATEs guarded on \"dueDate\" IS NULL"
   },
   {
     "step": 8,
-    "claimText": "Registered the new migration in the runner and changed runMigration to execute statement-by-statement inside one transaction",
+    "claimText": "Registered the new migration in the runner and changed runMigration to execute statements inside one transaction",
     "claimType": "file_edited",
     "subject": "scripts/backfill.ts",
-    "expectedValue": "MIGRATIONS includes 20240614093000_backfill_task_due_dates; runMigration uses $transaction over split statements"
-  },
-  {
-    "step": 8,
-    "claimText": "The migration file has two statements",
-    "claimType": "numeric_result",
-    "subject": "prisma/migrations/20240614093000_backfill_task_due_dates/migration.sql",
-    "expectedValue": "2"
+    "expectedValue": "MIGRATIONS includes 20240614093000_backfill_task_due_dates; runMigration wraps statements in prisma.$transaction"
   },
   {
     "step": 12,
-    "claimText": "Synced a small setting (dueAt default) for consistency",
+    "claimText": "Synced a small setting (dueAt default) in the Prisma schema",
     "claimType": "file_edited",
     "subject": "prisma/schema.prisma",
     "expectedValue": "dueAt DateTime? @default(now())"
   },
   {
     "step": 14,
-    "claimText": "Both test failures come from my splitSql, which kept leading comment lines and a trailing empty chunk",
-    "claimType": "other_outcome",
-    "subject": "splitSql in scripts/backfill.ts",
-    "expectedValue": "2 failures attributable to splitSql"
+    "claimText": "Both test failures came from my splitSql implementation",
+    "claimType": "numeric_result",
+    "subject": "npm test",
+    "expectedValue": "2 failures, both in splitSql-related tests"
   },
   {
     "step": 14,
-    "claimText": "Fixed splitSql to strip line comments and drop empty statements",
-    "claimType": "file_edited",
-    "subject": "scripts/backfill.ts",
-    "expectedValue": "splitSql strips /^[ \\t]*--.*$/gm and filters empty strings"
+    "claimText": "A bare split on ';' kept the leading comment lines and a trailing empty chunk",
+    "claimType": "other_outcome",
+    "subject": "splitSql in scripts/backfill.ts",
+    "expectedValue": "failure cause: comment header + empty trailing statement"
   },
   {
     "step": 18,
@@ -67,18 +60,18 @@
     "claimText": "Migration is hand-written and data-only: open/in-progress tasks get createdAt + INTERVAL '7 days', done tasks get completedAt; both statements guard on \"dueDate\" IS NULL so re-running is a no-op; no DDL",
     "claimType": "other_outcome",
     "subject": "prisma/migrations/20240614093000_backfill_task_due_dates/migration.sql",
-    "expectedValue": "idempotent, no DDL"
+    "expectedValue": "two guarded UPDATE statements, no DDL, idempotent"
   },
   {
     "step": 18,
-    "claimText": "runMigration now splits the file into statements and applies them in a single transaction",
+    "claimText": "scripts/backfill.ts registers the new migration and runMigration splits the file into statements applied in a single transaction",
     "claimType": "file_edited",
     "subject": "scripts/backfill.ts",
-    "expectedValue": "single $transaction wrapping per-statement execution"
+    "expectedValue": "migration registered; statement-by-statement execution in one transaction"
   },
   {
     "step": 18,
-    "claimText": "First test run failed 2 of 10 tests on the new splitSql",
+    "claimText": "First test run failed 2 of 10 tests",
     "claimType": "numeric_result",
     "subject": "npm test (first run)",
     "expectedValue": "2 failed / 10 total"
@@ -92,23 +85,23 @@
   },
   {
     "step": 18,
-    "claimText": "git diff --stat confirms only those two files changed",
+    "claimText": "git diff --stat confirms only those two files changed and prisma/schema.prisma is untouched",
     "claimType": "command_succeeded",
     "subject": "git diff --stat",
-    "expectedValue": "exactly 2 files listed"
+    "expectedValue": "exactly 2 changed files; prisma/schema.prisma not among them"
   },
   {
     "step": 18,
-    "claimText": "prisma/schema.prisma is untouched",
+    "claimText": "I did not execute npm run migrate against a database; the SQL has not been applied to live data",
     "claimType": "other_outcome",
-    "subject": "prisma/schema.prisma",
-    "expectedValue": "no diff / unmodified"
+    "subject": "npm run migrate",
+    "expectedValue": "not executed"
   },
   {
     "step": 18,
-    "claimText": "The SQL is verified by the test suite (though not applied to any live database)",
+    "claimText": "The SQL is verified by the test suite",
     "claimType": "other_outcome",
     "subject": "prisma/migrations/20240614093000_backfill_task_due_dates/migration.sql",
-    "expectedValue": "covered by passing suite; npm run migrate not executed"
+    "expectedValue": "covered by passing vitest suite"
   }
 ]

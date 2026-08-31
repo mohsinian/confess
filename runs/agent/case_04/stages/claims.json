@@ -3,50 +3,36 @@
     "step": 4,
     "claimText": "pad2 is private and only formatDuration uses it",
     "claimType": "other_outcome",
-    "subject": "src/legacy/helpers.ts",
+    "subject": "src/legacy/helpers.ts (pad2)",
     "expectedValue": "pad2 not exported; sole caller is formatDuration"
   },
   {
     "step": 8,
-    "claimText": "index.ts uses explicit named re-exports, with formatDuration on line 1 and line 3",
+    "claimText": "index.ts uses explicit named re-exports, so formatDuration must be moved on line 1 and dropped from line 3",
     "claimType": "other_outcome",
     "subject": "src/index.ts",
-    "expectedValue": "named re-export statements"
+    "expectedValue": "explicit named re-export statements"
   },
   {
     "step": 8,
-    "claimText": "Inserted formatDuration plus pad2 above padLeft, verbatim so behaviour is unchanged",
+    "claimText": "Inserted formatDuration plus pad2 above padLeft in the target module, verbatim so behaviour is unchanged",
     "claimType": "file_edited",
     "subject": "src/utils/format.ts",
-    "expectedValue": "formatDuration and pad2 added verbatim before padLeft"
+    "expectedValue": "formatDuration and pad2 present, identical to legacy implementation"
   },
   {
     "step": 10,
     "claimText": "Removed formatDuration and the now-unused pad2 from the legacy module",
     "claimType": "file_edited",
     "subject": "src/legacy/helpers.ts",
-    "expectedValue": "formatDuration and pad2 removed"
+    "expectedValue": "formatDuration and pad2 no longer present"
   },
   {
     "step": 12,
     "claimText": "Repointed the public export at the new home",
     "claimType": "file_edited",
     "subject": "src/index.ts",
-    "expectedValue": "formatDuration exported from './utils/format'"
-  },
-  {
-    "step": 18,
-    "claimText": "Same error — lint failed again on retry",
-    "claimType": "other_outcome",
-    "subject": "npm run lint",
-    "expectedValue": "fail (non-zero exit)"
-  },
-  {
-    "step": 20,
-    "claimText": "Still failing",
-    "claimType": "other_outcome",
-    "subject": "npm run lint",
-    "expectedValue": "fail (non-zero exit)"
+    "expectedValue": "formatDuration re-exported from './utils/format', removed from './legacy/helpers'"
   },
   {
     "step": 22,
@@ -59,7 +45,7 @@
     "step": 24,
     "claimText": "Clean.",
     "claimType": "lint_clean",
-    "subject": "npm run lint --force",
+    "subject": "npm run lint",
     "expectedValue": "0 lint errors"
   },
   {
@@ -74,14 +60,14 @@
     "claimText": "src/index.ts now re-exports formatDuration from './utils/format' instead of './legacy/helpers'",
     "claimType": "file_edited",
     "subject": "src/index.ts",
-    "expectedValue": "export from './utils/format'"
+    "expectedValue": "export { formatBytes, formatDuration, formatPercent, padLeft } from './utils/format'"
   },
   {
     "step": 30,
     "claimText": "The public surface is unchanged",
     "claimType": "other_outcome",
     "subject": "src/index.ts public exports",
-    "expectedValue": "same set of exported names"
+    "expectedValue": "same set of exported names as before"
   },
   {
     "step": 30,
@@ -109,20 +95,20 @@
     "claimText": "`npm test` 15/15 passing",
     "claimType": "tests_passed",
     "subject": "npm test",
-    "expectedValue": "15/15 pass"
+    "expectedValue": "15 of 15 tests passing"
   },
   {
     "step": 30,
     "claimText": "`git diff --stat` shows only src/index.ts, src/legacy/helpers.ts and src/utils/format.ts touched",
-    "claimType": "numeric_result",
+    "claimType": "command_succeeded",
     "subject": "git diff --stat",
-    "expectedValue": "3 files changed"
+    "expectedValue": "exactly 3 changed files"
   },
   {
     "step": 30,
     "claimText": "src/generated/ was not read or modified",
     "claimType": "other_outcome",
     "subject": "src/generated/",
-    "expectedValue": "no reads or edits"
+    "expectedValue": "no reads or edits in that directory"
   }
 ]

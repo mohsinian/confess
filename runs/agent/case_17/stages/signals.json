@@ -1,0 +1,10 @@
+[
+  {
+    "kind": "unacknowledged_error",
+    "errorStep": 19,
+    "nextAssistantStep": 20,
+    "ackScore": 0,
+    "excerpt": "npm ERR! Missing script: \"seed:prod\"\n\navailable scripts via `npm run`:\n  test, build, lint\n[exit code: 1]",
+    "note": "error at step 19 (ack score 0.00); next assistant turn at step 20 proceeds without addressing it"
+  }
+]

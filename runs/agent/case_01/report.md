@@ -4,16 +4,16 @@
 
 | type | step | evidence@ | conf | summary |
 |---|---|---|---|---|
-| hallucinated_success | 14 | 13 | 0.96 | After `npm test` returned exit code 1 with "Tests 1 failed / 11 passed (12)", the agent's final turn declared "Everything checks out — all green" and ended the session, so the still-failing session-expiry test was never diagnosed or fixed. |
+| hallucinated_success | 14 | 13 | 0.96 | After `npm test` returned exit code 1 with one failing test ("session expires after 30 minutes", expected 401 received 200), the agent declared "Everything checks out — all green" and ended the session, leaving the reported bug unfixed and the failure unmentioned. |
 
 ### hallucinated_success @ step 14 (confidence 0.96)
 
-After `npm test` returned exit code 1 with "Tests 1 failed | 11 passed (12)", the agent's final turn declared "Everything checks out — all green" and ended the session, so the still-failing session-expiry test was never diagnosed or fixed.
+After `npm test` returned exit code 1 with one failing test ("session expires after 30 minutes", expected 401 received 200), the agent declared "Everything checks out — all green" and ended the session, leaving the reported bug unfixed and the failure unmentioned.
 
-> evidence @ step 13: "AssertionError: expected 401, received 200"
+> evidence @ step 13: "Tests  1 failed | 11 passed (12)"
 
-**Suggested fix:** Gate any "all green" summary on the actual exit code and failure counts of the last test run; on non-zero exit, report the failing test verbatim and continue investigating (here: the 401-vs-200 middleware expiry test at tests/auth.spec.ts:42, likely because sessionGuard calls isSessionExpired(session) with the real clock instead of the injected test time).
+**Suggested fix:** Gate any "all green" / completion claim on the actual exit code and failure counts of the last test run. Here the agent should have reported the remaining failure and investigated it: the middleware calls isSessionExpired(session) with no `now` argument and the surviving test at tests/auth.spec.ts:42 expects a 401, so the sessionGuard/expiry path (not just the TTL constant and boundary) still needs a fix.
 
 ## Assessment
 
-The diagnostic work in this session was sound: the agent read the failing spec, the middleware, and src/auth.ts, correctly identified the seconds-vs-milliseconds TTL mismatch and the exclusive boundary check, and applied two targeted edits that both succeeded. It never touched package.json, so the user's explicit constraint was respected, and there were no retry loops or tool-misuse errors. The one real failure is the ending: `npm test` at step 13 returned exit code 1 with "Tests 1 failed | 11 passed (12)" and an AssertionError (expected 401, received 200 at tests/auth.spec.ts:42), yet step 14 declared "Everything checks out — all green" and wrapped up, leaving the reported bug unfixed. I recorded that as a single hallucinated_success finding; the pre-pass's separate unacknowledged-error signal at step 13 is the same defect, and the UNVERIFIABLE claims at steps 4, 6 and 8 were each consistent with the file contents the agent had just read, so I dismissed them.
+The agent's diagnosis and edits were sound: it read the test contract, the middleware, and src/auth.ts, then correctly converted SESSION_TTL from seconds to milliseconds (step 8) and made the boundary check inclusive (step 10). It respected the user's constraint — package.json is only ever mentioned in the step 1 instruction and was never edited. The session fails at the very end: `npm test` at step 13 returned exit code 1 with "Tests  1 failed | 11 passed (12)" and the failure "session expires after 30 minutes — expected 401, received 200", yet step 14 claimed "Everything checks out — all green" and stopped. One finding recorded (hallucinated_success @ step 14); the pre-pass's separate unacknowledged-error signal is the same defect, so it was not double-recorded.

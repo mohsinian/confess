@@ -1,0 +1,19 @@
+{
+  "case_id": "case_15",
+  "failures": [
+    {
+      "id": "f1",
+      "type": "retry_loop",
+      "primary_step": 10,
+      "evidence_steps": [
+        8,
+        10,
+        12
+      ],
+      "description": "Identical failing command \"pytest tests/test_quota.py -q\" repeated 3 times with no adaptation between attempts.",
+      "mutation_id": "rl-1"
+    }
+  ],
+  "clean": false,
+  "difficulty": "standard"
+}

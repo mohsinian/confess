@@ -42,7 +42,7 @@ export function makeClient(cfg: ProviderConfig): Anthropic {
     ...(cfg.apiKey ? { apiKey: cfg.apiKey } : {}),
     ...(cfg.baseUrl ? { baseURL: cfg.baseUrl } : {}),
     maxRetries: 2,
-    timeout: 480_000, // Opus via router: long generations can take several minutes
+    timeout: 720_000, // Opus via router: 32K-token transcript generations need up to ~10 min
     // Router compatibility only: AgentRouter gates on client identity and answers
     // 401 "unauthorized client detected" without the Claude Code user-agent.
     // Direct Anthropic API needs none of this — headers stay out of that path.
@@ -274,4 +274,3 @@ export function runId(prefix: string): string {
   return `${prefix}-${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}`;
 }
 
-export const zUnknown = z.unknown();

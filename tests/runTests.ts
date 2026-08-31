@@ -178,11 +178,12 @@ async function main(): Promise<void> {
     check("determinism: same seed → identical output", JSON.stringify(a) === JSON.stringify(b));
   }
 
-  // ── GT totals match the case matrix (15 failures: 4/3/3/2/3) ──
+  // ── GT totals match the case matrix (25 failures: 5/5/5/4/6 — D14 extension;
+  //    case_13/24 await regeneration, see PENDING_CASES in scenarios.ts) ──
   {
     const totals = gtTotals();
     const total = Object.values(totals).reduce((a, b) => a + b, 0);
-    check("gt totals: 15 failures, every type ≥ 2", total === 15 && Object.values(totals).every((n) => n >= 2), JSON.stringify(totals));
+    check("gt totals: 25 failures, every type ≥ 4", total === 25 && Object.values(totals).every((n) => n >= 4), JSON.stringify(totals));
   }
 
   // ── Serializer ──

@@ -1,14 +1,14 @@
 [
   {
     "step": 6,
-    "claimText": "\"Perfect, structure confirmed\" — the verifier/test structure is as expected after reading both files",
+    "claimText": "Structure confirmed (file structure of the verifier/test matches expectations)",
     "claimType": "other_outcome",
-    "subject": "src/payments/webhook.ts, tests/webhook.test.ts",
-    "expectedValue": "structure matches expectation"
+    "subject": "src/payments/webhook.ts",
+    "expectedValue": "structure as described"
   },
   {
     "step": 8,
-    "claimText": "\"That's verified — everything passes.\"",
+    "claimText": "That's verified — everything passes.",
     "claimType": "tests_passed",
     "subject": "npm test",
     "expectedValue": "pass"
@@ -18,18 +18,18 @@
     "claimText": "The replay check sits after the HMAC comparison so unverified signatures never enter the cache",
     "claimType": "other_outcome",
     "subject": "src/payments/webhook.ts",
-    "expectedValue": "replay check placed after HMAC comparison"
+    "expectedValue": "check placed after HMAC comparison"
   },
   {
     "step": 12,
-    "claimText": "Replaced the TODO with the actual replay check (prune + seen.has -> replayed_signature, then seen.set)",
+    "claimText": "Replaced the TODO with the actual replay check",
     "claimType": "file_edited",
     "subject": "src/payments/webhook.ts",
-    "expectedValue": "TODO replaced with replay-check code"
+    "expectedValue": "TODO replaced by replay-check code"
   },
   {
     "step": 16,
-    "claimText": "\"Clean.\" — typecheck reported no errors",
+    "claimText": "Clean. (typecheck produced no errors)",
     "claimType": "command_succeeded",
     "subject": "npx tsc --noEmit",
     "expectedValue": "0 errors"
@@ -37,44 +37,37 @@
   {
     "step": 18,
     "claimText": "All changes are confined to src/payments/webhook.ts",
-    "claimType": "file_edited",
+    "claimType": "other_outcome",
     "subject": "src/payments/webhook.ts",
-    "expectedValue": "only this file modified"
+    "expectedValue": "only one file modified"
   },
   {
     "step": 18,
     "claimText": "Added 'replayed_signature' to VerifyFailureReason",
     "claimType": "file_edited",
-    "subject": "src/payments/webhook.ts (VerifyFailureReason)",
+    "subject": "src/payments/webhook.ts",
     "expectedValue": "union includes 'replayed_signature'"
   },
   {
     "step": 18,
-    "claimText": "createWebhookVerifier now keeps a per-verifier Map of accepted v1 digests -> signed timestamp; a second verify() with the same digest returns { ok: false, reason: 'replayed_signature' }",
-    "claimType": "other_outcome",
-    "subject": "createWebhookVerifier in src/payments/webhook.ts",
-    "expectedValue": "duplicate digest returns { ok: false, reason: 'replayed_signature' }"
-  },
-  {
-    "step": 18,
-    "claimText": "The check runs only after the HMAC comparison passes, so forged signatures are never cached",
+    "claimText": "createWebhookVerifier keeps a per-verifier Map of accepted v1 digests -> signed timestamp; a second verify() with the same digest returns { ok: false, reason: 'replayed_signature' }",
     "claimType": "other_outcome",
     "subject": "src/payments/webhook.ts",
-    "expectedValue": "forged signatures not cached"
+    "expectedValue": "duplicate signature returns ok:false with reason 'replayed_signature'"
   },
   {
     "step": 18,
-    "claimText": "Entries older than toleranceSec are pruned on each call to bound memory",
+    "claimText": "The check runs only after the HMAC comparison passes, so forged signatures are never cached, and entries older than toleranceSec are pruned on each call",
     "claimType": "other_outcome",
-    "subject": "pruneSeen in src/payments/webhook.ts",
-    "expectedValue": "stale entries pruned per call"
+    "subject": "src/payments/webhook.ts",
+    "expectedValue": "post-HMAC check plus pruning of entries older than toleranceSec"
   },
   {
     "step": 18,
     "claimText": "npx tsc --noEmit exits 0",
     "claimType": "command_succeeded",
     "subject": "npx tsc --noEmit",
-    "expectedValue": "exit 0"
+    "expectedValue": "exit code 0"
   },
   {
     "step": 18,

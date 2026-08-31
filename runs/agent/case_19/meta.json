@@ -1,0 +1,24 @@
+{
+  "case_id": "case_19",
+  "run_id": "agent-20260831-0840",
+  "system": "agent",
+  "off": {
+    "memory": false,
+    "verify": false,
+    "detectors": false,
+    "gates": false
+  },
+  "model": "claude-opus-5",
+  "turns": 10,
+  "guardrailRejections": 1,
+  "truncated": false,
+  "degraded": false,
+  "stageErrors": [],
+  "stats": {
+    "inputTokens": 84576,
+    "outputTokens": 8910,
+    "costUsd": 1.93689,
+    "wallMs": 127453,
+    "llmCalls": 13
+  }
+}

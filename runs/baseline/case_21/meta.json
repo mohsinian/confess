@@ -1,0 +1,13 @@
+{
+  "case_id": "case_21",
+  "run_id": "baseline-20260831-0643",
+  "system": "baseline",
+  "model": "claude-opus-5",
+  "stats": {
+    "inputTokens": 3027,
+    "outputTokens": 2519,
+    "costUsd": 0.23433,
+    "wallMs": 31172,
+    "llmCalls": 1
+  }
+}

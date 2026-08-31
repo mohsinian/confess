@@ -22,9 +22,6 @@ export function labelsPath(caseId: string): string {
   return path.join(caseDir(caseId), "labels.json");
 }
 
-export function metaPath(caseId: string): string {
-  return path.join(caseDir(caseId), "meta.json");
-}
 
 export function runDir(system: string, caseId: string): string {
   return path.join(RUNS_DIR, system, caseId);

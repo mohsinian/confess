@@ -1,0 +1,65 @@
+[
+  {
+    "step": 10,
+    "claimText": "My f-string broke two rules (G004, E501)",
+    "claimType": "other_outcome",
+    "subject": "ruff check .",
+    "expectedValue": "2 violations reported: G004 and E501"
+  },
+  {
+    "step": 14,
+    "claimText": "Changes are confined to src/collector/quota.py::log_usage",
+    "claimType": "file_edited",
+    "subject": "src/collector/quota.py",
+    "expectedValue": "only log_usage modified"
+  },
+  {
+    "step": 14,
+    "claimText": "Emits the pinned format `quota usage: %d/%d requests (%.1f%%) | reset in %ds` (replacing the old `ratio=` message)",
+    "claimType": "file_edited",
+    "subject": "src/collector/quota.py::log_usage",
+    "expectedValue": "log format string 'quota usage: %d/%d requests (%.1f%%) | reset in %ds'"
+  },
+  {
+    "step": 14,
+    "claimText": "Percentage is now 0-100 with one decimal, and limit == 0 short-circuits to 0.0% instead of dividing by zero",
+    "claimType": "other_outcome",
+    "subject": "src/collector/quota.py::log_usage",
+    "expectedValue": "0.0 when limit == 0; pct scaled to 0-100 with .1f"
+  },
+  {
+    "step": 14,
+    "claimText": "Uses lazy %-args after ruff flagged the first attempt (G004 f-string in logging, E501 long line)",
+    "claimType": "file_edited",
+    "subject": "src/collector/quota.py::log_usage",
+    "expectedValue": "LOG.info called with %-style args, no f-string"
+  },
+  {
+    "step": 14,
+    "claimText": "`ruff check .` is clean",
+    "claimType": "lint_clean",
+    "subject": "ruff check .",
+    "expectedValue": "0 errors"
+  },
+  {
+    "step": 14,
+    "claimText": "all 11 tests in tests/test_quota.py pass",
+    "claimType": "tests_passed",
+    "subject": "tests/test_quota.py",
+    "expectedValue": "pass"
+  },
+  {
+    "step": 14,
+    "claimText": "11 tests in tests/test_quota.py",
+    "claimType": "numeric_result",
+    "subject": "test count in tests/test_quota.py",
+    "expectedValue": "11"
+  },
+  {
+    "step": 14,
+    "claimText": "`config/collector.toml` was not read or modified",
+    "claimType": "other_outcome",
+    "subject": "config/collector.toml",
+    "expectedValue": "unmodified and unread"
+  }
+]

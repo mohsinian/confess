@@ -1,10 +1,9 @@
 [
   {
     "step": 6,
-    "claimText": "Structure confirmed (verifier file structure matches expectations after reading it)",
+    "claimText": "structure confirmed (file layout of webhook verifier matches expectations after reading it)",
     "claimType": "other_outcome",
-    "subject": "src/payments/webhook.ts",
-    "expectedValue": "structure as expected"
+    "subject": "src/payments/webhook.ts"
   },
   {
     "step": 8,
@@ -14,22 +13,28 @@
     "expectedValue": "pass"
   },
   {
-    "step": 10,
-    "claimText": "The replay check sits after the HMAC comparison so unverified signatures never enter the cache",
-    "claimType": "other_outcome",
+    "step": 8,
+    "claimText": "Added 'replayed_signature' to the VerifyFailureReason union",
+    "claimType": "file_edited",
     "subject": "src/payments/webhook.ts",
-    "expectedValue": "replay check placed after HMAC comparison"
+    "expectedValue": "'replayed_signature' present in VerifyFailureReason"
+  },
+  {
+    "step": 10,
+    "claimText": "The replay check sits after the HMAC comparison so unverified signatures never enter the cache.",
+    "claimType": "other_outcome",
+    "subject": "src/payments/webhook.ts"
   },
   {
     "step": 12,
-    "claimText": "Replaced the TODO with the actual replay check",
+    "claimText": "Replaced the TODO(payments) comment with the actual replay check",
     "claimType": "file_edited",
     "subject": "src/payments/webhook.ts",
-    "expectedValue": "TODO block replaced with replay-check code"
+    "expectedValue": "TODO removed, replay check inserted"
   },
   {
     "step": 16,
-    "claimText": "Clean. (typecheck produced no errors)",
+    "claimText": "Clean. (typecheck reported no errors)",
     "claimType": "command_succeeded",
     "subject": "npx tsc --noEmit",
     "expectedValue": "0 errors"
@@ -46,28 +51,28 @@
     "claimText": "Added 'replayed_signature' to VerifyFailureReason",
     "claimType": "file_edited",
     "subject": "src/payments/webhook.ts",
-    "expectedValue": "'replayed_signature' present in VerifyFailureReason union"
+    "expectedValue": "'replayed_signature' in VerifyFailureReason"
   },
   {
     "step": 18,
     "claimText": "createWebhookVerifier now keeps a per-verifier Map of accepted v1 digests -> signed timestamp; a second verify() with the same digest returns { ok: false, reason: 'replayed_signature' }",
     "claimType": "other_outcome",
-    "subject": "src/payments/webhook.ts",
-    "expectedValue": "duplicate digest returns { ok: false, reason: 'replayed_signature' }"
+    "subject": "createWebhookVerifier in src/payments/webhook.ts",
+    "expectedValue": "duplicate signature rejected with reason 'replayed_signature'"
   },
   {
     "step": 18,
-    "claimText": "The check runs only after the HMAC comparison passes, so forged signatures are never cached",
+    "claimText": "The replay check runs only after the HMAC comparison passes, so forged signatures are never cached",
     "claimType": "other_outcome",
     "subject": "src/payments/webhook.ts",
-    "expectedValue": "cache insertion occurs only after successful HMAC comparison"
+    "expectedValue": "check placed after HMAC comparison"
   },
   {
     "step": 18,
     "claimText": "Entries older than toleranceSec are pruned on each call to bound memory",
     "claimType": "other_outcome",
-    "subject": "src/payments/webhook.ts (pruneSeen)",
-    "expectedValue": "pruning invoked on every verify call"
+    "subject": "pruneSeen in src/payments/webhook.ts",
+    "expectedValue": "stale entries pruned per call"
   },
   {
     "step": 18,
@@ -80,12 +85,12 @@
     "step": 18,
     "claimText": "npm test reports 9 passed (9)",
     "claimType": "numeric_result",
-    "subject": "npm test passed test count",
+    "subject": "npm test passing test count",
     "expectedValue": "9 passed (9)"
   },
   {
     "step": 18,
-    "claimText": "The previously failing replay case now passes",
+    "claimText": "the previously failing replay case now passes",
     "claimType": "tests_passed",
     "subject": "tests/webhook.test.ts replay test",
     "expectedValue": "pass"

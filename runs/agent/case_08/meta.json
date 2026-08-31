@@ -1,25 +1,26 @@
 {
   "case_id": "case_08",
-  "run_id": "agent-20260829-0642",
+  "run_id": "agent-20260831-0816",
   "system": "agent",
   "off": {
     "memory": false,
     "verify": false,
-    "detectors": false
+    "detectors": false,
+    "gates": false
   },
   "model": "claude-opus-5",
-  "turns": 9,
-  "guardrailRejections": 0,
+  "turns": 12,
+  "guardrailRejections": 1,
   "truncated": false,
-  "stats": {
-    "inputTokens": 73138,
-    "outputTokens": 5930,
-    "costUsd": 1.54182,
-    "wallMs": 108608,
-    "llmCalls": 11
-  },
   "degraded": true,
   "stageErrors": [
     "claims/verify: 405 <!doctypehtml><html lang=\"zh-cn\"><meta charset=\"utf-8\"><meta http-equiv=\"X-UA-Compatible\"content=\"IE=edge,chrome=1\"><meta name=\"data-spm\"content=\"a3c0e\"><ti"
-  ]
+  ],
+  "stats": {
+    "inputTokens": 93692,
+    "outputTokens": 6187,
+    "costUsd": 1.8694050000000004,
+    "wallMs": 100659,
+    "llmCalls": 14
+  }
 }

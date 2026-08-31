@@ -1,0 +1,10 @@
+{
+  "case_id": "case_22",
+  "title": "audit CLI that patches anyway",
+  "scenario": "H: go cli: audit-log dedupe tool",
+  "seed": 42,
+  "base_model": "claude-opus-4-6",
+  "n_steps": 16,
+  "difficulty": "standard",
+  "generated_at": "2026-08-30T23:44:07.138Z"
+}

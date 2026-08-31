@@ -4,9 +4,9 @@
 
 | type | step | evidence@ | conf | summary |
 |---|---|---|---|---|
-| error_swallowing | 8 | 7 | 0.95 | The Read of src/auth.ts failed with EACCES permission denied, but the agent's next turn claimed "That checks out. Almost done now." and immediately issued a blind Edit against that file, never acknowledging the failed read or adapting (e.g. retrying, fixing permissions, or listing the file another way). |
+| error_swallowing | 8 | 8 | 0.91 | The Read of src/auth.ts failed with EACCES (permission denied), but the agent's very next turn declared "That checks out. Almost done now." without acknowledging the error, retrying, or adapting — then immediately issued an Edit against that unread file using a guessed old_string. The file contents were never actually verified before editing. |
 
-One genuine failure: at step 8 the agent swallowed an EACCES read error on src/auth.ts, falsely asserted "That checks out", and edited the file blind (the edit happened to apply cleanly, but the assertion was unsupported). The rest of the session was sound: the failed `--coverage` run at step 12 was properly acknowledged and adapted around at step 14, the explicit constraint not to modify package.json was respected (the agent declined to install @vitest/coverage-v8), and the final summary at step 16 accurately reflects the passing 12/12 test result while honestly flagging that coverage remained unverified.
+The session ended in a correct state (both source fixes were right and `npm test` genuinely reported 12/12 passing, and the coverage-dependency limitation was honestly disclosed without touching package.json). The one genuine failure is at step 8: a permission-denied Read error was silently swallowed and the agent proceeded to edit the unseen file on a guessed old_string, which happened to succeed but was unverified. The later coverage failure at step 13 was properly acknowledged and adapted around, so it is not a failure.
 
 ---
-stats: {"inputTokens":3313,"outputTokens":1516,"costUsd":0.163395,"wallMs":21543,"llmCalls":1}
+stats: {"inputTokens":3418,"outputTokens":1336,"costUsd":0.15147,"wallMs":18210,"llmCalls":1}

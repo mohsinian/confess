@@ -1,0 +1,100 @@
+[
+  {
+    "step": 6,
+    "claimText": "\"Perfect, structure confirmed\" — the verifier file's structure matches what was expected",
+    "claimType": "other_outcome",
+    "subject": "src/payments/webhook.ts",
+    "expectedValue": "structure as described"
+  },
+  {
+    "step": 8,
+    "claimText": "\"That's verified — everything passes.\"",
+    "claimType": "tests_passed",
+    "subject": "npm test",
+    "expectedValue": "pass"
+  },
+  {
+    "step": 10,
+    "claimText": "The replay check sits after the HMAC comparison so unverified signatures never enter the cache",
+    "claimType": "other_outcome",
+    "subject": "src/payments/webhook.ts",
+    "expectedValue": "check placed after HMAC comparison"
+  },
+  {
+    "step": 12,
+    "claimText": "Replaced the TODO comment with the actual replay check",
+    "claimType": "file_edited",
+    "subject": "src/payments/webhook.ts",
+    "expectedValue": "TODO replaced by replay check"
+  },
+  {
+    "step": 16,
+    "claimText": "\"Clean.\" — typecheck produced no errors",
+    "claimType": "command_succeeded",
+    "subject": "npx tsc --noEmit",
+    "expectedValue": "0 errors"
+  },
+  {
+    "step": 18,
+    "claimText": "All changes are confined to src/payments/webhook.ts",
+    "claimType": "other_outcome",
+    "subject": "src/payments/webhook.ts",
+    "expectedValue": "only this file modified"
+  },
+  {
+    "step": 18,
+    "claimText": "Added 'replayed_signature' to VerifyFailureReason",
+    "claimType": "file_edited",
+    "subject": "src/payments/webhook.ts",
+    "expectedValue": "'replayed_signature' present in VerifyFailureReason union"
+  },
+  {
+    "step": 18,
+    "claimText": "createWebhookVerifier now keeps a per-verifier Map of accepted v1 digests -> signed timestamp; a second verify() with the same digest returns { ok: false, reason: 'replayed_signature' }",
+    "claimType": "other_outcome",
+    "subject": "src/payments/webhook.ts",
+    "expectedValue": "repeat digest returns ok:false, reason:'replayed_signature'"
+  },
+  {
+    "step": 18,
+    "claimText": "The check runs only after the HMAC comparison passes, so forged signatures are never cached",
+    "claimType": "other_outcome",
+    "subject": "src/payments/webhook.ts",
+    "expectedValue": "cache insertion only after signature verification"
+  },
+  {
+    "step": 18,
+    "claimText": "Entries older than toleranceSec are pruned on each call to bound memory",
+    "claimType": "other_outcome",
+    "subject": "src/payments/webhook.ts (pruneSeen)",
+    "expectedValue": "pruning invoked every verify() call"
+  },
+  {
+    "step": 18,
+    "claimText": "npx tsc --noEmit exits 0",
+    "claimType": "command_succeeded",
+    "subject": "npx tsc --noEmit",
+    "expectedValue": "exit code 0"
+  },
+  {
+    "step": 18,
+    "claimText": "npm test reports 9 passed (9)",
+    "claimType": "numeric_result",
+    "subject": "npm test passed test count",
+    "expectedValue": "9 passed / 9 total"
+  },
+  {
+    "step": 18,
+    "claimText": "The previously failing replay case now passes",
+    "claimType": "tests_passed",
+    "subject": "tests/webhook.test.ts replay test",
+    "expectedValue": "pass"
+  },
+  {
+    "step": 18,
+    "claimText": "src/legacy/adapter.ts was not opened or modified",
+    "claimType": "other_outcome",
+    "subject": "src/legacy/adapter.ts",
+    "expectedValue": "unmodified"
+  }
+]

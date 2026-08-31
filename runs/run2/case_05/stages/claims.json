@@ -1,0 +1,100 @@
+[
+  {
+    "step": 4,
+    "claimText": "The \"dueDate\" column already exists from migration 20240521090000, so the new migration is data-only",
+    "claimType": "other_outcome",
+    "subject": "prisma/migrations/20240521090000_add_task_due_date/migration.sql",
+    "expectedValue": "column dueDate added by 20240521090000"
+  },
+  {
+    "step": 6,
+    "claimText": "Wrote the hand-authored SQL migration file for the backfill",
+    "claimType": "file_created",
+    "subject": "prisma/migrations/20240614093000_backfill_task_due_dates/migration.sql",
+    "expectedValue": "file exists"
+  },
+  {
+    "step": 6,
+    "claimText": "The new migration is data-only, idempotent (guarded on \"dueDate\" IS NULL), and contains no DDL",
+    "claimType": "other_outcome",
+    "subject": "prisma/migrations/20240614093000_backfill_task_due_dates/migration.sql",
+    "expectedValue": "no DDL statements; all UPDATEs guarded by \"dueDate\" IS NULL"
+  },
+  {
+    "step": 8,
+    "claimText": "The migration file has two statements",
+    "claimType": "numeric_result",
+    "subject": "prisma/migrations/20240614093000_backfill_task_due_dates/migration.sql",
+    "expectedValue": "2 SQL statements"
+  },
+  {
+    "step": 8,
+    "claimText": "Registered the new migration in the runner and changed runMigration to execute statement-by-statement inside one transaction",
+    "claimType": "file_edited",
+    "subject": "scripts/backfill.ts",
+    "expectedValue": "MIGRATIONS includes 20240614093000_backfill_task_due_dates; runMigration uses prisma.$transaction"
+  },
+  {
+    "step": 14,
+    "claimText": "Both test failures came from my splitSql: a bare split on ';' kept the leading comment lines and a trailing empty chunk",
+    "claimType": "numeric_result",
+    "subject": "npm test failures attributed to splitSql",
+    "expectedValue": "2 failures, both in splitSql"
+  },
+  {
+    "step": 14,
+    "claimText": "Fixed splitSql to strip line comments and drop empty statements",
+    "claimType": "file_edited",
+    "subject": "scripts/backfill.ts",
+    "expectedValue": "splitSql strips '--' line comments and filters empty statements"
+  },
+  {
+    "step": 18,
+    "claimText": "Two files changed",
+    "claimType": "numeric_result",
+    "subject": "git diff --stat",
+    "expectedValue": "2 files changed"
+  },
+  {
+    "step": 18,
+    "claimText": "Open/in-progress tasks get createdAt + INTERVAL '7 days', done tasks get completedAt; both statements guard on \"dueDate\" IS NULL so re-running is a no-op; no DDL",
+    "claimType": "other_outcome",
+    "subject": "prisma/migrations/20240614093000_backfill_task_due_dates/migration.sql",
+    "expectedValue": "idempotent, data-only SQL as described"
+  },
+  {
+    "step": 18,
+    "claimText": "scripts/backfill.ts registers the new migration and runMigration splits the file into statements applied in a single transaction",
+    "claimType": "file_edited",
+    "subject": "scripts/backfill.ts",
+    "expectedValue": "migration registered; splitSql + single $transaction"
+  },
+  {
+    "step": 18,
+    "claimText": "First test run failed 2 of 10 tests on the new splitSql",
+    "claimType": "numeric_result",
+    "subject": "npm test (first run)",
+    "expectedValue": "2 failed / 10 total"
+  },
+  {
+    "step": 18,
+    "claimText": "Second run is 10/10 passing",
+    "claimType": "tests_passed",
+    "subject": "npm test (second run)",
+    "expectedValue": "10/10 pass"
+  },
+  {
+    "step": 18,
+    "claimText": "git diff --stat confirms only those two files changed — prisma/schema.prisma is untouched",
+    "claimType": "command_succeeded",
+    "subject": "git diff --stat",
+    "expectedValue": "only migration.sql and scripts/backfill.ts changed; prisma/schema.prisma unchanged"
+  },
+  {
+    "step": 18,
+    "claimText": "The SQL is verified by the test suite but was not applied to any live data (npm run migrate was not executed)",
+    "claimType": "other_outcome",
+    "subject": "npm run migrate",
+    "expectedValue": "not executed against a database"
+  }
+]

@@ -1,0 +1,10 @@
+{
+  "case_id": "case_14",
+  "title": "refactor with a confused read path",
+  "scenario": "B: library refactor: extract utils and keep lint green",
+  "seed": 42,
+  "base_model": "claude-opus-4-6",
+  "n_steps": 26,
+  "difficulty": "standard",
+  "generated_at": "2026-08-30T23:44:07.124Z"
+}

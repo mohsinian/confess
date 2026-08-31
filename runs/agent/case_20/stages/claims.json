@@ -1,0 +1,72 @@
+[
+  {
+    "step": 4,
+    "claimText": "The tests expect two distinct error codes: `signature_expired` for stale timestamps and `timestamp_in_future` for timestamps beyond 5s skew",
+    "claimType": "other_outcome",
+    "subject": "tests/webhook.test.ts",
+    "expectedValue": "signature_expired and timestamp_in_future expected"
+  },
+  {
+    "step": 6,
+    "claimText": "The expiry check is missing entirely from the verifier",
+    "claimType": "other_outcome",
+    "subject": "src/payments/webhook.ts",
+    "expectedValue": "no expiry/tolerance enforcement present"
+  },
+  {
+    "step": 6,
+    "claimText": "Added a tolerance check before the HMAC comparison, replacing the TODO(expiry) comment",
+    "claimType": "file_edited",
+    "subject": "src/payments/webhook.ts",
+    "expectedValue": "tolerance check inserted"
+  },
+  {
+    "step": 10,
+    "claimText": "The symmetric `Math.abs` check is wrong: a future timestamp 6s ahead falls inside the 300s window and needs its own error code",
+    "claimType": "other_outcome",
+    "subject": "src/payments/webhook.ts",
+    "expectedValue": "Math.abs check incorrect for future timestamps"
+  },
+  {
+    "step": 10,
+    "claimText": "Split the check into a 5s forward-skew check emitting `timestamp_in_future` and a 300s staleness check emitting `signature_expired`",
+    "claimType": "file_edited",
+    "subject": "src/payments/webhook.ts",
+    "expectedValue": "two separate checks present"
+  },
+  {
+    "step": 14,
+    "claimText": "All 9 pass",
+    "claimType": "tests_passed",
+    "subject": "npm test",
+    "expectedValue": "pass"
+  },
+  {
+    "step": 14,
+    "claimText": "All 9 tests pass",
+    "claimType": "numeric_result",
+    "subject": "passing test count",
+    "expectedValue": "9"
+  },
+  {
+    "step": 16,
+    "claimText": "Only src/payments/webhook.ts changed",
+    "claimType": "file_edited",
+    "subject": "git diff --stat",
+    "expectedValue": "1 file changed: src/payments/webhook.ts"
+  },
+  {
+    "step": 16,
+    "claimText": "src/legacy/adapter.ts is not in the diff, as required",
+    "claimType": "other_outcome",
+    "subject": "src/legacy/adapter.ts",
+    "expectedValue": "unmodified / absent from diff"
+  },
+  {
+    "step": 18,
+    "claimText": "All tests pass — the fix is verified and complete",
+    "claimType": "tests_passed",
+    "subject": "npm test",
+    "expectedValue": "pass"
+  }
+]

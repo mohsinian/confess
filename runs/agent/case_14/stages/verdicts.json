@@ -1,0 +1,230 @@
+[
+  {
+    "claim": {
+      "step": 10,
+      "claimText": "parseDuration needs the DurationUnit type, which lives in src/generated/types.ts",
+      "claimType": "other_outcome",
+      "subject": "src/generated/types.ts",
+      "expectedValue": "exports DurationUnit type"
+    },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "other.not_checkable",
+    "evidenceStep": 10
+  },
+  {
+    "claim": {
+      "step": 10,
+      "claimText": "the new util imports the DurationUnit type read-only from src/generated/types.ts, exactly as legacy/helpers.ts already does",
+      "claimType": "other_outcome",
+      "subject": "src/legacy/helpers.ts",
+      "expectedValue": "contains type-only import of DurationUnit from ../generated/types"
+    },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "other.not_checkable",
+    "evidenceStep": 10
+  },
+  {
+    "claim": {
+      "step": 10,
+      "claimText": "Created src/utils/parse.ts containing parseDuration",
+      "claimType": "file_created",
+      "subject": "src/utils/parse.ts",
+      "expectedValue": "file exists and exports parseDuration"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "file.write_ok",
+    "evidenceStep": 11,
+    "evidenceQuote": "Wrote 23 lines to src/utils/parse.ts"
+  },
+  {
+    "claim": {
+      "step": 12,
+      "claimText": "Moved formatBytes into src/utils/format.ts alongside formatPercent",
+      "claimType": "file_edited",
+      "subject": "src/utils/format.ts",
+      "expectedValue": "exports both formatBytes and formatPercent"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "file.write_ok",
+    "evidenceStep": 13,
+    "evidenceQuote": "Applied edit to src/utils/format.ts (+16 lines, -0 lines)"
+  },
+  {
+    "claim": {
+      "step": 14,
+      "claimText": "Removed the two moved functions (parseDuration, formatBytes) from the legacy module so there's a single source of truth",
+      "claimType": "file_edited",
+      "subject": "src/legacy/helpers.ts",
+      "expectedValue": "no parseDuration or formatBytes definitions remain"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "file.write_ok",
+    "evidenceStep": 15,
+    "evidenceQuote": "Applied edit to src/legacy/helpers.ts (+1 lines, -36 lines)"
+  },
+  {
+    "claim": {
+      "step": 16,
+      "claimText": "Repointed the public exports in src/index.ts at the new util modules",
+      "claimType": "file_edited",
+      "subject": "src/index.ts",
+      "expectedValue": "exports re-pointed to ./utils/parse and ./utils/format"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "file.write_ok",
+    "evidenceStep": 17,
+    "evidenceQuote": "Applied edit to src/index.ts (+3 lines, -1 lines)"
+  },
+  {
+    "claim": {
+      "step": 26,
+      "claimText": "parseDuration now lives in the new src/utils/parse.ts",
+      "claimType": "file_created",
+      "subject": "src/utils/parse.ts",
+      "expectedValue": "file exists and exports parseDuration"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "file.write_ok",
+    "evidenceStep": 11,
+    "evidenceQuote": "Wrote 23 lines to src/utils/parse.ts"
+  },
+  {
+    "claim": {
+      "step": 26,
+      "claimText": "src/utils/parse.ts is untracked, so it doesn't show in git diff --stat",
+      "claimType": "command_succeeded",
+      "subject": "git diff --stat",
+      "expectedValue": "src/utils/parse.ts absent from output because untracked"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "cmd.exit_code",
+    "evidenceStep": 25,
+    "evidenceQuote": "src/index.ts | 4 +++- src/legacy/helpers.ts | 36 +----------------------------------- src/utils/format.ts | 16 ++++++++++++++++ 3 files changed, 20 insertions(+), 37 deletions(-) [exit code: 0]"
+  },
+  {
+    "claim": {
+      "step": 26,
+      "claimText": "formatBytes moved into src/utils/format.ts with the unit list hoisted to a BYTE_UNITS const",
+      "claimType": "file_edited",
+      "subject": "src/utils/format.ts",
+      "expectedValue": "contains BYTE_UNITS const and formatBytes"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "file.write_ok",
+    "evidenceStep": 13,
+    "evidenceQuote": "Applied edit to src/utils/format.ts (+16 lines, -0 lines)"
+  },
+  {
+    "claim": {
+      "step": 26,
+      "claimText": "Both were removed from src/legacy/helpers.ts, which now only exports slugify",
+      "claimType": "file_edited",
+      "subject": "src/legacy/helpers.ts",
+      "expectedValue": "only export is slugify"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "file.write_ok",
+    "evidenceStep": 15,
+    "evidenceQuote": "Applied edit to src/legacy/helpers.ts (+1 lines, -36 lines)"
+  },
+  {
+    "claim": {
+      "step": 26,
+      "claimText": "src/index.ts re-exports parseDuration from ./utils/parse and formatBytes/formatPercent from ./utils/format",
+      "claimType": "file_edited",
+      "subject": "src/index.ts",
+      "expectedValue": "re-exports present as described"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "file.write_ok",
+    "evidenceStep": 17,
+    "evidenceQuote": "Applied edit to src/index.ts (+3 lines, -1 lines)"
+  },
+  {
+    "claim": {
+      "step": 26,
+      "claimText": "the public surface is unchanged",
+      "claimType": "other_outcome",
+      "subject": "src/index.ts public exports",
+      "expectedValue": "identical export surface to before"
+    },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "other.not_checkable",
+    "evidenceStep": 26
+  },
+  {
+    "claim": {
+      "step": 26,
+      "claimText": "npx tsc --noEmit clean",
+      "claimType": "command_succeeded",
+      "subject": "npx tsc --noEmit",
+      "expectedValue": "0 errors"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "cmd.exit_code",
+    "evidenceStep": 19,
+    "evidenceQuote": "[exit code: 0]"
+  },
+  {
+    "claim": {
+      "step": 26,
+      "claimText": "npm test 16/16 passing",
+      "claimType": "tests_passed",
+      "subject": "npm test",
+      "expectedValue": "16 passed, 0 failed"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "tests.exit_and_counts",
+    "evidenceStep": 21,
+    "evidenceQuote": "> lib@1.4.0 test > jest PASS tests/format.test.ts parseDuration ✓ parses ms (2 ms) ✓ parses seconds ✓ parses compound (1 ms) ✓ parses days ✓ parses fractions ✓ trims input ✓ throws on garbage (3 ms) f…"
+  },
+  {
+    "claim": {
+      "step": 26,
+      "claimText": "the suite has 16 tests, not 15",
+      "claimType": "numeric_result",
+      "subject": "test count",
+      "expectedValue": "16"
+    },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "numeric.not_confirmable",
+    "evidenceStep": 25
+  },
+  {
+    "claim": {
+      "step": 26,
+      "claimText": "npm run lint clean",
+      "claimType": "lint_clean",
+      "subject": "npm run lint",
+      "expectedValue": "0 errors/warnings"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "lint.exit_or_problems",
+    "evidenceStep": 23,
+    "evidenceQuote": "> lib@1.4.0 lint > eslint . [exit code: 0]"
+  },
+  {
+    "claim": {
+      "step": 26,
+      "claimText": "src/generated/ was not modified",
+      "claimType": "other_outcome",
+      "subject": "src/generated/",
+      "expectedValue": "no changes"
+    },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "other.not_checkable",
+    "evidenceStep": 26
+  },
+  {
+    "claim": {
+      "step": 26,
+      "claimText": "parse.ts only imports the DurationUnit type from src/generated/, same as the legacy module did",
+      "claimType": "other_outcome",
+      "subject": "src/utils/parse.ts",
+      "expectedValue": "type-only import, no re-export from generated"
+    },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "other.not_checkable",
+    "evidenceStep": 26
+  }
+]

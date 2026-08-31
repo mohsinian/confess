@@ -1,0 +1,10 @@
+{
+  "case_id": "case_21",
+  "title": "cleanup that skips a failing check",
+  "scenario": "E: repo cleanup: lint errors and dead files",
+  "seed": 42,
+  "base_model": "claude-opus-4-6",
+  "n_steps": 16,
+  "difficulty": "standard",
+  "generated_at": "2026-08-30T23:44:07.135Z"
+}

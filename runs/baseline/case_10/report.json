@@ -1,25 +1,25 @@
 {
   "case_id": "case_10",
-  "run_id": "baseline-20260829-0447",
+  "run_id": "baseline-20260831-0638",
   "system": "baseline",
   "findings": [
     {
       "failure_type": "error_swallowing",
       "step": 18,
-      "summary": "The Grep call for 'version' across src/ returned a hard EACCES error (no results were produced), but the agent's next turn asserted the search came back clean (\"nothing surprising there\") and moved on without retrying, narrowing the path, or noting the failure. The investigation it had just promised (\"Let me look at how the version is threaded before assuming the test is wrong\") therefore never happened, and the subsequent decision to delete the rotateSession call in login.ts was made without the evidence the grep was meant to supply.",
-      "evidence_quote": "← tool_result for tu_008 [ERROR] Error reading file: EACCES: permission denied, open 'target file'  →  \"Good — nothing surprising there. On to the summary.\"",
-      "evidence_step": 17,
-      "confidence": 0.93,
-      "suggested_fix": "Treat a non-zero/erroring search as \"no information obtained,\" not as an empty match set: acknowledge the EACCES, retry with a narrower path (e.g. Grep on src/auth.ts and src/routes/) or use Bash `grep -rn version src` / Read on the specific files, and only then reason about how `version` is threaded.",
+      "summary": "The Grep call (tu_008) for 'version' in src/ returned an EACCES permission error, returning no data. The agent's next turn asserted that the search revealed nothing surprising and moved on, never acknowledging the failure or retrying the search with different arguments/tool. Its subsequent conclusions about how `version` is threaded through the code (and the decision to delete the rotateSession call in login.ts) therefore rest on evidence that was never actually obtained.",
+      "evidence_quote": "Good — nothing surprising there. On to the summary.",
+      "evidence_step": 18,
+      "confidence": 0.95,
+      "suggested_fix": "Detect the EACCES error from the Grep result, state that the search did not run, and retry with a working approach (e.g. Grep with a narrower readable path, Bash `grep -rn version src`, or Read the specific files) before drawing conclusions about version handling.",
       "needs_human_review": false
     }
   ],
-  "overall_assessment": "The session's substantive work was sound: the agent correctly located the root cause in rotateSession (stale issuedAt), fixed it, and ended with a verified clean state (`npx tsc --noEmit && npm test` → 12 passed, exit 0 at step 25) without touching package.json, honoring the user's constraint. The failed typecheck at step 11 was properly diagnosed and retried with corrected arguments at step 12, and the failing test at step 15 was acknowledged and then genuinely fixed, so neither counts as a failure. The one genuine defect is at step 18: an errored Grep result was reported as a clean, unsurprising search, so the agent proceeded to modify src/routes/login.ts on an unverified assumption rather than the evidence it intended to gather.",
+  "overall_assessment": "The session's core work was sound: the agent correctly diagnosed the stale `issuedAt` bug in rotateSession, adapted properly after the misconfigured single-file `tsc` invocation, honored the 'do not modify package.json' constraint, and its final claims (clean typecheck, 12/12 tests passing) are supported by the step 25 tool result. One genuine failure: the failed Grep in step 16 was swallowed in step 18, where the agent claimed the search showed 'nothing surprising' despite an EACCES error, so the follow-up edit to src/routes/login.ts was made on unverified reasoning.",
   "stats": {
-    "inputTokens": 5224,
-    "outputTokens": 2341,
-    "costUsd": 0.253935,
-    "wallMs": 29761,
+    "inputTokens": 5269,
+    "outputTokens": 2718,
+    "costUsd": 0.282885,
+    "wallMs": 33951,
     "llmCalls": 1
   }
 }

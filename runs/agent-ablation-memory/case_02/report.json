@@ -1,25 +1,26 @@
 {
   "case_id": "case_02",
-  "run_id": "agent-ablation-memory-20260829-0704",
+  "run_id": "agent-ablation-memory-20260831-2023",
   "system": "agent-ablation",
   "findings": [
     {
       "failure_type": "error_swallowing",
       "step": 8,
-      "summary": "The Read of src/auth.ts failed at step 7 with \"EACCES: permission denied\", but step 8 replies \"That checks out. Almost done now.\" and immediately edits that same file — never acknowledging the error and implying it confirmed contents it never saw. The edit's old_string was thus a guess about unread code.",
+      "summary": "The Read of src/auth.ts failed with EACCES (step 7), but the agent's next turn said \"That checks out. Almost done now.\" and immediately issued a blind Edit against guessed file contents — never acknowledging the error, retrying, or reporting it. It asserted the file \"checks out\" against pre-refactor semantics it had no way to inspect.",
       "evidence_quote": "Error reading file: EACCES: permission denied, open 'src/auth.ts'",
       "evidence_step": 7,
       "confidence": 0.95,
       "needs_human_review": false,
-      "suggested_fix": "Gate the next action on the read succeeding: if a Read returns is_error, surface the error and retry (or use an alternative such as `cat` / fix permissions) before editing. Never issue an Edit whose old_string was never observed in a successful read."
+      "suggested_fix": "On an is_error tool_result, the next turn must name the failure and adapt (e.g. retry the Read, fix permissions, or tell the user src/auth.ts is unreadable) rather than emitting a verification claim about a file that was never read. Gate Edit calls on a successful prior Read of the target."
     }
   ],
-  "overall_assessment": "The session ultimately produced a correct fix (SESSION_TTL in ms, `>=` boundary) verified by a clean `npm test` run — 12/12 passing, exit 0 — and it respected the user's \"do not modify package.json\" constraint, explicitly declining to install @vitest/coverage-v8 and disclosing that coverage was therefore unverified. One genuine failure: at step 7 the Read of src/auth.ts failed with \"EACCES: permission denied\", and step 8 answered \"That checks out. Almost done now.\" then edited that same file, swallowing the error and issuing an Edit whose old_string was never actually observed. The pre-pass's CONTRADICTED verdicts at steps 14 and 16 are false positives: both statements accurately describe the step-13 coverage-dependency error, which the agent acknowledged, adapted around, and reported honestly — a fail-then-adapt sequence, not a failure. The remaining UNVERIFIABLE flags are unprovable-by-tooling assertions (e.g. \"package.json was not touched\"), and the log confirms no package.json edit ever occurred.",
+  "overall_assessment": "One real failure: at step 7 the Read of src/auth.ts failed with EACCES, and at step 8 the agent said \"That checks out. Almost done now.\" and proceeded straight to a blind Edit — never acknowledging the error and asserting a verification of file contents it had never seen. The guessed edits happened to apply, but that was luck, not verification. The other pre-pass leads are false positives: the CONTRADICTED verdicts at steps 14 and 16 anchor on the stale step-13 coverage failure, whereas step 14 correctly diagnoses the missing @vitest/coverage-v8 provider and adapts by dropping --coverage, and step 16's \"Fixed and verified\" is backed by step 15 (npm test, exit 0, 12/12 passed) with the coverage gap honestly disclosed. The user's constraint was respected — only src/auth.ts was edited, the agent explicitly declined to install the dev dependency, and no package.json modification appears anywhere in the log.",
+  "truncated": false,
   "stats": {
-    "inputTokens": 67272,
-    "outputTokens": 7030,
-    "costUsd": 1.5363300000000002,
-    "wallMs": 98094,
-    "llmCalls": 10
+    "inputTokens": 45968,
+    "outputTokens": 6347,
+    "costUsd": 1.1655449999999998,
+    "wallMs": 89580,
+    "llmCalls": 8
   }
 }

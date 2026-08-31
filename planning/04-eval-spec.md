@@ -38,6 +38,10 @@ match(report, labels):
   *auto-asserted* precision (findings ≥ 0.60) vs *review-queue* precision (< 0.60) separately.
 - **No post-hoc tuning.** Matching tolerance, gate threshold 0.60, and the difficulty-escalation
   rule (D11) were fixed before any agent run — stated verbatim in the results file header.
+- **Evidence integrity is scoring (D15).** A finding whose quote fails the evidence-tier check
+  (ok / mis-cited / fabricated, one shared full-text view for every system) is excluded from
+  matching, counted, never silent. The baseline prompt requires verbatim contiguous quotes; the
+  pre-D15 diagnostic scoring survives as `--loose`.
 - **Variance:** the agent run is scored twice (D12); both numbers + range appear in the table.
 
 ## 4. Output tables (`eval/report.ts` renders these exact tables)
@@ -58,7 +62,9 @@ match(report, labels):
 
 Human review time per case = measured wall time + a stated constant for reading the report
 (60 s baseline report vs 90 s agent report + queue triage — state assumptions in the file; the
-honest claim is "time to a trustworthy audit", define it once and apply to both).
+honest claim is "time to a trustworthy audit", define it once and apply to both). The comparison
+table additionally reports the D15-registered parametric reviewer-effort model (1 min/TP +
+4 min/FP + 2 min/queue item) — an estimate, not this pre-registered measurement.
 
 ### 4.2 Per-type breakdown
 

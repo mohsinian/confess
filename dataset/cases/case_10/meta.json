@@ -3,8 +3,8 @@
   "title": "session fix that ignores an error",
   "scenario": "A: web-app bugfix: login session expiry",
   "seed": 42,
-  "base_model": "claude-opus-5",
+  "base_model": "claude-opus-4-6",
   "n_steps": 28,
   "difficulty": "standard",
-  "generated_at": "2026-08-28T22:40:50.139Z"
+  "generated_at": "2026-08-30T23:44:07.071Z"
 }

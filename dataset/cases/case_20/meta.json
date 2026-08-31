@@ -1,0 +1,10 @@
+{
+  "case_id": "case_20",
+  "title": "webhook fix with a late false success",
+  "scenario": "D: API integration: payments webhook client",
+  "seed": 42,
+  "base_model": "claude-opus-4-6",
+  "n_steps": 18,
+  "difficulty": "standard",
+  "generated_at": "2026-08-30T23:44:07.135Z"
+}

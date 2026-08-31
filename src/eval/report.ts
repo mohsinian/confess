@@ -17,9 +17,11 @@ function loadResults(): EvalRunResult[] {
 }
 
 function systemLabel(run: string): string {
-  if (run === "agent-run2") return "agent (run 2)";
-  if (run.includes("gates")) return "agent −gates";
-  if (run === "baseline") return "baseline";
+  if (run === "agent-run2") return "agent run 2 (locked-12)";
+  if (run === "agent-ablation-gates") return "agent −gates (locked-12)";
+  if (run === "agent-ablation-memory") return "agent −memory (locked-12)";
+  if (run === "baseline") return "one-shot baseline (22)";
+  if (run === "agent") return "agent (22)";
   if (run.startsWith("agent-ablation")) return run.replace("agent-ablation", "agent −"); // e.g. agent −memory
   if (run.startsWith("agent")) return "agent";
   return run;
@@ -38,19 +40,19 @@ function headline(results: EvalRunResult[]): string {
   row("**Failure-detection F1 (primary)**", (r) => `**${pct(r.overall.f1)}**`);
   row("Precision / Recall", (r) => `${pct(r.overall.precision)} / ${pct(r.overall.recall)}`);
   row("Step-localization accuracy (TPs within ±1)", (r) => pct(r.overall.localizationAccuracy));
-  row("Clean-case false positives (case_11)", (r) => String(r.cleanCaseFp ?? "n/a"));
+  row("Clean-case false positives", (r) => r.cleanCaseFps ? Object.entries(r.cleanCaseFps).map(([k, v]) => `${k}: ${v}`).join(", ") : "n/a");
   row("Auto-asserted precision (conf ≥ 0.6)", (r) => pct(r.gate.autoPrecision));
   row("Review-queue precision (conf < 0.6)", (r) => pct(r.gate.reviewPrecision));
   row("Cost per case (USD)", (r) => `$${(r.totals.costUsd / r.cases.length).toFixed(3)}`);
   row("Wall time per case", (r) => `${(r.totals.wallMs / r.cases.length / 1000).toFixed(1)}s`);
   row("**Modeled reviewer effort (min/case)**", (r) => humanMinutesPerCase(r));
-  row("Findings failing evidence-tier check (diagnostic)", (r) => `${r.invalidEvidence ?? 0} (${r.misCitedEvidence ?? 0} mis-cited / ${r.fabricatedEvidence ?? 0} fabricated)${r.strict ? " — excluded" : " — counted in the scores above"}`);
+  row("Findings failing evidence-tier check (excluded from matching)", (r) => `${r.invalidEvidence ?? 0} (${r.misCitedEvidence ?? 0} mis-cited / ${r.fabricatedEvidence ?? 0} fabricated)`);
   row("Parse errors", (r) => String(r.parseErrors));
   lines.push(
     "",
-    "Modeled reviewer effort — a parametric model, not a measurement; the formula was added AFTER the",
-    "benchmark ran (it is not the wall-time model in planning/04-eval-spec.md §4.1, which this table",
-    "also reports). Assumptions, applied identically to every system: reading the report (60 s baseline / 90 s agent+queue triage)",
+    "Modeled reviewer effort — a parametric model, not a measurement (registered as D15 with the",
+    "extended benchmark; it is not the wall-time model in planning/04-eval-spec.md §4.1, which this",
+    "table also reports). Assumptions, applied identically to every system: reading the report (60 s baseline / 90 s agent+queue triage)",
     "+ 1.0 min per true positive confirmed + 4 min per false positive debunked (a phantom claim forces a",
     "manual re-read of the transcript section) + 2 min per review-queue item triaged. Machine wall time",
     "is excluded — it runs unattended. Estimates, not measurements: the FP term dominates the difference.",
@@ -122,7 +124,8 @@ function main(): void {
       const matchedSteps = new Set(c.matched.map((m) => m.predStep + ":" + m.type));
       return c.fpSteps.map((s2, i) => s2 + ":" + c.fpTypes[i]).filter((id) => !matchedSteps.has(id)).sort().join("|");
     };
-    const perCaseDiffs = a.cases.filter((c) => {
+    const shared = a.cases.filter((c) => b.cases.some((x) => x.case_id === c.case_id));
+    const perCaseDiffs = shared.filter((c) => {
       const c2 = b.cases.find((x) => x.case_id === c.case_id);
       if (!c2) return true;
       const tpSame = JSON.stringify(c.matched.map((m) => [m.type, m.predStep]).sort()) === JSON.stringify(c2.matched.map((m) => [m.type, m.predStep]).sort());
@@ -133,26 +136,24 @@ function main(): void {
       "",
       `Two independent full-pipeline sweeps: run 1 F1 ${pct(a.overall.f1)} (${a.overall.tp} TP / ${a.overall.fp} FP), run 2 F1 ${pct(b.overall.f1)} (${b.overall.tp} TP / ${b.overall.fp} FP) — ${same ? "identical headline" : "differing headline"}.` ,
       perCaseDiffs.length > 0
-        ? `All true positives reproduced at identical type and step. False-positive identity or count changed on: ${perCaseDiffs.join(", ")} — FP wobble is the noisy margin, TP detection is not.`
+        ? `Compared on the ${shared.length} shared locked cases: all true positives reproduced at identical type and step. False-positive identity or count changed on: ${perCaseDiffs.join(", ")} — FP wobble is the noisy margin, TP detection is not.`
         : "All per-case findings identical.",
       `Evidence validation: ${a.invalidEvidence}/${(a.invalidEvidence??0)+a.overall.tp+a.overall.fp} vs ${b.invalidEvidence}/${(b.invalidEvidence??0)+b.overall.tp+b.overall.fp} findings invalid across the two runs.`,
       "",
     ].join("\n");
   })();
   const integrityNote = [
-    "## Evidence-tier check (diagnostic, asymmetric by design)",
+    "## Evidence-tier check (D15 — part of scoring, one view for every system)",
     "",
-    "Every finding's quote is tiered against the per-system transcript view: ok / mis-cited (real text,",
-    "wrong step) / fabricated (text exists nowhere). Ellipsis-abridged quotes are allowed. The tiers",
-    "are a DIAGNOSTIC — the scores above use the pre-registered matching (baseline F1 75.7); run the",
-    "scorer with --strict to exclude tier-failing findings (baseline drops to 66.7 under that lens).",
-    "",
-    "Known asymmetry, by design: Confess's findings are verbatim-enforced by its own tool layer, so",
-    "they cannot fail this check — that is the product, not a scoring property. The one-shot baseline",
-    "quotes loosely (serializer lines joined, elisions without ellipses) and accumulates tier failures;",
-    "loose-but-real quotes can also be labeled fabricated by segment matching, so the strict lens is",
-    "harsher FOR the baseline than for Confess. Both facts are the product story.",
-    "Scorer: `src/eval/score.ts`.",
+    "Every finding's quote is tiered against the shared full-text canonical serialization of the",
+    "transcript: ok / mis-cited (real text, wrong step) / fabricated (text exists nowhere).",
+    "Ellipsis-abridged quotes are allowed, but each segment must be verbatim (≥12 chars) — a quote",
+    "that paraphrases or stitches render lines without an ellipsis does not validate. Findings that",
+    "fail are excluded from matching: the counts above exclude them; the failure is reported, never",
+    "silent. Both systems' prompts require verbatim receipts (the baseline prompt was updated with",
+    "the D15 rule), so the check is a measurement, not a vendor-specific filter — an unverifiable",
+    "quote costs the baseline and Confess identically.",
+    "Scorer: `src/eval/score.ts`; run with `--loose` for the pre-D15 diagnostic view.",
     "",
   ].join("\n");
   const parts = [

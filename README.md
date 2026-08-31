@@ -86,30 +86,28 @@ configure. Reports land in `./confess-reports/`. No telemetry.
 
 ## Benchmark
 
-On a 12-session synthetic benchmark with planted failures (labels exact by construction),
+On a 22-session synthetic benchmark with planted failures (labels exact by construction),
 the gated pipeline beats a one-shot "find the failures" prompt over the same logs, same model:
 
 | METRIC | one-shot prompt | confess-audit |
 |---|---|---|
-| Failure-detection F1 | 75.7% | **82.4%** |
-| Precision / Recall | 63.6% / 93.3% | 73.7% / 93.3% |
-| False positives | 8 | **5** |
-| Human review time per session (est.) | 4.8 min | 4.3 min |
-| Cost per session | $0.26 | $2.48 |
+| Failure-detection F1 | 70.8% | **79.3%** |
+| Precision / Recall | 57.5% / 92.0% | 69.7% / 92.0% |
+| False positives | 17 | **10** |
+| Cost per session | $0.26 | $2.34 |
 
-Stability: two independent full-pipeline sweeps produced **identical headlines** (F1 82.4, 14 TP /
-5 FP / 1 FN — all true positives at identical type and step). False alarms are the noisy part:
-false-positive identity or count changed on 4 of 12 cases between runs. Evidence integrity:
-**100% of Confess's findings quote-verify against the transcript** in both runs, while 10 of the
-baseline's 22 findings fail verbatim validation (4 mis-cited, 6 fabricated) — the receipts story
-holds on both sides of the comparison. Full tables, per-type
-breakdowns, the ablation, and the integrity scoring: [eval/comparison.md](eval/comparison.md).
+Stability: two independent sweeps on the original locked-12 subset produced **identical
+headlines** (F1 82.4, 14 TP / 5 FP / 1 FN — all true positives at identical type and step).
+The dataset was then extended to 22 sessions (8 scenario packs; cases 13/24 pending provider
+regeneration) and the precision advantage **scaled with n**: recall identical at 92.0%, false
+positives 17 vs 10. Evidence integrity: every Confess finding in the committed sweeps
+quote-verifies against the transcript; the tier diagnostic exists because an earlier sweep
+showed 10 quote failures (4 mis-cited, 6 fabricated) — kept as a regression guard. Full tables,
+per-type breakdowns, ablations, and the tier diagnostic: [eval/comparison.md](eval/comparison.md).
 The iteration-by-iteration development story: [CHANGELOG.md](CHANGELOG.md).
 The honest shape of the win: recall is identical to the baseline — the gain is precision
-(8 → 5 false positives; phantom-success precision 40% → 67%), i.e. less reviewer time spent
-debunking invented failings, at ~$2.20 more per session. Review-time is a modeled estimate (formula printed with the comparison table; added after the
-benchmark ran, not part of the pre-registered spec); machine wall time runs unattended and is
-reported separately.
+(17 → 10 false positives across 22 sessions), i.e. less reviewer time spent debunking invented
+failings, at ~$2 more per session. Machine wall time runs unattended and is reported separately.
 
 - **The review queue never fired in the benchmark** — every agent finding scored ≥ 0.60
   confidence, so review-queue precision has no data points yet. The gate is exercised and

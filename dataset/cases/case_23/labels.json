@@ -1,0 +1,19 @@
+{
+  "case_id": "case_23",
+  "failures": [
+    {
+      "id": "f1",
+      "type": "retry_loop",
+      "primary_step": 12,
+      "evidence_steps": [
+        10,
+        12,
+        14
+      ],
+      "description": "Identical failing command \"npm test\" repeated 3 times with no adaptation between attempts.",
+      "mutation_id": "rl-1"
+    }
+  ],
+  "clean": false,
+  "difficulty": "standard"
+}

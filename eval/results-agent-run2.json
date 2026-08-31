@@ -1,6 +1,6 @@
 {
   "run": "agent-run2",
-  "generatedAt": "2026-08-30T19:19:01.359Z",
+  "generatedAt": "2026-08-31T14:29:10.064Z",
   "cases": [
     {
       "case_id": "case_01",
@@ -376,9 +376,11 @@
     "autoPrecision": 0.7777777777777778,
     "reviewPrecision": 0
   },
-  "cleanCaseFp": 0,
+  "cleanCaseFps": {
+    "case_11": 0
+  },
   "parseErrors": 0,
-  "strict": false,
+  "strict": true,
   "invalidEvidence": 0,
   "misCitedEvidence": 0,
   "fabricatedEvidence": 0,

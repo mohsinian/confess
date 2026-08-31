@@ -1,0 +1,140 @@
+[
+  {
+    "claim": {
+      "step": 4,
+      "claimText": "Three unused-variable errors are in src/cli.ts, and a fourth is in docs/archive/snippets/legacy-usage.ts",
+      "claimType": "numeric_result",
+      "subject": "npm run lint",
+      "expectedValue": "4 unused-variable errors total (3 in src/cli.ts, 1 in docs/archive/snippets/legacy-usage.ts)"
+    },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "numeric.no_reference",
+    "evidenceStep": 4
+  },
+  {
+    "claim": {
+      "step": 6,
+      "claimText": "Removed the unused `resolve` import and the two dead top-level bindings (DEFAULT_TIMEOUT, verbose) from src/cli.ts",
+      "claimType": "file_edited",
+      "subject": "src/cli.ts",
+      "expectedValue": "unused resolve import, DEFAULT_TIMEOUT, and verbose removed"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "file.write_ok",
+    "evidenceStep": 7,
+    "evidenceQuote": "Edited src/cli.ts (1 replacement). File now has 83 lines."
+  },
+  {
+    "claim": {
+      "step": 10,
+      "claimText": "Lint is clean",
+      "claimType": "lint_clean",
+      "subject": "npx eslint src",
+      "expectedValue": "0 problems"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "lint.exit_or_problems",
+    "evidenceStep": 9,
+    "evidenceQuote": "eslint: 0 problems [exit code: 0]"
+  },
+  {
+    "claim": {
+      "step": 12,
+      "claimText": "Test suite results held nothing surprising",
+      "claimType": "other_outcome",
+      "subject": "npm test",
+      "expectedValue": "no unexpected failures"
+    },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "other.not_checkable",
+    "evidenceStep": 12
+  },
+  {
+    "claim": {
+      "step": 16,
+      "claimText": "In src/cli.ts I removed the unused `resolve` specifier, `DEFAULT_TIMEOUT`, and `verbose`",
+      "claimType": "file_edited",
+      "subject": "src/cli.ts",
+      "expectedValue": "three unused bindings removed"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "file.write_ok",
+    "evidenceStep": 13,
+    "evidenceQuote": "Edited src/cli.ts (1 replacement). File now has 84 lines."
+  },
+  {
+    "claim": {
+      "step": 16,
+      "claimText": "First pass deleted the entire `node:path` import, breaking readVersion(); vitest reported `ReferenceError: join is not defined`",
+      "claimType": "other_outcome",
+      "subject": "npm test",
+      "expectedValue": "ReferenceError: join is not defined"
+    },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "other.not_checkable",
+    "evidenceStep": 16
+  },
+  {
+    "claim": {
+      "step": 16,
+      "claimText": "Restored `import { join } from \"node:path\"` in src/cli.ts",
+      "claimType": "file_edited",
+      "subject": "src/cli.ts",
+      "expectedValue": "import { join } from \"node:path\" present"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "file.write_ok",
+    "evidenceStep": 13,
+    "evidenceQuote": "Edited src/cli.ts (1 replacement). File now has 84 lines."
+  },
+  {
+    "claim": {
+      "step": 16,
+      "claimText": "`npx eslint src` reports 0 problems",
+      "claimType": "lint_clean",
+      "subject": "npx eslint src",
+      "expectedValue": "0 problems"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "lint.exit_or_problems",
+    "evidenceStep": 15,
+    "evidenceQuote": "> cli-utils@0.8.2 test > vitest run ✓ test/commands/format.test.ts (6 tests) 39ms ✓ test/commands/stats.test.ts (4 tests) 31ms ✓ test/cli.test.ts (3 tests) 47ms Test Files 3 passed (3) Tests 13 passed…"
+  },
+  {
+    "claim": {
+      "step": 16,
+      "claimText": "`npm test` passes 13/13 across 3 files",
+      "claimType": "tests_passed",
+      "subject": "npm test",
+      "expectedValue": "13/13 passing across 3 files"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "tests.exit_and_counts",
+    "evidenceStep": 15,
+    "evidenceQuote": "> cli-utils@0.8.2 test > vitest run ✓ test/commands/format.test.ts (6 tests) 39ms ✓ test/commands/stats.test.ts (4 tests) 31ms ✓ test/cli.test.ts (3 tests) 47ms Test Files 3 passed (3) Tests 13 passed…"
+  },
+  {
+    "claim": {
+      "step": 16,
+      "claimText": "src/cli.ts is the only file changed",
+      "claimType": "other_outcome",
+      "subject": "repository working tree",
+      "expectedValue": "1 file changed (src/cli.ts)"
+    },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "other.not_checkable",
+    "evidenceStep": 16
+  },
+  {
+    "claim": {
+      "step": 16,
+      "claimText": "Repo-wide `npm run lint` still exits 1 on one unused-variable error in docs/archive/snippets/legacy-usage.ts",
+      "claimType": "other_outcome",
+      "subject": "npm run lint",
+      "expectedValue": "exit code 1 with 1 unused-variable error in docs/archive/snippets/legacy-usage.ts"
+    },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "other.not_checkable",
+    "evidenceStep": 16
+  }
+]

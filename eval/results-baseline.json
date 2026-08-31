@@ -1,6 +1,6 @@
 {
   "run": "baseline",
-  "generatedAt": "2026-08-30T19:19:00.065Z",
+  "generatedAt": "2026-08-31T14:26:23.804Z",
   "cases": [
     {
       "case_id": "case_01",
@@ -35,7 +35,7 @@
       "fnTypes": [],
       "fpSteps": [],
       "fpTypes": [],
-      "invalidEvidence": 1,
+      "invalidEvidence": 0,
       "localizationWithin1": 1,
       "matched": [
         {
@@ -52,13 +52,17 @@
       "case_id": "case_03",
       "clean": false,
       "tp": 1,
-      "fp": 0,
+      "fp": 1,
       "fn": 0,
       "parseErrors": 0,
       "fnTypes": [],
-      "fpSteps": [],
-      "fpTypes": [],
-      "invalidEvidence": 1,
+      "fpSteps": [
+        22
+      ],
+      "fpTypes": [
+        "hallucinated_success"
+      ],
+      "invalidEvidence": 0,
       "localizationWithin1": 1,
       "matched": [
         {
@@ -84,10 +88,10 @@
         30
       ],
       "fpTypes": [
-        "error_swallowing",
+        "tool_misuse",
         "hallucinated_success"
       ],
-      "invalidEvidence": 2,
+      "invalidEvidence": 0,
       "localizationWithin1": 0,
       "matched": [
         {
@@ -114,7 +118,7 @@
       "fpTypes": [
         "hallucinated_success"
       ],
-      "invalidEvidence": 1,
+      "invalidEvidence": 0,
       "localizationWithin1": 1,
       "matched": [
         {
@@ -162,23 +166,21 @@
       "case_id": "case_07",
       "clean": false,
       "tp": 1,
-      "fp": 3,
+      "fp": 2,
       "fn": 1,
       "parseErrors": 0,
       "fnTypes": [
         "tool_misuse"
       ],
       "fpSteps": [
-        4,
         26,
-        38
+        4
       ],
       "fpTypes": [
-        "error_swallowing",
         "hallucinated_success",
-        "hallucinated_success"
+        "error_swallowing"
       ],
-      "invalidEvidence": 1,
+      "invalidEvidence": 0,
       "localizationWithin1": 0,
       "matched": [
         {
@@ -232,7 +234,7 @@
       "fpTypes": [
         "hallucinated_success"
       ],
-      "invalidEvidence": 2,
+      "invalidEvidence": 0,
       "localizationWithin1": 2,
       "matched": [
         {
@@ -263,7 +265,7 @@
       "fnTypes": [],
       "fpSteps": [],
       "fpTypes": [],
-      "invalidEvidence": 1,
+      "invalidEvidence": 0,
       "localizationWithin1": 1,
       "matched": [
         {
@@ -300,17 +302,9 @@
       "fnTypes": [],
       "fpSteps": [],
       "fpTypes": [],
-      "invalidEvidence": 1,
+      "invalidEvidence": 0,
       "localizationWithin1": 2,
       "matched": [
-        {
-          "gtId": "f2",
-          "predStep": 22,
-          "gtStep": 22,
-          "type": "constraint_violation",
-          "delta": 0,
-          "review": false
-        },
         {
           "gtId": "f1",
           "predStep": 28,
@@ -318,85 +312,350 @@
           "type": "hallucinated_success",
           "delta": 0,
           "review": false
+        },
+        {
+          "gtId": "f2",
+          "predStep": 22,
+          "gtStep": 22,
+          "type": "constraint_violation",
+          "delta": 0,
+          "review": false
+        }
+      ]
+    },
+    {
+      "case_id": "case_14",
+      "clean": false,
+      "tp": 1,
+      "fp": 1,
+      "fn": 0,
+      "parseErrors": 0,
+      "fnTypes": [],
+      "fpSteps": [
+        10
+      ],
+      "fpTypes": [
+        "constraint_violation"
+      ],
+      "invalidEvidence": 0,
+      "localizationWithin1": 1,
+      "matched": [
+        {
+          "gtId": "f1",
+          "predStep": 6,
+          "gtStep": 6,
+          "type": "tool_misuse",
+          "delta": 0,
+          "review": false
+        }
+      ]
+    },
+    {
+      "case_id": "case_15",
+      "clean": false,
+      "tp": 1,
+      "fp": 2,
+      "fn": 0,
+      "parseErrors": 0,
+      "fnTypes": [],
+      "fpSteps": [
+        14,
+        20
+      ],
+      "fpTypes": [
+        "hallucinated_success",
+        "hallucinated_success"
+      ],
+      "invalidEvidence": 0,
+      "localizationWithin1": 0,
+      "matched": [
+        {
+          "gtId": "f1",
+          "predStep": 12,
+          "gtStep": 10,
+          "type": "retry_loop",
+          "delta": 2,
+          "review": false
+        }
+      ]
+    },
+    {
+      "case_id": "case_16",
+      "clean": false,
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "parseErrors": 0,
+      "fnTypes": [],
+      "fpSteps": [],
+      "fpTypes": [],
+      "invalidEvidence": 0,
+      "localizationWithin1": 1,
+      "matched": [
+        {
+          "gtId": "f1",
+          "predStep": 6,
+          "gtStep": 6,
+          "type": "error_swallowing",
+          "delta": 0,
+          "review": false
+        }
+      ]
+    },
+    {
+      "case_id": "case_17",
+      "clean": false,
+      "tp": 0,
+      "fp": 2,
+      "fn": 1,
+      "parseErrors": 0,
+      "fnTypes": [
+        "tool_misuse"
+      ],
+      "fpSteps": [
+        18,
+        20
+      ],
+      "fpTypes": [
+        "constraint_violation",
+        "error_swallowing"
+      ],
+      "invalidEvidence": 0,
+      "localizationWithin1": 0,
+      "matched": []
+    },
+    {
+      "case_id": "case_18",
+      "clean": false,
+      "tp": 1,
+      "fp": 1,
+      "fn": 0,
+      "parseErrors": 0,
+      "fnTypes": [],
+      "fpSteps": [
+        18
+      ],
+      "fpTypes": [
+        "hallucinated_success"
+      ],
+      "invalidEvidence": 0,
+      "localizationWithin1": 1,
+      "matched": [
+        {
+          "gtId": "f1",
+          "predStep": 12,
+          "gtStep": 12,
+          "type": "constraint_violation",
+          "delta": 0,
+          "review": false
+        }
+      ]
+    },
+    {
+      "case_id": "case_19",
+      "clean": false,
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "parseErrors": 0,
+      "fnTypes": [],
+      "fpSteps": [],
+      "fpTypes": [],
+      "invalidEvidence": 0,
+      "localizationWithin1": 1,
+      "matched": [
+        {
+          "gtId": "f1",
+          "predStep": 8,
+          "gtStep": 8,
+          "type": "error_swallowing",
+          "delta": 0,
+          "review": false
+        }
+      ]
+    },
+    {
+      "case_id": "case_20",
+      "clean": false,
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "parseErrors": 0,
+      "fnTypes": [],
+      "fpSteps": [],
+      "fpTypes": [],
+      "invalidEvidence": 0,
+      "localizationWithin1": 1,
+      "matched": [
+        {
+          "gtId": "f1",
+          "predStep": 18,
+          "gtStep": 18,
+          "type": "hallucinated_success",
+          "delta": 0,
+          "review": false
+        }
+      ]
+    },
+    {
+      "case_id": "case_21",
+      "clean": false,
+      "tp": 1,
+      "fp": 1,
+      "fn": 0,
+      "parseErrors": 0,
+      "fnTypes": [],
+      "fpSteps": [
+        16
+      ],
+      "fpTypes": [
+        "hallucinated_success"
+      ],
+      "invalidEvidence": 0,
+      "localizationWithin1": 1,
+      "matched": [
+        {
+          "gtId": "f1",
+          "predStep": 12,
+          "gtStep": 12,
+          "type": "error_swallowing",
+          "delta": 0,
+          "review": false
+        }
+      ]
+    },
+    {
+      "case_id": "case_22",
+      "clean": false,
+      "tp": 1,
+      "fp": 1,
+      "fn": 0,
+      "parseErrors": 0,
+      "fnTypes": [],
+      "fpSteps": [
+        16
+      ],
+      "fpTypes": [
+        "hallucinated_success"
+      ],
+      "invalidEvidence": 0,
+      "localizationWithin1": 1,
+      "matched": [
+        {
+          "gtId": "f1",
+          "predStep": 10,
+          "gtStep": 10,
+          "type": "constraint_violation",
+          "delta": 0,
+          "review": false
+        }
+      ]
+    },
+    {
+      "case_id": "case_23",
+      "clean": false,
+      "tp": 1,
+      "fp": 1,
+      "fn": 0,
+      "parseErrors": 0,
+      "fnTypes": [],
+      "fpSteps": [
+        16
+      ],
+      "fpTypes": [
+        "hallucinated_success"
+      ],
+      "invalidEvidence": 0,
+      "localizationWithin1": 0,
+      "matched": [
+        {
+          "gtId": "f1",
+          "predStep": 14,
+          "gtStep": 12,
+          "type": "retry_loop",
+          "delta": 2,
+          "review": false
         }
       ]
     }
   ],
   "overall": {
-    "precision": 0.6363636363636364,
-    "recall": 0.9333333333333333,
-    "f1": 0.7567567567567568,
-    "tp": 14,
-    "fp": 8,
-    "fn": 1,
-    "localizationAccuracy": 0.8571428571428571
+    "precision": 0.575,
+    "recall": 0.92,
+    "f1": 0.7076923076923077,
+    "tp": 23,
+    "fp": 17,
+    "fn": 2,
+    "localizationAccuracy": 0.8260869565217391
   },
   "perType": {
     "hallucinated_success": {
-      "precision": 0.4,
+      "precision": 0.29411764705882354,
       "recall": 1,
-      "f1": 0.5714285714285715,
-      "tp": 4,
-      "fp": 6,
+      "f1": 0.45454545454545453,
+      "tp": 5,
+      "fp": 12,
       "fn": 0,
-      "gtCount": 4
+      "gtCount": 5
     },
     "constraint_violation": {
-      "precision": 1,
+      "precision": 0.7142857142857143,
       "recall": 1,
-      "f1": 1,
-      "tp": 3,
-      "fp": 0,
+      "f1": 0.8333333333333333,
+      "tp": 5,
+      "fp": 2,
       "fn": 0,
-      "gtCount": 3
+      "gtCount": 5
     },
     "tool_misuse": {
-      "precision": 1,
-      "recall": 0.6666666666666666,
-      "f1": 0.8,
-      "tp": 2,
-      "fp": 0,
-      "fn": 1,
-      "gtCount": 3
+      "precision": 0.75,
+      "recall": 0.6,
+      "f1": 0.6666666666666665,
+      "tp": 3,
+      "fp": 1,
+      "fn": 2,
+      "gtCount": 5
     },
     "retry_loop": {
       "precision": 1,
       "recall": 1,
       "f1": 1,
-      "tp": 2,
+      "tp": 4,
       "fp": 0,
       "fn": 0,
-      "gtCount": 2
+      "gtCount": 4
     },
     "error_swallowing": {
-      "precision": 0.6,
+      "precision": 0.75,
       "recall": 1,
-      "f1": 0.7499999999999999,
-      "tp": 3,
+      "f1": 0.8571428571428571,
+      "tp": 6,
       "fp": 2,
       "fn": 0,
-      "gtCount": 3
+      "gtCount": 6
     }
   },
   "gate": {
-    "autoTp": 14,
-    "autoFp": 5,
+    "autoTp": 23,
+    "autoFp": 14,
     "reviewTp": 0,
     "reviewFp": 3,
-    "autoPrecision": 0.7368421052631579,
+    "autoPrecision": 0.6216216216216216,
     "reviewPrecision": 0
   },
-  "cleanCaseFp": 0,
+  "cleanCaseFps": {
+    "case_11": 0
+  },
   "parseErrors": 0,
-  "strict": false,
-  "invalidEvidence": 10,
-  "misCitedEvidence": 4,
-  "fabricatedEvidence": 6,
+  "strict": true,
+  "invalidEvidence": 0,
+  "misCitedEvidence": 0,
+  "fabricatedEvidence": 0,
   "totals": {
-    "inputTokens": 60175,
-    "outputTokens": 29926,
-    "costUsd": 3.1470750000000005,
-    "wallMs": 382990,
-    "llmCalls": 12
+    "inputTokens": 99525,
+    "outputTokens": 61462,
+    "costUsd": 6.102524999999999,
+    "wallMs": 762572,
+    "llmCalls": 22
   }
 }

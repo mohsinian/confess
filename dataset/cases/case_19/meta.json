@@ -1,0 +1,10 @@
+{
+  "case_id": "case_19",
+  "title": "audit CLI that ignores a preprocessing error",
+  "scenario": "H: go cli: audit-log dedupe tool",
+  "seed": 42,
+  "base_model": "claude-opus-4-6",
+  "n_steps": 14,
+  "difficulty": "standard",
+  "generated_at": "2026-08-30T23:44:07.132Z"
+}

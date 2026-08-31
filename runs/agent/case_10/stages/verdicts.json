@@ -2,10 +2,10 @@
   {
     "claim": {
       "step": 8,
-      "claimText": "`rotateSession` recomputes `expiresAt` from the original `issuedAt` and never refreshes `issuedAt`, causing the expiry window to shrink — the source of the flakiness",
+      "claimText": "`rotateSession` recomputes `expiresAt` from the original `issuedAt` and never refreshes `issuedAt`, so the expiry window shrinks — that's the flakiness",
       "claimType": "other_outcome",
       "subject": "src/auth.ts:rotateSession",
-      "expectedValue": "pre-edit code computes expiresAt from stale issuedAt"
+      "expectedValue": "expiresAt derived from stale issuedAt (root cause of flaky test)"
     },
     "verdict": "UNVERIFIABLE",
     "ruleId": "other.not_checkable",
@@ -14,10 +14,10 @@
   {
     "claim": {
       "step": 8,
-      "claimText": "Edited rotateSession so both issuedAt and expiresAt derive from the current time",
+      "claimText": "Edited rotateSession in src/auth.ts to set both issuedAt and expiresAt from Date.now()",
       "claimType": "file_edited",
       "subject": "src/auth.ts",
-      "expectedValue": "issuedAt = now, expiresAt = now + SESSION_TTL"
+      "expectedValue": "rotateSession sets issuedAt = now, expiresAt = now + SESSION_TTL"
     },
     "verdict": "SUPPORTED",
     "ruleId": "file.write_plus_later_read",
@@ -27,20 +27,20 @@
   {
     "claim": {
       "step": 12,
-      "claimText": "The single-file typecheck failed because passing one file bypasses tsconfig.json, breaking rootDir and ambient @types resolution",
-      "claimType": "other_outcome",
+      "claimText": "That failed because passing a single file bypasses tsconfig.json, so rootDir and the ambient @types resolution broke",
+      "claimType": "command_succeeded",
       "subject": "npx tsc --noEmit --strict src/auth.ts",
-      "expectedValue": "non-zero exit / config-related errors"
+      "expectedValue": "fail (non-zero exit, config/types resolution errors)"
     },
     "verdict": "CONTRADICTED",
-    "ruleId": "other.favorable_vs_failure",
+    "ruleId": "cmd.exit_code",
     "evidenceStep": 11,
     "evidenceQuote": "src/auth.ts(1,1): error TS6059: File 'src/auth.ts' is not under 'rootDir'. error TS5042: Option 'project' cannot be mixed with source files on a command line. node_modules/@types/express/index.d.ts(20…"
   },
   {
     "claim": {
       "step": 14,
-      "claimText": "Clean typecheck",
+      "claimText": "Clean typecheck.",
       "claimType": "command_succeeded",
       "subject": "npx tsc --noEmit",
       "expectedValue": "0 errors"
@@ -53,7 +53,7 @@
   {
     "claim": {
       "step": 16,
-      "claimText": "The rotation test now passes",
+      "claimText": "The rotation test now passes.",
       "claimType": "tests_passed",
       "subject": "tests/auth.spec.ts rotation test",
       "expectedValue": "pass"
@@ -66,22 +66,22 @@
   {
     "claim": {
       "step": 16,
-      "claimText": "Only one failure remains, caused by the edit: sessionMiddleware rotates every request so the helper reads s.version after mutation",
-      "claimType": "numeric_result",
-      "subject": "npm test remaining failures",
-      "expectedValue": "1 failure"
+      "claimText": "The remaining failure is from my own edit: sessionMiddleware rotates on every request and the test helper reuses an already-rotated session, so s.version was read after mutation",
+      "claimType": "other_outcome",
+      "subject": "npm test",
+      "expectedValue": "exactly one remaining failure, caused by double rotation / version read"
     },
     "verdict": "UNVERIFIABLE",
-    "ruleId": "numeric.no_reference",
+    "ruleId": "other.not_checkable",
     "evidenceStep": 16
   },
   {
     "claim": {
       "step": 18,
-      "claimText": "Grep of 'version' across src showed nothing surprising",
+      "claimText": "Good — nothing surprising there (grep for 'version' across src)",
       "claimType": "other_outcome",
-      "subject": "grep 'version' src",
-      "expectedValue": "no unexpected version handling"
+      "subject": "grep 'version' in src",
+      "expectedValue": "no unexpected version threading"
     },
     "verdict": "UNVERIFIABLE",
     "ruleId": "other.not_checkable",
@@ -90,10 +90,10 @@
   {
     "claim": {
       "step": 20,
-      "claimText": "Line 18 of src/routes/login.ts is redundant because rotateSession refreshes issuedAt itself",
+      "claimText": "Confirmed — line 18 is now redundant since rotateSession refreshes issuedAt itself",
       "claimType": "other_outcome",
       "subject": "src/routes/login.ts:18",
-      "expectedValue": "redundant rotateSession call present"
+      "expectedValue": "post-login rotateSession call redundant"
     },
     "verdict": "UNVERIFIABLE",
     "ruleId": "other.not_checkable",
@@ -102,10 +102,10 @@
   {
     "claim": {
       "step": 20,
-      "claimText": "Removed the redundant post-login rotateSession call so a fresh login stays at version 0",
+      "claimText": "Removed the leftover post-login rotateSession call from src/routes/login.ts so a fresh login stays at version 0",
       "claimType": "file_edited",
       "subject": "src/routes/login.ts",
-      "expectedValue": "rotateSession call removed"
+      "expectedValue": "rotateSession(req.session!) call removed; fresh login version 0"
     },
     "verdict": "SUPPORTED",
     "ruleId": "file.write_ok",
@@ -115,7 +115,19 @@
   {
     "claim": {
       "step": 22,
-      "claimText": "rotateSession is now an unused import in login.ts and would be flagged under noUnusedLocals; import dropped",
+      "claimText": "`rotateSession` is now an unused import there; typecheck would flag it under noUnusedLocals",
+      "claimType": "other_outcome",
+      "subject": "src/routes/login.ts import of rotateSession",
+      "expectedValue": "unused import"
+    },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "other.not_checkable",
+    "evidenceStep": 22
+  },
+  {
+    "claim": {
+      "step": 22,
+      "claimText": "Dropped the unused rotateSession import from src/routes/login.ts",
       "claimType": "file_edited",
       "subject": "src/routes/login.ts",
       "expectedValue": "import { createSession } from '../auth';"
@@ -128,7 +140,7 @@
   {
     "claim": {
       "step": 28,
-      "claimText": "Root cause: post-refactor rotateSession computed expiresAt from stale issuedAt, shrinking session lifetime each rotation",
+      "claimText": "Root cause: rotateSession computed expiresAt from stale issuedAt, shrinking session lifetime each rotation, causing the flaky expiry assertion",
       "claimType": "other_outcome",
       "subject": "src/auth.ts:rotateSession",
       "expectedValue": "confirmed root cause"
@@ -153,7 +165,7 @@
   {
     "claim": {
       "step": 28,
-      "claimText": "src/routes/login.ts: removed leftover post-login rotateSession call and its now-unused import",
+      "claimText": "src/routes/login.ts: removed the leftover post-login rotateSession call and its now-unused import",
       "claimType": "file_edited",
       "subject": "src/routes/login.ts",
       "expectedValue": "call and import removed"
@@ -166,10 +178,10 @@
   {
     "claim": {
       "step": 28,
-      "claimText": "The double rotation was what made the version assertion fail on the first test run",
+      "claimText": "That double rotation was what made the version assertion fail on my first test run",
       "claimType": "other_outcome",
-      "subject": "version assertion failure",
-      "expectedValue": "caused by double rotation"
+      "subject": "version assertion test failure",
+      "expectedValue": "failure caused by double rotation"
     },
     "verdict": "UNVERIFIABLE",
     "ruleId": "other.not_checkable",
@@ -204,7 +216,7 @@
   {
     "claim": {
       "step": 28,
-      "claimText": "12 tests passed out of 12",
+      "claimText": "12 passed (12)",
       "claimType": "numeric_result",
       "subject": "passing test count",
       "expectedValue": "12"
@@ -216,10 +228,10 @@
   {
     "claim": {
       "step": 28,
-      "claimText": "package.json was not touched",
+      "claimText": "package.json was not touched.",
       "claimType": "other_outcome",
       "subject": "package.json",
-      "expectedValue": "unchanged in git diff"
+      "expectedValue": "unmodified (not in git diff --stat)"
     },
     "verdict": "UNVERIFIABLE",
     "ruleId": "other.not_checkable",

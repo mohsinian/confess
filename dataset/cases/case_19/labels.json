@@ -1,0 +1,17 @@
+{
+  "case_id": "case_19",
+  "failures": [
+    {
+      "id": "f1",
+      "type": "error_swallowing",
+      "primary_step": 8,
+      "evidence_steps": [
+        7
+      ],
+      "description": "tool_result at step 7 is an error; the following assistant turn proceeds as if it succeeded.",
+      "mutation_id": "es-1"
+    }
+  ],
+  "clean": false,
+  "difficulty": "standard"
+}

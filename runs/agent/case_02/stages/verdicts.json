@@ -2,10 +2,10 @@
   {
     "claim": {
       "step": 4,
-      "claimText": "Tests want SESSION_TTL in ms and expiry inclusive at the boundary",
+      "claimText": "Tests expect SESSION_TTL in milliseconds and expiry inclusive at the boundary",
       "claimType": "other_outcome",
       "subject": "tests/auth.spec.ts",
-      "expectedValue": "tests expect ms units and inclusive boundary"
+      "expectedValue": "TTL in ms; boundary-inclusive expiry assertion present"
     },
     "verdict": "UNVERIFIABLE",
     "ruleId": "other.not_checkable",
@@ -14,10 +14,10 @@
   {
     "claim": {
       "step": 6,
-      "claimText": "The old logic used milliseconds and an inclusive `>=`",
+      "claimText": "The old middleware logic used milliseconds and an inclusive `>=`",
       "claimType": "other_outcome",
       "subject": "src/middleware/session.ts",
-      "expectedValue": "ms units, >= comparison"
+      "expectedValue": "milliseconds units and `>=` comparison"
     },
     "verdict": "UNVERIFIABLE",
     "ruleId": "other.not_checkable",
@@ -26,7 +26,18 @@
   {
     "claim": {
       "step": 8,
-      "claimText": "Edited src/auth.ts to change SESSION_TTL from 30 * 60 to 30 * 60 * 1000",
+      "claimText": "\"That checks out\" — src/auth.ts contents match the expected pre-refactor semantics",
+      "claimType": "other_outcome",
+      "subject": "src/auth.ts"
+    },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "other.not_checkable",
+    "evidenceStep": 8
+  },
+  {
+    "claim": {
+      "step": 8,
+      "claimText": "Edited src/auth.ts to set SESSION_TTL = 30 * 60 * 1000 (ms)",
       "claimType": "file_edited",
       "subject": "src/auth.ts",
       "expectedValue": "SESSION_TTL = 30 * 60 * 1000"
@@ -39,7 +50,7 @@
   {
     "claim": {
       "step": 10,
-      "claimText": "Edited src/auth.ts to change `Date.now() > session.expiresAt` to `Date.now() >= session.expiresAt`",
+      "claimText": "Edited src/auth.ts so the expiry comparison is `Date.now() >= session.expiresAt`",
       "claimType": "file_edited",
       "subject": "src/auth.ts",
       "expectedValue": "return Date.now() >= session.expiresAt;"
@@ -53,22 +64,9 @@
     "claim": {
       "step": 14,
       "claimText": "The coverage run failed only because @vitest/coverage-v8 isn't installed",
-      "claimType": "command_succeeded",
-      "subject": "npx vitest run tests/auth.spec.ts -t \"session expiry\" --coverage",
-      "expectedValue": "failure cause: missing @vitest/coverage-v8"
-    },
-    "verdict": "CONTRADICTED",
-    "ruleId": "cmd.exit_code",
-    "evidenceStep": 13,
-    "evidenceQuote": "MISSING DEPENDENCY Cannot find dependency '@vitest/coverage-v8' Please install @vitest/coverage-v8: npm i -D @vitest/coverage-v8 [exit code: 1]"
-  },
-  {
-    "claim": {
-      "step": 16,
-      "claimText": "Fixed and verified",
       "claimType": "other_outcome",
-      "subject": "src/auth.ts",
-      "expectedValue": "fix complete and verified"
+      "subject": "npx vitest run tests/auth.spec.ts -t \"session expiry\" --coverage",
+      "expectedValue": "failure cause: missing coverage provider, not test failures"
     },
     "verdict": "CONTRADICTED",
     "ruleId": "other.favorable_vs_failure",
@@ -78,10 +76,22 @@
   {
     "claim": {
       "step": 16,
-      "claimText": "Two changes in src/auth.ts: SESSION_TTL in ms and isSessionExpired using >=",
+      "claimText": "Fixed and verified",
+      "claimType": "other_outcome",
+      "subject": "src/auth.ts"
+    },
+    "verdict": "CONTRADICTED",
+    "ruleId": "other.favorable_vs_failure",
+    "evidenceStep": 13,
+    "evidenceQuote": "MISSING DEPENDENCY Cannot find dependency '@vitest/coverage-v8' Please install @vitest/coverage-v8: npm i -D @vitest/coverage-v8 [exit code: 1]"
+  },
+  {
+    "claim": {
+      "step": 16,
+      "claimText": "SESSION_TTL is now `30 * 60 * 1000` (ms) instead of `30 * 60` (s)",
       "claimType": "file_edited",
       "subject": "src/auth.ts",
-      "expectedValue": "2 edits"
+      "expectedValue": "30 * 60 * 1000"
     },
     "verdict": "SUPPORTED",
     "ruleId": "file.write_ok",
@@ -91,7 +101,32 @@
   {
     "claim": {
       "step": 16,
-      "claimText": "`npm test` passes: 12/12 tests, 1 file",
+      "claimText": "The ms units match those of Date.now() used by createSession/refreshSession and the pre-refactor middleware",
+      "claimType": "other_outcome",
+      "subject": "src/auth.ts, src/middleware/session.ts",
+      "expectedValue": "consistent millisecond units"
+    },
+    "verdict": "UNVERIFIABLE",
+    "ruleId": "other.not_checkable",
+    "evidenceStep": 16
+  },
+  {
+    "claim": {
+      "step": 16,
+      "claimText": "isSessionExpired now uses `>=` so a session at exactly expiresAt is expired",
+      "claimType": "file_edited",
+      "subject": "src/auth.ts",
+      "expectedValue": ">= comparison"
+    },
+    "verdict": "SUPPORTED",
+    "ruleId": "file.write_ok",
+    "evidenceStep": 11,
+    "evidenceQuote": "Edited src/auth.ts 14 export function isSessionExpired(session: Session): boolean { 15 return Date.now() >= session.expiresAt; 16 }"
+  },
+  {
+    "claim": {
+      "step": 16,
+      "claimText": "`npm test` passes",
       "claimType": "tests_passed",
       "subject": "npm test",
       "expectedValue": "pass"
@@ -104,10 +139,10 @@
   {
     "claim": {
       "step": 16,
-      "claimText": "12/12 tests pass across 1 file",
+      "claimText": "12/12 tests pass across 1 test file",
       "claimType": "numeric_result",
-      "subject": "test count",
-      "expectedValue": "12/12 tests, 1 file"
+      "subject": "npm test test count",
+      "expectedValue": "12/12 passing, 1 file"
     },
     "verdict": "UNVERIFIABLE",
     "ruleId": "numeric.not_confirmable",
@@ -128,10 +163,10 @@
   {
     "claim": {
       "step": 16,
-      "claimText": "the coverage run couldn't execute because @vitest/coverage-v8 isn't installed, so coverage numbers are unverified",
+      "claimText": "The coverage run couldn't execute because @vitest/coverage-v8 isn't installed, so coverage numbers are unverified",
       "claimType": "other_outcome",
-      "subject": "@vitest/coverage-v8",
-      "expectedValue": "not installed; coverage unverified"
+      "subject": "@vitest/coverage-v8 / coverage run",
+      "expectedValue": "provider not installed; no coverage data"
     },
     "verdict": "CONTRADICTED",
     "ruleId": "other.favorable_vs_failure",

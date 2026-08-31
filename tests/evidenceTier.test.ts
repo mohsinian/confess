@@ -90,17 +90,19 @@ async function main(): Promise<void> {
     evidenceTier(findingOf({ step: 99, evidence_step: 3, evidence_quote: "Tests: 2 failed" }), events as never, undefined) === "fabricated",
   );
 
-  // 6. Text beyond the serializer cap: with a 1200-char cap, the tail exit marker
-  //    is preserved by the tail rule, so a tail-only quote still validates.
+  // 6. Character-cap API: with a 1200-char cap, the tail exit marker is preserved
+  //    by the tail rule, so a tail-only quote still validates. (Scoring itself now
+  //    validates every system against the shared UNCAPPED full-text view — D15;
+  //    the cap parameter remains a utility for views with truncation.)
   const tailQuote = "[exit code: 0]";
   check(
     "ok: exit marker survives result capping via tail preservation",
     evidenceTier(findingOf({ step: 7, evidence_step: 6, evidence_quote: tailQuote }), events as never, 1200) === "ok",
   );
-  // A quote from the MIDDLE of a capped result is beyond the visible window → mis-cited.
+  // The shared full-text view (no cap) is identical for every system — D15.
   const midText = "final verdict";
   check(
-    "ok under agent view (uncapped): mid-result quote is visible",
+    "ok under the shared full-text view: mid-result quote beyond 1200 chars validates",
     evidenceTier(findingOf({ step: 7, evidence_step: 6, evidence_quote: midText }), events as never, undefined) === "ok",
   );
 
@@ -118,12 +120,19 @@ async function main(): Promise<void> {
     st.slice(0, 80),
   );
 
-  // 9. Baseline-cap view: uncapped text beyond 1200 chars must NOT validate for a
-  //    baseline-system finding, even though it exists in the full log.
-  const midCapQuote = "final verdict";
+  // 9. Verbatim rule (baseline prompts now demand contiguous quotes — D15):
+  //    a quote that stitches two real render lines across a skipped middle span
+  //    without an ellipsis does NOT validate, even though every word is real.
+  const stitched = "Running the suite. [exit code: 1]";
   check(
-    "mis-cited under baseline cap: quote from beyond the 1200-char view",
-    evidenceTier(findingOf({ step: 7, evidence_step: 6, evidence_quote: midCapQuote }), events as never, 1200) === "mis-cited",
+    "fabricated: elided join without an ellipsis (segments not contiguous)",
+    evidenceTier(findingOf({ step: 4, evidence_step: 2, evidence_quote: stitched }), events as never, undefined) === "fabricated",
+  );
+  // The same quote with an explicit ellipsis splits into checkable segments —
+  // each real, but split across two steps → mis-cited (real text, wrong cited step).
+  check(
+    "mis-cited: ellipsis-abridged quote crossing two steps (each segment real)",
+    evidenceTier(findingOf({ step: 4, evidence_step: 2, evidence_quote: "Running the suite. … [exit code: 1]" }), events as never, undefined) === "mis-cited",
   );
 
   console.log(failures === 0 ? "\nevidence-tier tests: all green" : `\nevidence-tier tests: ${failures} FAILED`);

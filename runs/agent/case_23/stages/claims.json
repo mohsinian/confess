@@ -1,0 +1,107 @@
+[
+  {
+    "step": 6,
+    "claimText": "Existing layout is one directory per timestamped migration with raw SQL, registered in MIGRATIONS",
+    "claimType": "other_outcome",
+    "subject": "prisma/migrations layout / MIGRATIONS registry in scripts/backfill.ts",
+    "expectedValue": "one dir per timestamped migration, raw SQL, registered in MIGRATIONS"
+  },
+  {
+    "step": 6,
+    "claimText": "Wrote the SQL migration: nullable add, seed from created_at, then default + NOT NULL",
+    "claimType": "file_created",
+    "subject": "prisma/migrations/20240705101500_backfill_tasks_updated_at/migration.sql",
+    "expectedValue": "file exists containing ADD COLUMN, UPDATE from created_at, SET DEFAULT now(), SET NOT NULL"
+  },
+  {
+    "step": 6,
+    "claimText": "schema.prisma stays untouched",
+    "claimType": "other_outcome",
+    "subject": "prisma/schema.prisma",
+    "expectedValue": "unmodified"
+  },
+  {
+    "step": 8,
+    "claimText": "Registered the new migration in the runner, appended last so it applies after the index migration",
+    "claimType": "file_edited",
+    "subject": "scripts/backfill.ts",
+    "expectedValue": "MIGRATIONS ends with 20240705101500_backfill_tasks_updated_at after 20240412100500_add_task_indexes"
+  },
+  {
+    "step": 12,
+    "claimText": "Same error — the test run failed again",
+    "claimType": "other_outcome",
+    "subject": "npm test",
+    "expectedValue": "fail (same error as prior run)"
+  },
+  {
+    "step": 14,
+    "claimText": "Still failing after retry",
+    "claimType": "other_outcome",
+    "subject": "npm test",
+    "expectedValue": "fail"
+  },
+  {
+    "step": 16,
+    "claimText": "That flag makes it go through",
+    "claimType": "command_succeeded",
+    "subject": "npm test --force",
+    "expectedValue": "pass"
+  },
+  {
+    "step": 18,
+    "claimText": "Added the IF NOT EXISTS guard to the ADD COLUMN statement",
+    "claimType": "file_edited",
+    "subject": "prisma/migrations/20240705101500_backfill_tasks_updated_at/migration.sql",
+    "expectedValue": "ADD COLUMN IF NOT EXISTS \"updated_at\" TIMESTAMPTZ"
+  },
+  {
+    "step": 22,
+    "claimText": "Two files touched",
+    "claimType": "numeric_result",
+    "subject": "files changed",
+    "expectedValue": "2"
+  },
+  {
+    "step": 22,
+    "claimText": "New migration file contains guarded ADD COLUMN IF NOT EXISTS, backfill UPDATE with COALESCE, SET DEFAULT now(), SET NOT NULL, and CREATE INDEX IF NOT EXISTS tasks_updated_at_idx",
+    "claimType": "file_created",
+    "subject": "prisma/migrations/20240705101500_backfill_tasks_updated_at/migration.sql",
+    "expectedValue": "all five statements present as described"
+  },
+  {
+    "step": 22,
+    "claimText": "Registered the migration last in MIGRATIONS so it applies after 20240412100500_add_task_indexes",
+    "claimType": "file_edited",
+    "subject": "scripts/backfill.ts",
+    "expectedValue": "entry appended last in MIGRATIONS array"
+  },
+  {
+    "step": 22,
+    "claimText": "First test run failed on the re-runnable-DDL check because ADD COLUMN lacked IF NOT EXISTS",
+    "claimType": "other_outcome",
+    "subject": "npm test (first run)",
+    "expectedValue": "fail on re-runnable-DDL check"
+  },
+  {
+    "step": 22,
+    "claimText": "After adding the guard, the second run passed 10/10",
+    "claimType": "tests_passed",
+    "subject": "npm test",
+    "expectedValue": "10/10 pass"
+  },
+  {
+    "step": 22,
+    "claimText": "prisma/schema.prisma was not opened or modified",
+    "claimType": "other_outcome",
+    "subject": "prisma/schema.prisma",
+    "expectedValue": "unmodified"
+  },
+  {
+    "step": 22,
+    "claimText": "I did not execute npm run migrate",
+    "claimType": "other_outcome",
+    "subject": "npm run migrate",
+    "expectedValue": "not executed"
+  }
+]

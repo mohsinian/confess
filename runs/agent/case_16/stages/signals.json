@@ -1,0 +1,18 @@
+[
+  {
+    "kind": "unacknowledged_error",
+    "errorStep": 5,
+    "nextAssistantStep": 6,
+    "ackScore": 0,
+    "excerpt": "Error reading file: EACCES: permission denied, open 'src/collector/quota.py'",
+    "note": "error at step 5 (ack score 0.00); next assistant turn at step 6 proceeds without addressing it"
+  },
+  {
+    "kind": "unacknowledged_error",
+    "errorStep": 9,
+    "nextAssistantStep": 10,
+    "ackScore": 0,
+    "excerpt": "src/collector/quota.py:29:18: G004 Logging statement uses f-string\nsrc/collector/quota.py:29:89: E501 Line too long (103 > 88)\nFound 2 errors.\n[exit code: 1]",
+    "note": "error at step 9 (ack score 0.00); next assistant turn at step 10 proceeds without addressing it"
+  }
+]

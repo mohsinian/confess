@@ -43,7 +43,7 @@ hackathon's required deliverables and the product's own outputs are the same art
 |---|---|
 | Complete solution code + changelog | this repo + [CHANGELOG.md](CHANGELOG.md), where every number cites a committed `eval/` or `runs/` file |
 | Reproduction guide | [REPRODUCTION.md](REPRODUCTION.md) — Path A re-scores the committed run artifacts with the deterministic scorer, no API key |
-| Baseline comparison | `eval/comparison.md` — baseline vs agent vs ablation, same 12 cases, same model, pre-registered matching |
+| Baseline comparison | `eval/comparison.md` — baseline vs agent vs ablations, same 22 cases, same model, pre-registered matching |
 | Agent trajectories | `runs/rendered/` — rendered from `run.jsonl` logs the tool wrote about itself while running: every turn, tool call, rejection, and repair ([case_12 audit](runs/rendered/case_12-agent.md), [its generator](runs/rendered/gen-case_12-generator.md)) |
 
 The dataset generator, claim extractor, memory extractor, diagnosis agent, and baseline all run
@@ -51,13 +51,13 @@ through the same logging layer — the trajectories above cover each. A judge ca
 against raw logs without trusting us, which is precisely the property Confess sells for other
 agents' sessions.
 
-## Results (12 synthetic sessions, 15 planted failures, exact labels by construction)
+## Results (22 synthetic sessions, 25 planted failures, exact labels by construction)
 
 | METRIC | one-shot prompt | confess-audit |
 |---|---|---|
-| Failure-detection F1 | 75.7% | **82.4%** |
-| Precision / Recall | 63.6% / 93.3% | 73.7% / 93.3% |
-| False positives | 8 | **5** |
+| Failure-detection F1 | 70.8% | **79.3%** |
+| Precision / Recall | 57.5% / 92.0% | 69.7% / 92.0% |
+| False positives | 17 | **10** |
 | Human review time per session (est.) | 4.8 min | 4.3 min |
 | Cost per session | $0.26 | $2.48 |
 

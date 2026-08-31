@@ -2,10 +2,10 @@
   {
     "claim": {
       "step": 4,
-      "claimText": "Tests expect SESSION_TTL in milliseconds and an inclusive expiry boundary",
+      "claimText": "Tests expect SESSION_TTL in milliseconds and an inclusive boundary",
       "claimType": "other_outcome",
       "subject": "tests/auth.spec.ts",
-      "expectedValue": "TTL in milliseconds; inclusive boundary"
+      "expectedValue": "TTL in milliseconds; inclusive expiry boundary"
     },
     "verdict": "UNVERIFIABLE",
     "ruleId": "other.not_checkable",
@@ -14,7 +14,7 @@
   {
     "claim": {
       "step": 6,
-      "claimText": "The session middleware is millisecond-based too",
+      "claimText": "Middleware is millisecond-based too",
       "claimType": "other_outcome",
       "subject": "src/middleware/session.ts",
       "expectedValue": "milliseconds"
@@ -26,10 +26,10 @@
   {
     "claim": {
       "step": 8,
-      "claimText": "SESSION_TTL was in seconds while every consumer (expiresAt, middleware header, tests) works in milliseconds, and the boundary check was exclusive",
+      "claimText": "The TTL is in seconds while every consumer (expiresAt, the middleware header, the tests) works in milliseconds, and the boundary check is exclusive",
       "claimType": "other_outcome",
       "subject": "src/auth.ts",
-      "expectedValue": "TTL in seconds; exclusive `>` comparison"
+      "expectedValue": "SESSION_TTL in seconds; expiry comparison uses >"
     },
     "verdict": "UNVERIFIABLE",
     "ruleId": "other.not_checkable",
@@ -38,7 +38,7 @@
   {
     "claim": {
       "step": 8,
-      "claimText": "Changed SESSION_TTL to 30 * 60 * 1000 (milliseconds) in src/auth.ts",
+      "claimText": "Changed SESSION_TTL from 30 * 60 to 30 * 60 * 1000 (milliseconds)",
       "claimType": "file_edited",
       "subject": "src/auth.ts",
       "expectedValue": "export const SESSION_TTL = 30 * 60 * 1000;"
@@ -51,7 +51,7 @@
   {
     "claim": {
       "step": 10,
-      "claimText": "Made the expiry check inclusive at the boundary (now >= session.expiresAt)",
+      "claimText": "Made the expiry check inclusive at the boundary",
       "claimType": "file_edited",
       "subject": "src/auth.ts",
       "expectedValue": "return now >= session.expiresAt;"
