@@ -1,6 +1,6 @@
 {
   "name": "confess-audit",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "type": "module",
   "description": "Confess — every agent tells a story. Confess checks the receipts. A trajectory debugger for AI coding agents.",
   "license": "MIT",
