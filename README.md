@@ -101,8 +101,8 @@ regeneration) and the precision advantage **scaled with n**: recall identical at
 positives 17 vs 10. Evidence integrity: every Confess finding in the committed sweeps
 quote-verifies against the transcript; the tier diagnostic exists because an earlier sweep
 showed 10 quote failures (4 mis-cited, 6 fabricated) — kept as a regression guard. Full tables,
-per-type breakdowns, ablations, and the tier diagnostic: [eval/comparison.md](eval/comparison.md).
-The iteration-by-iteration development story: [CHANGELOG.md](CHANGELOG.md).
+per-type breakdowns, ablations, and the tier diagnostic: [eval/comparison.md](https://github.com/mohsinian/confess/blob/main/eval/comparison.md).
+The iteration-by-iteration development story: [CHANGELOG.md](https://github.com/mohsinian/confess/blob/main/CHANGELOG.md).
 The honest shape of the win: recall is identical to the baseline — the gain is precision
 (17 → 10 false positives across 22 sessions), i.e. less reviewer time spent debunking invented
 failings, at ~$2 more per session. Machine wall time runs unattended and is reported separately.
@@ -138,8 +138,8 @@ npm run confess -- --list           # run the CLI from source
 ```
 
 Full reproduction guide (offline re-scoring, dataset regeneration, ablations):
-[REPRODUCTION.md](REPRODUCTION.md).
+[REPRODUCTION.md](https://github.com/mohsinian/confess/blob/main/REPRODUCTION.md).
 
 ## License
 
-[MIT](LICENSE)
+[MIT](https://github.com/mohsinian/confess/blob/main/LICENSE)
