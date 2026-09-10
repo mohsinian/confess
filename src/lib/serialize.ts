@@ -1,5 +1,5 @@
 // Transcript serializer — the ONE formatter shared by the baseline prompt and
-// (Day 2) the agent's read_steps tool, so formatting can never be a confound.
+// the agent's read_steps tool, so formatting can never be a confound.
 import type { Trajectory, TrajectoryEvent } from "../types.js";
 
 export interface SerializeOpts {

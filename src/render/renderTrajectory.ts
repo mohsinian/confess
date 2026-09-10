@@ -1,4 +1,4 @@
-// Trajectory renderer (deliverable 04): turns runs/<system>/<case>/run.jsonl
+// Trajectory renderer: turns runs/<system>/<case>/run.jsonl
 // into a readable markdown narrative — every LLM turn, every tool call and its
 // response, repairs and guardrail rejections, ending with the report.
 // Usage: npm run demo -- --case case_12 [--system agent] [--out runs/rendered]
@@ -96,7 +96,7 @@ async function main(): Promise<void> {
   await ensureDir(outDir);
 
   // --file <path>: render any JSONL run log directly (e.g. the dataset generator's
-  // dataset/.cache/gen-case_XX.jsonl) — deliverable 04 asks for every agent we used.
+  // dataset/.cache/gen-case_XX.jsonl) — covers every agent, not just the diagnosis agent.
   const fileIdx = process.argv.indexOf("--file");
   if (fileIdx !== -1) {
     const src = process.argv[fileIdx + 1];

@@ -6,8 +6,7 @@ dist/
 dataset/.cache/
 .tsbuildinfo
 
-# Video recording materials stay local — the repo ships code only
-docs/video/
+# Recordings stay local — the repo ships code only
 *.mp4
 *.mov
 *.mkv

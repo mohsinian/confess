@@ -123,7 +123,7 @@ export interface CaseMeta {
   generated_at: string;
 }
 
-// ── Day-2 module types (declared now so interfaces stay stable) ─────────────
+// ── agent module types (declared now so interfaces stay stable) ─────────────
 
 export type ClaimType =
   | "tests_passed"

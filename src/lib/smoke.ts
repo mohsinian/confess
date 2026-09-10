@@ -1,4 +1,4 @@
-// Provider smoke test (Day-1 first hour, decision D13):
+// Provider smoke test (decision D13):
 //  1. verifies Bearer/base-URL auth works through the SDK,
 //  2. settles the exact model string (tries candidates in order),
 //  3. prints latency + a price signal from usage data.

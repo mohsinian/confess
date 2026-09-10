@@ -1,5 +1,5 @@
 // Frozen prompts. The taxonomy text below is shared VERBATIM by the baseline
-// and (Day 2) the diagnosis agent — same model, same definitions, same JSON
+// and the diagnosis agent — same model, same definitions, same JSON
 // robustness. The only difference between the two systems is the workflow
 // (planning/05-baseline-spec.md §1, the fairness contract).
 

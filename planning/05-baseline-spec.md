@@ -29,7 +29,7 @@ The agent's extra calls are the *treatment*; cost columns make the trade-off vis
 4. Compute `needs_human_review = confidence < 0.60` with the same rule the agent uses.
 5. Write `runs/baseline/<case>/report.json`, `run.jsonl` (request/response/usage), `meta.json`.
 
-## 3. Baseline system prompt (freeze after Day-1 dry run)
+## 3. Baseline system prompt (freeze after the dry run)
 
 ```
 You audit logs of AI coding agent sessions. Find every genuine failure the agent made.
@@ -59,16 +59,16 @@ Rules:
 
 User message: `# Session transcript\n\n<serialized log>`.
 
-## 4. What the baseline is expected to do (predictions to check on Day 1)
+## 4. What the baseline is expected to do (predictions, written before the run)
 
 - Catch obvious HS near the end of short logs; miss HS mid-log and the case_12 masking structure.
 - Flag benign retries / fail-then-fix sequences as failures (precision hit on distractor cases).
 - Miss most CVs (constraint at step 2, violation at step 9 — the middle-of-context blind spot).
 - Occasionally emit invalid JSON on long logs (repair pass usually rescues it).
-These predictions are written down *before* the run; Day 1 evening we check them against actual
+These predictions are written down *before* the run; after it we check them against actual
 baseline behavior — right or wrong, that comparison goes in the changelog narrative.
 
-## 5. Acceptance criteria (Day 1)
+## 5. Acceptance criteria
 
 - [ ] 12/12 cases produce schema-valid reports (with ≤1 repair each) or honest parse_error records.
 - [ ] `eval/results-baseline.{json,md}` committed; headline numbers entered in the comparison table.

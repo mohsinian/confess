@@ -118,7 +118,7 @@ export interface EvalRunResult {
 }
 
 /**
- * Evidence validation, three tiers (ground rule 9: a TP must have checkable receipts):
+ * Evidence validation, three tiers (a TP must have checkable receipts):
  *  - ok:         every non-trivial segment of the quote (ellipsis-abridged allowed)
  *                appears in the cited step's canonical serialization
  *  - mis-cited:  segments appear somewhere in the log, but not in the cited step
@@ -208,7 +208,7 @@ export async function scoreRun(runName: string, caseIds: string[], strictEvidenc
       parseErrors += 1;
     }
 
-  // Evidence integrity (D15, ground rule 9): a finding must have checkable receipts.
+  // Evidence integrity (D15): a finding must have checkable receipts.
   // Tiers: ok → scored normally; mis-cited (quote exists elsewhere in the log) and
   // fabricated (quote exists nowhere) → excluded from matching, counted, never
   // silently dropped. The same full-text view is used for every system.

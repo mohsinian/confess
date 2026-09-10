@@ -31,7 +31,7 @@ match(report, labels):
 
 - **Invalid report JSON:** one repair retry (identical policy for baseline and agent). Still invalid
   → the case scores 0 recall and the parse failure is logged in the results file. Never silently
-  dropped (ground rule 09: report failures).
+  dropped — failures are reported, not hidden.
 - **Invalid single finding** (e.g., bad enum): that finding is excluded and counted as a parse error
   (visible in results JSON), not a silent pass.
 - **Confidence is not used for matching.** The gate is analyzed, never rewarded: we report
@@ -46,7 +46,7 @@ match(report, labels):
 
 ## 4. Output tables (`eval/report.ts` renders these exact tables)
 
-### 4.1 Headline comparison (the brief's format, extended)
+### 4.1 Headline comparison
 
 | METRIC | SIMPLE BASELINE | AGENT SOLUTION | CHANGE |
 |---|---|---|---|
@@ -89,7 +89,7 @@ on easy cases" objections and feeds the changelog with specifics.
 
 ### 4.5 The hard case paragraph (written prose, not a table)
 case_12 results for baseline vs agent, what the masking structure did to each system, quoted
-evidence from both reports. The brief explicitly asks for the challenging case to be explained.
+evidence from both reports. The hard case gets its own explained section, not just table rows.
 
 ## 5. Scoring runner contract
 
@@ -101,11 +101,11 @@ npm run report                      # aggregates all results-*.json into the com
 ```
 
 - `eval` reads **only committed artifacts** — no API key needed (reproduction path A).
-- `results-*.json` contains everything the tables show + per-case detail, so a judge can re-derive
-  every markdown number from JSON (ground rule 09).
+- `results-*.json` contains everything the tables show + per-case detail, so anyone can re-derive
+  every markdown number from JSON.
 - Cost/time numbers come from each run's `meta.json` / `run.jsonl` usage records, not estimates.
 
-## 6. Acceptance criteria for the eval itself (Day 1 evening)
+## 6. Acceptance criteria for the eval itself (checked before the first real eval run)
 
 - [ ] Unit test: hand-written tiny report + labels fixture produces known P/R/F1 (catch off-by-ones).
 - [ ] Empty findings on a failing case → recall 0, precision defined (0/0 → report as "n/a"), no NaN.

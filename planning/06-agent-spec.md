@@ -63,7 +63,7 @@ type Claim = { step: number; claimText: string; claimType: ClaimType;
              };
 ```
 
-Prompt core (freeze on Day 2 morning):
+Prompt core (frozen once shipped):
 > "List every checkable assertion the agent makes about its own work in these numbered messages.
 > Only assertions about what already happened (results, files, commands) — not plans or intentions.
 > Classify each with a claimType and, where present, the subject (path/command/metric)."
@@ -117,7 +117,7 @@ memory as an engineering artifact, not a hope about the model's attention.
 
 ## Stage 6 — Diagnosis agent (`src/agent/diagnose.ts`, `tools.ts`)
 
-The Anthropic SDK tool-use loop. System prompt (freeze Day 2, draft below). Max **25 turns**,
+The Anthropic SDK tool-use loop. System prompt (frozen, draft below). Max **25 turns**,
 temp 0, context = signals digest (stages 2–5 compacted to ≤ 2.5K tokens) + case header; the log
 itself is accessed through tools only.
 
@@ -162,7 +162,7 @@ not failures. A clean session must return zero findings.
 
 ### Loop mechanics
 - SDK tool loop (`client.messages.create` + `tool_use` dispatch), every request/response pair logged
-  via `runlog.ts` **before** the next call (crash-safe, deliverable-04-ready).
+  via `runlog.ts` **before** the next call (crash-safe).
 - Tool errors returned as tool_results (never throw the loop dead): schema rejection returns the
   zod error text so the agent can self-correct — visible retries are part of the trajectory story.
 - Turn cap hit → loop ends, findings kept, report marked `truncated: true` (scored honestly).
@@ -172,19 +172,19 @@ not failures. A clean session must return zero findings.
 - `needs_human_review = confidence < 0.60` (D10, a priori).
 - `report.json` (shared schema) + `report.md`: findings table (type, step, summary, evidence quote
   + step, confidence, fix), overall assessment, stats, and a **Review Queue** section listing
-  low-confidence findings flagged "needs human review" — the human checkpoint (ground rule 05).
+  low-confidence findings flagged "needs human review" — the human checkpoint.
 - Also writes `runs/agent/<case>/meta.json`: per-stage costs, wall time, turn count, truncation flag.
 
-## Self-logging & the trajectory deliverable
+## Self-logging & trajectory rendering
 
 `run.jsonl` per case records: every LLM request (stage, messages digest, full payload), every
 response (stop_reason, usage, cost), every tool call + its result, every repair/rejection (schema
-fails, submit-guardrail rejections — these ARE the "retries and human checkpoints" the brief wants
-visible). `src/render/renderTrajectory.ts` turns it into markdown: turn-by-turn narrative, tool
+fails, submit-guardrail rejections — the visible retries and enforced checkpoints).
+`src/render/renderTrajectory.ts` turns it into markdown: turn-by-turn narrative, tool
 calls as fenced blocks (long results truncated with byte counts + step pointers), final report
 inline. Export 2–3 cases (hard case_12 + one standard + one clean) into `runs/rendered/`.
 
-## Per-module acceptance criteria (Day 2, checked as each lands)
+## Per-module acceptance criteria (checked as each module lands)
 
 - [ ] parse: 12/12 cases pair cleanly; exit codes parsed from every Bash result.
 - [ ] detectors: catches 100% of planted RL (2/2) as signals; zero false loop signals on clean case.
@@ -196,5 +196,5 @@ inline. Export 2–3 cases (hard case_12 + one standard + one clean) into `runs/
       violating step; zero violations on case_11.
 - [ ] diagnose: full run on case_01 + case_12 produces schema-valid reports; submit-guardrail
       demonstrably rejects at least once in testing (craft a lazy submit; show the retry in a
-      rendered trajectory — great video material).
+      rendered trajectory).
 - [ ] Whole pipeline: 12/12 cases, ≤ 25 turns avg, ≤ $5 cost cap per case enforced.

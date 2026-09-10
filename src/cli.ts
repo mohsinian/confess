@@ -122,7 +122,7 @@ function listSessions(): void {
   console.log(`\naudit one:  npx confess-audit "<path from above>"`);
 }
 
-// ── cost checkpoint (ground rule: human approval before the spend) ─────────
+// ── cost checkpoint (human approval before the spend) ─────────
 
 async function confirmSpend(question: string): Promise<boolean> {
   if (!process.stdin.isTTY || !process.stdout.isTTY) return false;

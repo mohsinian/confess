@@ -1,5 +1,5 @@
 // Crash-safe JSONL run logger. Every request/response/repair/tool interaction is
-// appended BEFORE the next call is made — the log IS deliverable 04's raw material.
+// appended BEFORE the next call is made — the log is the raw material for the rendered trajectories.
 import fs from "node:fs";
 import path from "node:path";
 
