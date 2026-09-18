@@ -17,3 +17,7 @@ confess-reports/
 
 # npm pack artifacts
 *.tgz
+
+# Local AI-tool workspace state
+.commandcode/
+.kilo/

@@ -1,6 +1,6 @@
 {
   "name": "confess-audit",
-  "version": "0.1.5",
+  "version": "0.2.0",
   "type": "module",
   "description": "Confess — every agent tells a story. Confess checks the receipts. A trajectory debugger for AI coding agents.",
   "license": "MIT",
@@ -16,7 +16,8 @@
   },
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    ".env.example"
   ],
   "scripts": {
     "smoke": "tsx src/lib/smoke.ts",
@@ -24,7 +25,7 @@
     "baseline": "tsx src/baseline/runBaseline.ts",
     "eval": "tsx src/eval/score.ts",
     "report": "tsx src/eval/report.ts",
-    "selftest": "tsx src/eval/score.ts --selftest && tsx tests/runTests.ts && tsx tests/agentSelfTest.ts && tsx tests/evidenceTier.test.ts",
+    "selftest": "tsx src/eval/score.ts --selftest && tsx tests/runTests.ts && tsx tests/agentSelfTest.ts && tsx tests/evidenceTier.test.ts && tsx tests/provider.test.ts",
     "typecheck": "tsc --noEmit",
     "agent": "tsx src/agent/run.ts",
     "ablate": "tsx src/agent/run.ts",

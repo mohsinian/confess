@@ -1,9 +1,8 @@
 // Stage 3 — claim extraction (1 LLM call, temp 0): what did the agent CLAIM
 // happened, as structured checkable assertions linked to steps.
 import { z } from "zod";
-import type Anthropic from "@anthropic-ai/sdk";
-import type { Budget, ProviderConfig } from "../lib/anthropic.js";
-import { callJson } from "../lib/anthropic.js";
+import type { Budget, LlmClient, ProviderConfig } from "../lib/provider.js";
+import { callJson } from "../lib/provider.js";
 import type { RunLog } from "../lib/runlog.js";
 import type { Claim, ParsedTrajectory } from "./types.js";
 import { eventText } from "./parse.js";
@@ -31,7 +30,7 @@ claim implies one ("pass", "0 errors", "12").
 Output ONLY JSON: {"claims": [...]}`;
 
 export async function extractClaims(
-  client: Anthropic,
+  client: LlmClient,
   cfg: ProviderConfig,
   budget: Budget,
   log: RunLog | undefined,

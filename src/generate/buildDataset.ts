@@ -2,7 +2,7 @@
 // Usage: npm run gen:dataset [-- --seed 42] [-- --case case_01] [-- --fresh]
 import fs from "node:fs";
 import path from "node:path";
-import { loadProviderConfig, makeClient, Budget } from "../lib/anthropic.js";
+import { loadProviderConfig, makeClient, Budget } from "../lib/provider.js";
 import { RunLog } from "../lib/runlog.js";
 import { CACHE_DIR, caseDir, ensureDir } from "../lib/cases.js";
 import { CASES, getCase, gtTotals, packFor } from "./scenarios.js";
@@ -53,7 +53,7 @@ async function main() {
       if (!cd) return;
       try {
         const pack = packFor(cd);
-        const budget = new Budget(cfg.maxRunCost);
+        const budget = new Budget(cfg.maxRunCost, cfg.price);
         const log = new RunLog(path.join(CACHE_DIR, `gen-${cd.caseId}.jsonl`));
         await log.append(cd.caseId, "stage_start", { scenario: pack.id, injections: cd.injections, seed });
 

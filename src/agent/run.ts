@@ -5,7 +5,7 @@
 //   npm run agent [-- --case case_12] [-- --off memory|verify|detectors]
 import fs from "node:fs";
 import path from "node:path";
-import { loadProviderConfig, makeClient, Budget, runId, BudgetExceededError } from "../lib/anthropic.js";
+import { loadProviderConfig, makeClient, Budget, runId, BudgetExceededError } from "../lib/provider.js";
 import { RunLog } from "../lib/runlog.js";
 import { listCases, runDir, ensureDir, trajectoryPath } from "../lib/cases.js";
 import { parseTrajectory } from "./parse.js";
@@ -128,7 +128,7 @@ async function runAudit(
   hooks: AuditHooks = {},
 ): Promise<DiagnosisReport> {
   const client = makeClient(cfg);
-  const budget = new Budget(cfg.maxRunCost);
+  const budget = new Budget(cfg.maxRunCost, cfg.price);
   const systemName = opts.off.memory || opts.off.verify || opts.off.detectors || opts.off.gates ? "agent-ablation" : "agent";
   const dir = hooks.outBase ? path.join(hooks.outBase, caseId) : runDir(runTag, caseId);
   await ensureDir(dir);

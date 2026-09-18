@@ -11,19 +11,56 @@ Works with Claude Code session logs today (`~/.claude/projects/**/*.jsonl`).
 ## Quick start
 
 ```bash
+npx confess-audit setup                 # first time only — interactive, writes ./.env
+npx confess-audit doctor                # verify credentials + model
 npx confess-audit                       # audit your most recent Claude Code session
 npx confess-audit --list                # browse sessions, newest first
 npx confess-audit <file.jsonl>          # audit a specific transcript
 npx confess-audit --off verify,memory   # cheaper pass (detectors + diagnosis agent)
 ```
 
-Credentials: `ANTHROPIC_API_KEY` (direct Anthropic) or `ANTHROPIC_AUTH_TOKEN` +
-`ANTHROPIC_BASE_URL` (any Anthropic-compatible router) — via environment variables or a
-`.env` in the working directory.
-
 The command confirms the model and expected cost before the first API call (`--yes` skips
-the prompt). A typical audit costs ~$1–3 and takes 1–3 minutes. Findings print to the
-terminal; the full report lands in `./confess-reports/<session>/report.md`.
+the prompt; free/local providers skip it automatically). A typical audit costs ~$1–3 with
+an Opus-class model and takes 1–3 minutes. Findings print to the terminal; the full report
+lands in `./confess-reports/<session>/report.md`.
+
+## Setup
+
+`npx confess-audit setup` asks which provider you want, takes your key, writes `./.env`,
+and offers to test the connection. To do it manually instead, set environment variables
+(or write `./.env` yourself — see [.env.example](https://github.com/mohsinian/confess/blob/main/.env.example)):
+
+| Provider | Variables | Cost |
+|---|---|---|
+| Anthropic API ([key](https://console.anthropic.com)) | `ANTHROPIC_API_KEY` (+ optional `ANTHROPIC_MODEL`, default `claude-opus-5`) | paid |
+| Anthropic-compatible router (AgentRouter, …) | `ANTHROPIC_AUTH_TOKEN` + `ANTHROPIC_BASE_URL` | paid |
+| OpenAI-compatible API (OpenRouter, Together, Groq, vLLM, LM Studio) | `OPENAI_BASE_URL` + `OPENAI_API_KEY` + `OPENAI_MODEL` | paid |
+| Local Ollama | nothing — `npx confess-audit --local --model qwen2.5-coder:32b` | free |
+
+Generic aliases work everywhere: `CONFESS_PROVIDER` (`anthropic`/`openai`),
+`CONFESS_API_KEY`, `CONFESS_BASE_URL`, `CONFESS_MODEL`. CLI flags (`--provider`,
+`--base-url`, `--api-key`, `--model`) override the environment for one run.
+
+```bash
+# bash
+export ANTHROPIC_API_KEY=sk-ant-...
+```
+```powershell
+# PowerShell
+$env:ANTHROPIC_API_KEY="sk-ant-..."
+```
+
+Three notes:
+
+- **Tool calling** — the diagnosis stage uses native tool use. For models without
+  reliable tool support, set `CONFESS_TOOL_MODE=json` (tools are then prompted as JSON;
+  the guardrails live in Confess's tool layer, so they hold either way).
+- **Pricing** — built-in estimates cover Claude and a few hosted models; local endpoints
+  are treated as free. Override with `CONFESS_PRICE_INPUT` / `CONFESS_PRICE_OUTPUT`
+  (USD per million tokens) for anything else.
+- **Model quality** — the published benchmark numbers are Opus-class only. Other models
+  work, and the CLI says so when you select one, but precision/recall with them is
+  unmeasured until the eval harness (`npm run eval`) has been run against them.
 
 ## What it detects
 
@@ -74,6 +111,7 @@ Confess is **read-only analysis**: it never executes the commands in the log it 
 
 - Typical audit ~$1–3 with an Opus-class model; per-audit hard cap via `MAX_RUN_COST`
   (default $8.00).
+- Local models (Ollama, LM Studio) are free — the spend checkpoint skips itself.
 - Cheaper pass: `--off verify,memory` (detectors + diagnosis agent only).
 - Very large sessions can exceed the cap — raise `MAX_RUN_COST` or use the cheaper pass.
 
@@ -120,6 +158,9 @@ failings, at ~$2 more per session. Machine wall time runs unattended and is repo
 - **Exit-code markers** — deterministic verification keys on a `[exit code: N]` suffix when
   present; Claude Code results don't carry it, so those rules fall back to matching pass/fail
   counts in the command output.
+- **Model dependence** — the benchmark numbers above come from Opus-class models. The
+  pipeline runs on other providers and open models (see Setup), and the verification
+  guardrails are model-independent, but detection quality with them is unmeasured.
 - **Format support** — Claude Code transcripts today. The pipeline's input format is plain
   JSONL (user/assistant events with text / tool_use / tool_result blocks); supporting another
   agent means writing one adapter.
@@ -131,7 +172,7 @@ failings, at ~$2 more per session. Machine wall time runs unattended and is repo
 ```bash
 git clone https://github.com/mohsinian/confess.git
 cd confess && npm ci
-npm run selftest                    # 59 no-LLM checks
+npm run selftest                    # 87 no-LLM checks
 npm run build                       # emit dist/
 npm run eval -- --run agent         # re-score committed runs offline (no API key)
 npm run confess -- --list           # run the CLI from source

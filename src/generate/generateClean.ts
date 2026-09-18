@@ -1,9 +1,8 @@
 // Phase 1 of dataset generation: the LLM writes a CLEAN, successful session per
 // case. Failures are never LLM-invented — Phase 2 (mutations.ts) plants them
 // deterministically, so ground truth is exact by construction (decision D8).
-import type Anthropic from "@anthropic-ai/sdk";
-import type { ProviderConfig, Budget } from "../lib/anthropic.js";
-import { callRaw } from "../lib/anthropic.js";
+import type { LlmClient, ProviderConfig, Budget } from "../lib/provider.js";
+import { callRaw } from "../lib/provider.js";
 import { validateTrajectory } from "../schema.js";
 import type { Trajectory, TrajectoryEvent } from "../types.js";
 import type { RunLog } from "../lib/runlog.js";
@@ -117,7 +116,7 @@ function parseJsonlEvents(text: string): TrajectoryEvent[] {
 }
 
 export async function generateCleanSession(
-  client: Anthropic,
+  client: LlmClient,
   cfg: ProviderConfig,
   budget: Budget,
   log: RunLog | undefined,

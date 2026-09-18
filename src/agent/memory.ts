@@ -2,9 +2,8 @@
 // call), then deterministically check every later tool_use against the ledger.
 // The multi-hop fix: a step-2 constraint is structurally carried to step-20.
 import { z } from "zod";
-import type Anthropic from "@anthropic-ai/sdk";
-import type { Budget, ProviderConfig } from "../lib/anthropic.js";
-import { callJson } from "../lib/anthropic.js";
+import type { Budget, LlmClient, ProviderConfig } from "../lib/provider.js";
+import { callJson } from "../lib/provider.js";
 import type { RunLog } from "../lib/runlog.js";
 import type { Constraint, LedgerViolation, ParsedTrajectory } from "./types.js";
 import { constraintSchema } from "./types.js";
@@ -34,7 +33,7 @@ export interface MemoryResult {
 }
 
 export async function buildLedger(
-  client: Anthropic,
+  client: LlmClient,
   cfg: ProviderConfig,
   budget: Budget,
   log: RunLog | undefined,

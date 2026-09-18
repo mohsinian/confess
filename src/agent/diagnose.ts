@@ -1,11 +1,13 @@
-// Stage 6 — the diagnosis agent loop (Anthropic SDK tool-use loop, temp 0).
-// The agent pulls leads from the pre-pass digest, reads windows of the log,
-// re-verifies claims, records findings with verbatim evidence, and submits.
-// The submit guardrail (in tools.ts) rejects lazy submissions — visible,
-// logged retries are part of the trajectory story.
-import Anthropic from "@anthropic-ai/sdk";
-import type { Budget, ProviderConfig } from "../lib/anthropic.js";
-import { priceForModel } from "../lib/anthropic.js";
+// Stage 6 — the diagnosis agent loop (tool-use loop over the provider
+// interface, temp 0). Two tool modes: "native" (wire-level tool calling) and
+// "json" (tools described in the system prompt, calls parsed from the model's
+// JSON output — for models/servers without native tool calling). The agent
+// pulls leads from the pre-pass digest, reads windows of the log, re-verifies
+// claims, records findings with verbatim evidence, and submits. The submit
+// guardrail (in tools.ts) rejects lazy submissions — visible, logged retries
+// are part of the trajectory story.
+import type { Budget, LlmClient, LlmMessage, ProviderConfig, ToolCall, ToolResultMsg } from "../lib/provider.js";
+import { extractJson } from "../lib/provider.js";
 import type { RunLog } from "../lib/runlog.js";
 import type { ParsedTrajectory } from "./parse.js";
 import type { PrePass } from "./tools.js";
@@ -45,6 +47,50 @@ Precision rules (the record_finding tool enforces some of these):
 Do not invent failures. Acknowledged errors, adapted retries, and fail-then-fixed sequences are
 not failures. A clean session must return zero findings.`;
 
+// Appended in CONFESS_TOOL_MODE=json — the same loop, but tool calls travel as
+// JSON text instead of wire-level tool_use blocks.
+function jsonToolProtocol(): string {
+  const toolList = DIAGNOSIS_TOOLS.map(
+    (t) => `- ${t.name}: ${t.description}\n  input schema: ${JSON.stringify(t.input_schema)}`,
+  ).join("\n");
+  return (
+    `\nTOOL ACCESS — JSON PROTOCOL (this environment has no native tool calling).\n` +
+    `To call tools, reply with ONLY a JSON object, no prose, no code fences:\n` +
+    `  {"tool_calls": [{"name": "<tool name>", "input": { …arguments… }}]}\n` +
+    `You may batch several calls in one reply. Tool results arrive as the next user message.\n` +
+    `Available tools:\n${toolList}\n` +
+    `Every reply must be exactly one tool-call JSON object. Finish by calling submit_report.`
+  );
+}
+
+const JSON_REPAIR_HINT =
+  `Your reply was not a valid tool-call JSON object. Reply with ONLY ` +
+  `{"tool_calls": [{"name": "<tool>", "input": {...}}]} — no prose, no code fences.`;
+
+/** Parse a json-mode model reply into tool calls; null when unusable. Exported for tests. */
+export function parseJsonToolCalls(text: string, turn: number): ToolCall[] | null {
+  let parsed: unknown;
+  try {
+    parsed = extractJson(text);
+  } catch {
+    return null;
+  }
+  if (typeof parsed !== "object" || parsed === null) return null;
+  const calls = (parsed as { tool_calls?: unknown }).tool_calls;
+  if (!Array.isArray(calls) || calls.length === 0) return null;
+  const out: ToolCall[] = [];
+  for (let i = 0; i < calls.length; i++) {
+    const c = calls[i] as { name?: unknown; input?: unknown };
+    if (typeof c?.name !== "string" || c.name.length === 0) return null;
+    out.push({
+      id: `json-${turn}-${i}`,
+      name: c.name,
+      input: typeof c.input === "object" && c.input !== null ? (c.input as Record<string, unknown>) : {},
+    });
+  }
+  return out;
+}
+
 export interface DiagnoseResult {
   findings: FindingDraft[];
   assessment: string;
@@ -55,9 +101,10 @@ export interface DiagnoseResult {
 }
 
 const MAX_TURNS = 25;
+const MAX_JSON_PARSE_FAILURES = 2;
 
 export async function runAgentLoop(
-  client: Anthropic,
+  client: LlmClient,
   cfg: ProviderConfig,
   budget: Budget,
   log: RunLog | undefined,
@@ -67,7 +114,9 @@ export async function runAgentLoop(
   enabled: { memory: boolean; verify: boolean; detectors: boolean; gates: boolean },
 ): Promise<DiagnoseResult> {
   const toolbox = new DiagnosisToolbox(parsed, prePass, enabled);
-  const messages: Anthropic.MessageParam[] = [
+  const jsonMode = cfg.toolMode === "json";
+  const system = jsonMode ? DIAGNOSIS_SYSTEM + "\n" + jsonToolProtocol() : DIAGNOSIS_SYSTEM;
+  const messages: LlmMessage[] = [
     {
       role: "user",
       content:
@@ -79,59 +128,73 @@ export async function runAgentLoop(
   let truncated = false;
   let turns = 0;
   let model = cfg.model;
-  const price = priceForModel(cfg.model);
+  let jsonParseFailures = 0;
 
   for (; turns < MAX_TURNS; turns++) {
     await log?.append(`diagnose:${caseId}`, "request", { turn: turns + 1, nMessages: messages.length });
-    const response = await client.messages.create({
-      model: cfg.model,
-      max_tokens: 6000,
-      temperature: 0,
-      system: DIAGNOSIS_SYSTEM,
+    const response = await client.chat({
+      system,
       messages,
-      tools: DIAGNOSIS_TOOLS,
+      maxTokens: 6000,
+      ...(jsonMode ? {} : { tools: DIAGNOSIS_TOOLS }),
     });
-    // Normalize proxies that return JSON with a non-JSON content-type.
-    const message = (
-      typeof (response as unknown) === "string" ? JSON.parse(response as unknown as string) : response
-    ) as Anthropic.Message;
-    model = message.model ?? model;
+    model = response.model || model;
     const costUsd =
-      (message.usage.input_tokens / 1e6) * price.input + (message.usage.output_tokens / 1e6) * price.output;
-    budget.addUsage(cfg.model, {
-      input_tokens: message.usage.input_tokens,
-      output_tokens: message.usage.output_tokens,
-    });
+      (response.usage.inputTokens / 1e6) * cfg.price.input + (response.usage.outputTokens / 1e6) * cfg.price.output;
+    budget.addUsage(response.usage);
     await log?.append(
       `diagnose:${caseId}`,
       "response",
-      { turn: turns + 1, stopReason: message.stop_reason, content: message.content },
-      { inputTokens: message.usage.input_tokens, outputTokens: message.usage.output_tokens, costUsd },
+      { turn: turns + 1, stopReason: response.stopReason, text: response.text, toolCalls: response.toolCalls },
+      { inputTokens: response.usage.inputTokens, outputTokens: response.usage.outputTokens, costUsd },
     );
 
-    if (message.stop_reason !== "tool_use") break;
+    let calls: ToolCall[];
+    if (jsonMode) {
+      const parsedCalls = parseJsonToolCalls(response.text, turns + 1);
+      if (parsedCalls === null) {
+        jsonParseFailures++;
+        if (jsonParseFailures > MAX_JSON_PARSE_FAILURES) {
+          throw new Error("model could not emit tool-call JSON after retries — try a stronger model or native tool mode");
+        }
+        messages.push({ role: "assistant", content: response.text || "(empty reply)" });
+        messages.push({ role: "user", content: JSON_REPAIR_HINT });
+        continue;
+      }
+      jsonParseFailures = 0;
+      calls = parsedCalls;
+    } else {
+      if (response.stopReason !== "tool_use" || response.toolCalls.length === 0) break;
+      calls = response.toolCalls;
+    }
 
-    // Dispatch every tool_use block; collect tool_results.
-    const toolResults: Anthropic.ToolResultBlockParam[] = [];
-    for (const block of message.content) {
-      if (block.type !== "tool_use") continue;
-      const outcome = toolbox.handle(block.name, (block.input ?? {}) as Record<string, unknown>);
+    // Dispatch every call; collect results. The toolbox enforces the
+    // verification-before-assertion guardrails regardless of tool mode.
+    const results: ToolResultMsg[] = [];
+    for (const call of calls) {
+      const outcome = toolbox.handle(call.name, call.input);
       await log?.append(`diagnose:${caseId}`, "tool_result", {
-        tool: block.name,
-        input: block.input,
+        tool: call.name,
+        input: call.input,
         output: outcome.output.slice(0, 1500),
         isError: outcome.isError,
       });
-      toolResults.push({
-        type: "tool_result",
-        tool_use_id: block.id,
-        content: outcome.output,
-        is_error: outcome.isError,
-      });
+      results.push({ id: call.id, output: outcome.output, isError: outcome.isError });
     }
     if (toolbox.submitted !== null) break; // submit_report succeeded
-    messages.push({ role: "assistant", content: message.content });
-    messages.push({ role: "user", content: toolResults });
+
+    if (jsonMode) {
+      messages.push({ role: "assistant", content: response.text });
+      messages.push({
+        role: "user",
+        content:
+          "Tool results:\n" +
+          results.map((r, i) => `[${calls[i].name}]${r.isError ? " ERROR:" : ""}\n${r.output}`).join("\n\n"),
+      });
+    } else {
+      messages.push({ role: "assistant", content: response.text, toolCalls: calls });
+      messages.push({ role: "tool", results });
+    }
   }
   if (turns >= MAX_TURNS && toolbox.submitted === null) truncated = true;
 

@@ -3,7 +3,7 @@
 // repair policy as the agent. Usage: npm run baseline [-- --case case_01]
 import fs from "node:fs";
 import path from "node:path";
-import { loadProviderConfig, makeClient, Budget, callJson, runId, BudgetExceededError } from "../lib/anthropic.js";
+import { loadProviderConfig, makeClient, Budget, callJson, runId, BudgetExceededError } from "../lib/provider.js";
 import { RunLog } from "../lib/runlog.js";
 import { listCases, runDir, ensureDir, trajectoryPath } from "../lib/cases.js";
 import { serializeTrajectory } from "../lib/serialize.js";
@@ -43,7 +43,7 @@ function findingMarkdown(report: DiagnosisReport): string {
 
 async function runCase(caseId: string, cfg: ReturnType<typeof loadProviderConfig>): Promise<DiagnosisReport> {
   const client = makeClient(cfg);
-  const budget = new Budget(cfg.maxRunCost);
+  const budget = new Budget(cfg.maxRunCost, cfg.price);
   const id = runId("baseline");
   const dir = runDir("baseline", caseId);
   await ensureDir(dir);

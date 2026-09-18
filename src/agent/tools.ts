@@ -1,6 +1,6 @@
 // Stage 6 tool definitions for the diagnosis agent. The log is accessed ONLY
 // through these tools (context-efficient windowed reads, not a full dump).
-import Anthropic from "@anthropic-ai/sdk";
+import type { LlmTool } from "../lib/provider.js";
 import { isMeaningfulFailure, type ParsedTrajectory } from "./parse.js";
 import { serializeTrajectory } from "../lib/serialize.js";
 import { verifyClaim } from "./verify.js";
@@ -13,7 +13,7 @@ export interface PrePass {
   violations: LedgerViolation[];
 }
 
-export const DIAGNOSIS_TOOLS: Anthropic.Tool[] = [
+export const DIAGNOSIS_TOOLS: LlmTool[] = [
   {
     name: "list_signals",
     description:
